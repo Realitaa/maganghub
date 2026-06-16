@@ -18,8 +18,17 @@ import {
     GraduationCap,
     ArrowRight
 } from '@lucide/vue';
-import { ref } from 'vue';
+import bankIndonesiaSvg from 'idn-finlogos/icons/bank-indonesia';
+import briSvg from 'idn-finlogos/icons/bri';
+import mandiri from 'idn-finlogos/icons/mandiri'
+import { ref, h } from 'vue';
 import CountUp from '@/components/landing/CountUp.vue';
+import Google from '@/components/landing/icons/Google.vue';
+import Goto from '@/components/landing/icons/Goto.vue';
+import Huawei from '@/components/landing/icons/Huawei.vue';
+import Ibm from '@/components/landing/icons/Ibm.vue';
+import IndosatOoredoHutsicon from '@/components/landing/icons/IndosatOoredoHutsicon.vue';
+import TelkomIndonesia from '@/components/landing/icons/TelkomIndonesia.vue';
 import ImpactChart from '@/components/landing/ImpactChart.vue';
 import LogoLoop from '@/components/landing/LogoLoop.vue';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -27,9 +36,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stepper, StepperTrigger, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper';
+import { cn } from '@/lib/utils';
 import { dashboard, login } from '@/routes';
-import { Logo } from 'idn-finlogos/vue';
-import bcaSvg from 'idn-finlogos/icons/bca';
 
 // state
 const hoveredStep = ref(6);
@@ -46,33 +54,67 @@ const navLinks = [
     { label: 'FAQ', href: '#faq' }
 ];
 
-// Company
+const svgLogoWrapper = (node: any, className?: string) => h('div', {
+    class: cn(
+        "flex items-center gap-3 h-7 [&>svg]:h-7 [&>svg]:w-auto text-zinc-400 dark:text-zinc-500 select-none grayscale opacity-60 dark:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-200",
+        className
+    )
+}, [
+    h(node)
+]);
+
+const idnfinlogosWrapper = (logo: any) => {
+    return `<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none grayscale opacity-60 dark:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-200">
+                <div class="h-7 w-auto flex items-center justify-center [&>svg]:h-7 [&>svg]:w-auto">${logo}</div>
+            </div>`
+};
+// Company logos loop items
 const companyLogos = [
-  { 
-    node: '<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none"><svg viewBox="0 0 256 221" class="h-7 w-auto fill-current" style="height: 28px;"><path d="M204.8 0H256L128 220.8L0 0h51.2L128 132.48L204.8 0z"/><path d="M176.64 0H204.8L128 132.48L51.2 0h28.16L128 99.84L176.64 0z" opacity="0.75"/></svg><span>Vue.js</span></div>', 
-    title: "Vue.js", 
-    href: "https://vuejs.org" 
-  },
-  { 
-    node: '<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none"><svg viewBox="0 0 50 50" class="h-7 w-auto fill-none stroke-current" stroke-width="3.5" style="height: 28px;"><path d="M12 4L4 12V38L12 46H38L46 38V12L38 4H12Z" /><path d="M25 10V40M10 25H40" /></svg><span>Laravel</span></div>', 
-    title: "Laravel", 
-    href: "https://laravel.com" 
-  },
-  { 
-    node: '<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none"><svg viewBox="0 0 24 24" class="h-7 w-auto fill-current" style="height: 28px;"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.41 0-6.19-2.78-6.19-6.19 0-3.41 2.78-6.19 6.19-6.19 1.7 0 3.25.69 4.39 1.81l3.05-3.05C19.34 2.11 16.03 1 12.24 1 6.03 1 1 6.03 1 12.24s4.97 11.24 11.24 11.24c6.48 0 10.87-4.56 10.87-11.08 0-.74-.08-1.3-.22-1.92h-10.65z"/></svg><span>Google</span></div>', 
-    title: "Google", 
-    href: "https://google.com" 
-  },
-  { 
-    node: '<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none"><svg viewBox="0 0 23 23" class="h-6 w-auto fill-current" style="height: 24px;"><rect x="0" y="0" width="10.5" height="10.5"/><rect x="11.5" y="0" width="10.5" height="10.5"/><rect x="0" y="11.5" width="10.5" height="10.5"/><rect x="11.5" y="11.5" width="10.5" height="10.5"/></svg><span>Microsoft</span></div>', 
-    title: "Microsoft", 
-    href: "https://microsoft.com" 
-  },
-  { 
-    node: '<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none"><svg viewBox="0 0 24 24" class="h-7 w-auto fill-current" style="height: 28px;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>GitHub</span></div>', 
-    title: "GitHub", 
-    href: "https://github.com" 
-  }
+    {
+        node: svgLogoWrapper(Google),
+        title: 'Google',
+        href: 'https://google.com/'
+    },
+    {
+        node: svgLogoWrapper(TelkomIndonesia),
+        title: 'Telkom Indonesia',
+        href: 'https://www.telkom.co.id/'
+    },
+    {
+        node: idnfinlogosWrapper(briSvg),
+        title: 'BRI',
+        href: 'https://www.bri.co.id'
+    },
+    {
+        node: idnfinlogosWrapper(bankIndonesiaSvg),
+        title: 'Bank Indonesia',
+        href: 'https://www.bi.go.id'
+    },
+    {
+        node: svgLogoWrapper(IndosatOoredoHutsicon),
+        title: 'Indosat Ooredoo Hutchison',
+        href: 'https://www.ioh.co.id'
+    },
+    {
+        node: idnfinlogosWrapper(mandiri),
+        title: 'Bank Mandiri',
+        href: 'https://www.bankmandiri.co.id'
+    },
+    {
+        node: svgLogoWrapper(Ibm),
+        title: 'IBM',
+        href: 'https://www.ibm.com'
+    },
+    {
+        node: svgLogoWrapper(Huawei),
+        title: 'Huawei',
+        href: 'https://www.huawei.com/'
+    },
+    {
+        node: svgLogoWrapper(Goto),
+        title: 'Goto',
+        href: 'https://www.goto.com/'
+    }
 ];
 
 // Statistics data for Impact section

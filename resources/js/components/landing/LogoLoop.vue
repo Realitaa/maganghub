@@ -75,7 +75,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 
 export type LogoItemNode = {
-  node: string;
+  node: string | any;
   href?: string;
   title?: string;
   ariaLabel?: string;
@@ -404,14 +404,26 @@ const LogoContent = defineComponent({
       }
 
       if (isNodeItem(props.item)) {
-        return h('span', {
-          class: [
-            ...baseClasses,
-            'text-[length:var(--logoloop-logoHeight)] [&>i]:text-[length:var(--logoloop-logoHeight)] [&>i]:leading-[1]'
-          ],
-          innerHTML: props.item.node,
-          'aria-hidden': !!(props.item as LogoItemNode).href && !(props.item as LogoItemNode).ariaLabel
-        });
+        if (typeof props.item.node === 'string') {
+          return h('span', {
+            class: [
+              ...baseClasses,
+              'text-[length:var(--logoloop-logoHeight)] [&>i]:text-[length:var(--logoloop-logoHeight)] [&>i]:leading-[1]'
+            ],
+            innerHTML: props.item.node,
+            'aria-hidden': !!(props.item as LogoItemNode).href && !(props.item as LogoItemNode).ariaLabel
+          });
+        } else {
+          return h('span', {
+            class: [
+              ...baseClasses,
+              'text-[length:var(--logoloop-logoHeight)] [&>i]:text-[length:var(--logoloop-logoHeight)] [&>i]:leading-[1]'
+            ],
+            'aria-hidden': !!(props.item as LogoItemNode).href && !(props.item as LogoItemNode).ariaLabel
+          }, [
+            h(props.item.node)
+          ]);
+        }
       } else {
         const imgClasses = [
           'h-[var(--logoloop-logoHeight)] w-auto block object-contain',
