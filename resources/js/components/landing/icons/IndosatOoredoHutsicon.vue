@@ -9,25 +9,6 @@
     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:svg="http://www.w3.org/2000/svg">
-    <sodipodi:namedview
-      id="namedview943"
-      pagecolor="#ffffff"
-      bordercolor="#666666"
-      borderopacity="1.0"
-      inkscape:pageshadow="2"
-      inkscape:pageopacity="0.0"
-      inkscape:pagecheckerboard="0"
-      inkscape:document-units="mm"
-      showgrid="false"
-      inkscape:zoom="0.16693097"
-      inkscape:cx="-727.84578"
-      inkscape:cy="-188.70076"
-      inkscape:window-width="1366"
-      inkscape:window-height="715"
-      inkscape:window-x="-8"
-      inkscape:window-y="-8"
-      inkscape:window-maximized="1"
-      inkscape:current-layer="layer1" />
     <defs
       id="defs938" />
     <g

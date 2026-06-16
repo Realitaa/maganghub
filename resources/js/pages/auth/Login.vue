@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import { Form, Head, Link } from '@inertiajs/vue3';
+import { Form, Head } from '@inertiajs/vue3';
 import {
-    GraduationCap,
     FileText,
     Users,
     Activity,
     NotebookPen,
 } from '@lucide/vue';
+import AppLogo from '@/components/AppLogo.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { home } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
@@ -48,16 +45,6 @@ defineProps<{
                     <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="2" />
                 </svg>
             </div>
-
-            <!-- Top Brand Logo -->
-            <Link :href="home()" class="relative z-20 flex items-center gap-2.5 w-fit group">
-                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-primary group-hover:scale-105 transition-transform duration-200">
-                    <GraduationCap class="h-5.5 w-5.5" />
-                </div>
-                <span class="text-xl font-bold tracking-tight text-white">
-                    MagangHub
-                </span>
-            </Link>
 
             <!-- Middle Illustration -->
             <div class="relative z-10 my-auto max-w-md">
@@ -135,35 +122,20 @@ defineProps<{
         <!-- Right Side: Login Form Card -->
         <div class="flex flex-col items-center justify-between p-6 sm:p-10 lg:p-12 bg-background min-h-screen">
             
-            <!-- Mobile Brand Header (Visible on Mobile Only) -->
-            <div class="w-full flex justify-between items-center lg:hidden border-b border-border pb-4">
-                <Link :href="home()" class="flex items-center gap-2 group">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground group-hover:scale-105 transition-transform duration-200">
-                        <GraduationCap class="h-5 w-5" />
-                    </div>
-                    <span class="text-lg font-bold tracking-tight text-foreground">
-                        MagangHub
-                    </span>
-                </Link>
-                <Link :href="home()" class="text-xs font-semibold text-muted-foreground hover:text-foreground">
-                    Kembali ke Beranda
-                </Link>
-            </div>
+           
 
             <!-- Spacer for vertical center alignment -->
             <div class="hidden lg:block h-6"></div>
 
             <!-- Login Container Card -->
             <div class="w-full max-w-sm space-y-6 my-auto">
-                <div class="space-y-2 text-center lg:text-left">
-                    <!-- Desktop Brand Indicator (Hidden on Mobile) -->
-                    <div class="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
-                        <GraduationCap class="h-6 w-6" />
-                    </div>
-                    <h1 class="text-2xl font-bold tracking-tight text-foreground">
+                <div class="space-y-2 flex flex-col items-center justify-center">
+                    <!-- Desktop Brand Indicator -->
+                    <AppLogo />
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground mt-4">
                         Selamat Datang Kembali
                     </h1>
-                    <p class="text-sm text-muted-foreground leading-normal">
+                    <p class="text-sm text-muted-foreground leading-normal text-center">
                         Silakan masuk ke akun MagangHub mahasiswa atau administrator Anda.
                     </p>
                 </div>
@@ -204,14 +176,6 @@ defineProps<{
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
                             <Label for="password" class="text-xs font-semibold tracking-wide text-foreground">Kata Sandi</Label>
-                            <TextLink
-                                v-if="canResetPassword"
-                                :href="request()"
-                                class="text-xs text-primary hover:text-primary/80"
-                                :tabindex="5"
-                            >
-                                Lupa kata sandi?
-                            </TextLink>
                         </div>
                         <PasswordInput
                             id="password"

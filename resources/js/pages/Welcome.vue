@@ -15,13 +15,13 @@ import {
     Menu,
     X,
     Check,
-    GraduationCap,
     ArrowRight
 } from '@lucide/vue';
 import bankIndonesiaSvg from 'idn-finlogos/icons/bank-indonesia';
 import briSvg from 'idn-finlogos/icons/bri';
 import mandiri from 'idn-finlogos/icons/mandiri'
 import { ref, h } from 'vue';
+import AppLogo from '@/components/AppLogo.vue';
 import CountUp from '@/components/landing/CountUp.vue';
 import Google from '@/components/landing/icons/Google.vue';
 import Goto from '@/components/landing/icons/Goto.vue';
@@ -54,7 +54,7 @@ const navLinks = [
     { label: 'FAQ', href: '#faq' }
 ];
 
-const svgLogoWrapper = (node: any, className?: string) => h('div', {
+const svgLogoWrapper = (node: any, className?: string) => () => h('div', {
     class: cn(
         "flex items-center gap-3 h-7 [&>svg]:h-7 [&>svg]:w-auto text-zinc-400 dark:text-zinc-500 select-none grayscale opacity-60 dark:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-200",
         className
@@ -236,14 +236,7 @@ const faqs = [
         <header class="fixed top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
                 <!-- Logo -->
-                <Link href="/" class="flex items-center gap-2.5 group">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground group-hover:scale-105 transition-transform duration-200">
-                        <GraduationCap class="h-5.5 w-5.5" />
-                    </div>
-                    <span class="text-xl font-bold tracking-tight text-foreground">
-                        Magang<span class="text-primary font-extrabold">Hub</span>
-                    </span>
-                </Link>
+                <AppLogo />
 
                 <!-- Desktop Menu -->
                 <nav class="hidden md:flex items-center gap-8">
@@ -760,12 +753,7 @@ const faqs = [
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                     <!-- Brand info -->
                     <div class="space-y-4 md:col-span-1">
-                        <div class="flex items-center gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
-                                <GraduationCap class="h-4.5 w-4.5" />
-                            </div>
-                            <span class="text-lg font-bold text-white tracking-tight">MagangHub</span>
-                        </div>
+                        <AppLogo keepLight />
                         <p class="text-xs text-zinc-400 leading-relaxed">
                             Sistem pengelolaan magang digital untuk menghubungkan mahasiswa, perguruan tinggi, dan industri secara efisien dan transparan.
                         </p>

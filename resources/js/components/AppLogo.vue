@@ -1,16 +1,21 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+import { home } from '@/routes';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+
+defineProps<{
+    keepLight?: boolean;
+}>() 
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
-    >
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
-    </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold"
-            >Laravel Starter Kit</span
-        >
-    </div>
+    <Link :href="home()" :class="['flex items-center gap-2.5 group', keepLight ? 'text-white' : '']">
+        <AppLogoIcon />
+        <div class="flex flex-col">
+            <span class="text-xl font-bold tracking-tight" :class="[keepLight ? 'text-white' : 'text-foreground']">
+                Magang<span class="text-primary font-extrabold">Hub</span>
+            </span>
+            <span class="text-xs font-medium" :class="[keepLight ? 'text-white/60' : 'text-muted-foreground']">Ilmu Komputer</span>
+        </div>
+    </Link>
 </template>
