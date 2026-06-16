@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import {
+    GraduationCap,
+    FileText,
+    Users,
+    Activity,
+    NotebookPen,
+} from '@lucide/vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -8,13 +15,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { home } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        title: 'Masuk ke Akun Anda',
+        description: 'Masukkan email dan kata sandi Anda di bawah ini untuk masuk',
     },
 });
 
@@ -25,77 +33,227 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="Masuk ke Sistem" />
 
-    <div
-        v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
-    >
-        {{ status }}
-    </div>
-
-    <Form
-        v-bind="store.form()"
-        :reset-on-success="['password']"
-        v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
-    >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    required
-                    autofocus
-                    :tabindex="1"
-                    autocomplete="email"
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
+    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
+        
+        <!-- Left Side: Dark green / Emerald branding and illustration (Hidden on Mobile) -->
+        <div class="relative hidden lg:flex flex-col justify-between bg-primary p-12 text-primary-foreground overflow-hidden dark:bg-emerald-950/40 dark:border-r dark:border-border/30">
+            <!-- Subtle background pattern overlay -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <svg viewBox="0 0 100 100" class="w-full h-full fill-current">
+                    <circle cx="10" cy="10" r="30" />
+                    <circle cx="90" cy="90" r="40" />
+                    <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="2" />
+                    <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="2" />
+                </svg>
             </div>
 
-            <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
-                    <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="text-sm"
-                        :tabindex="5"
-                    >
-                        Forgot your password?
-                    </TextLink>
+            <!-- Top Brand Logo -->
+            <Link :href="home()" class="relative z-20 flex items-center gap-2.5 w-fit group">
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-primary group-hover:scale-105 transition-transform duration-200">
+                    <GraduationCap class="h-5.5 w-5.5" />
                 </div>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    required
-                    :tabindex="2"
-                    autocomplete="current-password"
-                    placeholder="Password"
-                />
-                <InputError :message="errors.password" />
+                <span class="text-xl font-bold tracking-tight text-white">
+                    MagangHub
+                </span>
+            </Link>
+
+            <!-- Middle Illustration -->
+            <div class="relative z-10 my-auto max-w-md">
+                <!-- High-fidelity academic/internship themed vector illustration -->
+                <svg viewBox="0 0 400 300" class="w-full h-auto drop-shadow-lg mb-8 select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Base glow -->
+                    <circle cx="200" cy="150" r="100" fill="white" fill-opacity="0.05" filter="blur(20px)" />
+                    
+                    <!-- Ground/Desk line -->
+                    <line x1="50" y1="230" x2="350" y2="230" stroke="white" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round" />
+                    
+                    <!-- Campus/University shape in background -->
+                    <path d="M70 230 V160 L100 130 L130 160 V230 Z" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.15" stroke-width="1.5" />
+                    <path d="M130 230 V140 L160 110 L190 140 V230 Z" fill="white" fill-opacity="0.12" stroke="white" stroke-opacity="0.25" stroke-width="1.5" />
+                    <rect x="152" y="170" width="16" height="25" rx="2" fill="white" fill-opacity="0.2" />
+                    <circle cx="160" cy="135" r="5" fill="white" fill-opacity="0.3" />
+
+                    <!-- Floating Document representing proposal -->
+                    <rect x="230" y="80" width="70" height="90" rx="6" fill="white" fill-opacity="0.1" stroke="white" stroke-opacity="0.3" stroke-width="2" transform="rotate(5 265 125)" />
+                    <line x1="245" y1="105" x2="285" y2="105" stroke="white" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" transform="rotate(5 265 125)" />
+                    <line x1="245" y1="120" x2="275" y2="120" stroke="white" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" transform="rotate(5 265 125)" />
+                    <line x1="245" y1="135" x2="280" y2="135" stroke="white" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" transform="rotate(5 265 125)" />
+                    <circle cx="280" cy="150" r="8" fill="var(--color-emerald-400, #34d399)" fill-opacity="0.9" transform="rotate(5 265 125)" />
+                    <path d="M277 150 L279 152 L283 148" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(5 265 125)" />
+
+                    <!-- Floating Cog/Gears representing system -->
+                    <circle cx="290" cy="200" r="24" stroke="white" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="6 4" />
+                    <circle cx="290" cy="200" r="14" fill="white" fill-opacity="0.05" stroke="white" stroke-opacity="0.15" stroke-width="2" />
+
+                    <!-- Connected nodes representing group/collaboration -->
+                    <circle cx="90" cy="90" r="6" fill="white" fill-opacity="0.4" />
+                    <circle cx="120" cy="70" r="8" fill="white" fill-opacity="0.6" />
+                    <circle cx="160" cy="80" r="5" fill="white" fill-opacity="0.4" />
+                    <line x1="96" y1="88" x2="114" y2="74" stroke="white" stroke-opacity="0.3" stroke-width="1.5" />
+                    <line x1="128" y1="72" x2="155" y2="78" stroke="white" stroke-opacity="0.3" stroke-width="1.5" />
+                </svg>
+
+                <h2 class="text-2xl font-bold tracking-tight text-white">
+                    Kelola Proses Magang Anda Secara Digital
+                </h2>
+                <p class="mt-3 text-sm text-primary-foreground/85 leading-relaxed">
+                    Dari pembentukan kelompok hingga verifikasi proposal dan pengisian logbook harian, semua terintegrasi secara cepat, teratur, dan transparan dalam satu sistem akademik kampus.
+                </p>
             </div>
 
-            <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
-                </Label>
+            <!-- Bottom Features Highlight Grid -->
+            <div class="relative z-10 grid grid-cols-2 gap-4 border-t border-white/10 pt-8">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                        <FileText class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white">Pengajuan Magang</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                        <Users class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white">Kelola Kelompok</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                        <Activity class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white">Monitoring Status</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                        <NotebookPen class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white">Logbook Digital</span>
+                </div>
             </div>
-
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :tabindex="4"
-                :disabled="processing"
-                data-test="login-button"
-            >
-                <Spinner v-if="processing" />
-                Log in
-            </Button>
         </div>
-    </Form>
+
+        <!-- Right Side: Login Form Card -->
+        <div class="flex flex-col items-center justify-between p-6 sm:p-10 lg:p-12 bg-background min-h-screen">
+            
+            <!-- Mobile Brand Header (Visible on Mobile Only) -->
+            <div class="w-full flex justify-between items-center lg:hidden border-b border-border pb-4">
+                <Link :href="home()" class="flex items-center gap-2 group">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground group-hover:scale-105 transition-transform duration-200">
+                        <GraduationCap class="h-5 w-5" />
+                    </div>
+                    <span class="text-lg font-bold tracking-tight text-foreground">
+                        MagangHub
+                    </span>
+                </Link>
+                <Link :href="home()" class="text-xs font-semibold text-muted-foreground hover:text-foreground">
+                    Kembali ke Beranda
+                </Link>
+            </div>
+
+            <!-- Spacer for vertical center alignment -->
+            <div class="hidden lg:block h-6"></div>
+
+            <!-- Login Container Card -->
+            <div class="w-full max-w-sm space-y-6 my-auto">
+                <div class="space-y-2 text-center lg:text-left">
+                    <!-- Desktop Brand Indicator (Hidden on Mobile) -->
+                    <div class="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
+                        <GraduationCap class="h-6 w-6" />
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground">
+                        Selamat Datang Kembali
+                    </h1>
+                    <p class="text-sm text-muted-foreground leading-normal">
+                        Silakan masuk ke akun MagangHub mahasiswa atau administrator Anda.
+                    </p>
+                </div>
+
+                <!-- Session Status / Alert Message -->
+                <div
+                    v-if="status"
+                    class="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 text-center"
+                >
+                    {{ status }}
+                </div>
+
+                <!-- Form component -->
+                <Form
+                    v-bind="store.form()"
+                    :reset-on-success="['password']"
+                    v-slot="{ errors, processing }"
+                    class="space-y-5"
+                >
+                    <!-- Email field -->
+                    <div class="space-y-1.5">
+                        <Label for="email" class="text-xs font-semibold tracking-wide text-foreground">Alamat Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            required
+                            autofocus
+                            :tabindex="1"
+                            autocomplete="email"
+                            placeholder="nama@mahasiswa.ac.id"
+                            class="h-10 rounded-lg border-border/80 focus-visible:ring-primary/40 focus-visible:border-primary"
+                        />
+                        <InputError :message="errors.email" />
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <Label for="password" class="text-xs font-semibold tracking-wide text-foreground">Kata Sandi</Label>
+                            <TextLink
+                                v-if="canResetPassword"
+                                :href="request()"
+                                class="text-xs text-primary hover:text-primary/80"
+                                :tabindex="5"
+                            >
+                                Lupa kata sandi?
+                            </TextLink>
+                        </div>
+                        <PasswordInput
+                            id="password"
+                            name="password"
+                            required
+                            :tabindex="2"
+                            autocomplete="current-password"
+                            placeholder="Kata Sandi"
+                            class="h-10 rounded-lg border-border/80 focus-visible:ring-primary/40 focus-visible:border-primary"
+                        />
+                        <InputError :message="errors.password" />
+                    </div>
+
+                    <!-- Remember me checkbox -->
+                    <div class="flex items-center justify-between">
+                        <Label for="remember" class="flex items-center space-x-2.5 cursor-pointer text-xs select-none">
+                            <Checkbox id="remember" name="remember" :tabindex="3" class="rounded-md border-border/80 focus:ring-primary" />
+                            <span class="text-muted-foreground font-medium">Ingat saya di perangkat ini</span>
+                        </Label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <Button
+                        type="submit"
+                        class="w-full h-10.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-all duration-150 font-semibold text-sm shadow-sm"
+                        :tabindex="4"
+                        :disabled="processing"
+                        data-test="login-button"
+                    >
+                        <Spinner v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
+                        Masuk ke Dasbor
+                    </Button>
+                </Form>
+            </div>
+
+            <!-- Footer Text -->
+            <div class="w-full text-center py-6 border-t border-border/40 mt-8">
+                <span class="text-[11px] text-muted-foreground tracking-wide font-medium uppercase">
+                    MagangHub &mdash; Platform Pengelolaan Magang Mahasiswa
+                </span>
+            </div>
+
+        </div>
+    </div>
 </template>
