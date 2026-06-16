@@ -19,7 +19,7 @@ import { store } from '@/routes/login';
 defineOptions({
     layout: {
         title: 'Masuk ke Akun Anda',
-        description: 'Masukkan email dan kata sandi Anda di bawah ini untuk masuk',
+        description: 'Masukkan email atau NIM dan kata sandi Anda di bawah ini untuk masuk',
     },
 });
 
@@ -121,9 +121,6 @@ defineProps<{
 
         <!-- Right Side: Login Form Card -->
         <div class="flex flex-col items-center justify-between p-6 sm:p-10 lg:p-12 bg-background min-h-screen">
-            
-           
-
             <!-- Spacer for vertical center alignment -->
             <div class="hidden lg:block h-6"></div>
 
@@ -136,7 +133,7 @@ defineProps<{
                         Selamat Datang Kembali
                     </h1>
                     <p class="text-sm text-muted-foreground leading-normal text-center">
-                        Silakan masuk ke akun MagangHub mahasiswa atau administrator Anda.
+                        Silakan masuk dengan email atau NIM Anda.
                     </p>
                 </div>
 
@@ -155,18 +152,18 @@ defineProps<{
                     v-slot="{ errors, processing }"
                     class="space-y-5"
                 >
-                    <!-- Email field -->
+                    <!-- Email or NIM field -->
                     <div class="space-y-1.5">
-                        <Label for="email" class="text-xs font-semibold tracking-wide text-foreground">Alamat Email</Label>
+                        <Label for="email" class="text-xs font-semibold tracking-wide text-foreground">Email atau NIM</Label>
                         <Input
                             id="email"
-                            type="email"
+                            type="text"
                             name="email"
                             required
                             autofocus
                             :tabindex="1"
-                            autocomplete="email"
-                            placeholder="nama@mahasiswa.ac.id"
+                            autocomplete="username"
+                            placeholder="Email atau NIM"
                             class="h-10 rounded-lg border-border/80 focus-visible:ring-primary/40 focus-visible:border-primary"
                         />
                         <InputError :message="errors.email" />
@@ -206,7 +203,7 @@ defineProps<{
                         data-test="login-button"
                     >
                         <Spinner v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
-                        Masuk ke Dasbor
+                        Masuk
                     </Button>
                 </Form>
             </div>

@@ -10,11 +10,63 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+test('students can authenticate using their NIM and are redirected to home', function () {
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+    ]);
 
     $response = $this->post(route('login.store'), [
-        'email' => $user->email,
+        'email' => '10121001',
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('home', absolute: false));
+});
+
+test('students can authenticate using their email and are redirected to home', function () {
+    $user = User::factory()->create([
+        'role' => 'student',
+        'email' => 'student@example.com',
+        'nim' => '10121001',
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'student@example.com',
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('home', absolute: false));
+});
+
+test('administrators and operators can authenticate using their email and are redirected to dashboard', function () {
+    // Test Administrator
+    $admin = User::factory()->create([
+        'role' => 'administrator',
+        'email' => 'admin@example.com',
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'admin@example.com',
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    // Logout
+    $this->post(route('logout'));
+
+    // Test Operator
+    $operator = User::factory()->create([
+        'role' => 'operator',
+        'email' => 'operator@example.com',
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'operator@example.com',
         'password' => 'password',
     ]);
 
@@ -30,10 +82,13 @@ test('users with two factor enabled are redirected to two factor challenge', fun
         'confirmPassword' => true,
     ]);
 
-    $user = User::factory()->withTwoFactor()->create();
+    $user = User::factory()->withTwoFactor()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+    ]);
 
     $response = $this->post(route('login'), [
-        'email' => $user->email,
+        'email' => '10121001',
         'password' => 'password',
     ]);
 
@@ -43,10 +98,13 @@ test('users with two factor enabled are redirected to two factor challenge', fun
 });
 
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+    ]);
 
     $this->post(route('login.store'), [
-        'email' => $user->email,
+        'email' => '10121001',
         'password' => 'wrong-password',
     ]);
 
@@ -54,22 +112,28 @@ test('users can not authenticate with invalid password', function () {
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+    ]);
 
     $response = $this->actingAs($user)->post(route('logout'));
 
-    $response->assertRedirect(route('home'));
+    $response->assertRedirect(route('welcome'));
 
     $this->assertGuest();
 });
 
 test('users are rate limited', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+    ]);
 
-    RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
+    RateLimiter::increment(md5('login'.implode('|', ['10121001', '127.0.0.1'])), amount: 5);
 
     $response = $this->post(route('login.store'), [
-        'email' => $user->email,
+        'email' => '10121001',
         'password' => 'wrong-password',
     ]);
 

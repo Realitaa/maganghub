@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { home } from '@/routes';
+import { welcome } from '@/routes';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 defineProps<{
@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-    <Link :href="home()" :class="['flex items-center gap-2.5 group', keepLight ? 'text-white' : '']">
+    <Link :href="welcome()" :class="['flex items-center gap-2.5 group', keepLight ? 'text-white' : '']">
         <AppLogoIcon />
         <div class="flex flex-col">
             <span class="text-xl font-bold tracking-tight" :class="[keepLight ? 'text-white' : 'text-foreground']">

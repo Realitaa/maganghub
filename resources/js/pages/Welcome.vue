@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     FileText,
     Users,
@@ -37,7 +37,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stepper, StepperTrigger, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper';
 import { cn } from '@/lib/utils';
-import { dashboard, login } from '@/routes';
+import { dashboard, home, login } from '@/routes';
 
 // state
 const hoveredStep = ref(6);
@@ -45,6 +45,10 @@ const mobileMenuOpen = ref(false);
 const toggleMobileMenu = () => {
     mobileMenuOpen.value = !mobileMenuOpen.value;
 };
+
+const page = usePage();
+const user = page.props.auth?.user;
+const role = user?.role;
 
 // Navigation links
 const navLinks = [
@@ -253,8 +257,15 @@ const faqs = [
                 <!-- CTA Button -->
                 <div class="hidden md:flex items-center gap-4">
                     <Button as-child size="sm" class="h-9.5 px-5">
-                        <Link :href="$page.props.auth?.user ? dashboard() : login()">
-                            {{ $page.props.auth?.user ? 'Dashboard' : 'Masuk ke Sistem' }}
+                        <Link 
+                            :href="user 
+                                ? role === 'student' ? home() : dashboard() 
+                                : login()"
+                        >
+                            {{ user 
+                                ? role === 'student' ? 'Beranda' : 'Dashboard'
+                                : 'Masuk' 
+                            }}
                         </Link>
                     </Button>
                 </div>
@@ -287,8 +298,15 @@ const faqs = [
                     </a>
                     <div class="mt-4 px-3 border-t border-border pt-4">
                         <Button as-child class="w-full">
-                            <Link :href="$page.props.auth?.user ? dashboard() : login()">
-                                {{ $page.props.auth?.user ? 'Dashboard' : 'Masuk ke Sistem' }}
+                            <Link 
+                                :href="user 
+                                    ? role === 'student' ? home() : dashboard() 
+                                    : login()"
+                            >
+                                {{ user 
+                                    ? role === 'student' ? 'Beranda' : 'Dashboard' 
+                                    : 'Masuk' 
+                                }}
                             </Link>
                         </Button>
                     </div>
@@ -318,8 +336,16 @@ const faqs = [
                 <!-- CTA Buttons -->
                 <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
                     <Button as-child size="lg" class="h-12 px-7 text-base font-medium shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-150">
-                        <Link :href="$page.props.auth?.user ? dashboard() : login()">
-                            {{ $page.props.auth?.user ? 'Masuk ke Dashboard' : 'Masuk ke Sistem' }}
+                        <Link 
+                            :href="user 
+                                ? role === 'student' ? home() : dashboard() 
+                                : login()"
+                        >
+                            Masuk ke 
+                            {{ user 
+                                ? role === 'student' ? 'Beranda' : 'Dashboard' 
+                                : 'Sistem' 
+                            }}
                             <ArrowRight class="ml-2 h-4 w-4" />
                         </Link>
                     </Button>
@@ -738,7 +764,11 @@ const faqs = [
                     </p>
                     <div class="mt-8 flex justify-center">
                         <Button as-child variant="secondary" size="xl" class="bg-background text-primary hover:bg-background/95 font-semibold shadow-sm">
-                            <Link :href="$page.props.auth?.user ? dashboard() : login()">
+                            <Link 
+                                :href="user 
+                                    ? role === 'student' ? home() : dashboard() 
+                                    : login()"
+                            >
                                 Masuk ke MagangHub
                             </Link>
                         </Button>
@@ -764,9 +794,8 @@ const faqs = [
                         <h4 class="text-xs font-bold tracking-wider text-zinc-100 uppercase mb-4">Panduan Pengguna</h4>
                         <ul class="space-y-2 text-xs">
                             <li><a href="#" class="hover:text-white transition-colors duration-150">Panduan Mahasiswa</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">Panduan Koordinator</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">Panduan Dosen Pembimbing</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">Kebijakan Akademik</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors duration-150">Panduan Operator</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors duration-150">Panduan Administrator</a></li>
                         </ul>
                     </div>
 
@@ -774,10 +803,9 @@ const faqs = [
                     <div>
                         <h4 class="text-xs font-bold tracking-wider text-zinc-100 uppercase mb-4">Kontak Kampus</h4>
                         <ul class="space-y-2 text-xs text-zinc-400">
-                            <li>Jl. Kampus Merdeka No. 12</li>
-                            <li>Jakarta Selatan, DKI Jakarta</li>
-                            <li>Email: support@university.ac.id</li>
-                            <li>Telp: (021) 800-999-12</li>
+                            <li>Jl. William Iskandar Ps. V</li>
+                            <li>Deli Serdang, Sumatera Utara</li>
+                            <li>Email: support@csunimed.ac.id</li>
                         </ul>
                     </div>
 
@@ -785,10 +813,7 @@ const faqs = [
                     <div>
                         <h4 class="text-xs font-bold tracking-wider text-zinc-100 uppercase mb-4">Sosial Media</h4>
                         <ul class="space-y-2 text-xs">
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">Instagram</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">LinkedIn Portal</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">YouTube Channel</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors duration-150">Twitter / X</a></li>
+                            <li><a href="https://www.instagram.com/ilmukomputerunimed/" target="_blank" class="hover:text-white transition-colors duration-150">Instagram</a></li>
                         </ul>
                     </div>
                 </div>
@@ -798,7 +823,7 @@ const faqs = [
                         &copy; 2026 MagangHub. Hak Cipta Dilindungi Undang-Undang.
                     </p>
                     <p class="text-[11px] text-zinc-500">
-                        Dikembangkan oleh Tim IT Universitas Nasional
+                        Universitas Negeri Medan
                     </p>
                 </div>
             </div>

@@ -6,6 +6,12 @@ export type User = {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    nim: string;
+    major: string;
+    phone: string;
+    role: string;
+    gender: 'L' | 'P';
+    is_active: boolean;
     [key: string]: unknown;
 };
 
