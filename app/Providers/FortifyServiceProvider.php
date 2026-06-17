@@ -30,6 +30,14 @@ class FortifyServiceProvider extends ServiceProvider
                 {
                     $user = $request->user();
 
+                    if ($user && ! $user->is_active) {
+                        auth()->logout();
+                        $request->session()->invalidate();
+                        $request->session()->regenerateToken();
+
+                        return redirect()->route('deactivated');
+                    }
+
                     if ($user && $user->role === 'student') {
                         return redirect()->intended(route('home'));
                     }

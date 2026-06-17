@@ -1,0 +1,464 @@
+<?php
+
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
+use Inertia\Testing\AssertableInertia as Assert;
+use Maatwebsite\Excel\Facades\Excel;
+
+describe('administrator', function () {
+
+    // --- Authentication & Authorization Edge Cases ---
+
+    it('can view user management page if administrator', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this
+            ->actingAs($admin)
+            ->get(route('users.index'));
+
+        $response->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+            );
+    });
+
+    it('can prevent operator from viewing user management page', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+
+        $response = $this
+            ->actingAs($operator)
+            ->get(route('users.index'));
+
+        $response->assertForbidden();
+    });
+
+    it('can prevent student from viewing user management page', function () {
+        $student = User::factory()->create(['role' => 'student']);
+
+        $response = $this
+            ->actingAs($student)
+            ->get(route('users.index'));
+
+        $response->assertForbidden();
+    });
+
+    it('can prevent guest from viewing user management page', function () {
+        $response = $this
+            ->get(route('users.index'));
+
+        $response->assertRedirect(route('login'));
+    });
+
+    // --- Listing, Filtering & Search ---
+
+    it('can search users by name, email, or nim', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $user1 = User::factory()->create([
+            'name' => 'SearchNameTarget',
+            'email' => 'unique1@example.com',
+            'nim' => '99990001',
+            'role' => 'student',
+        ]);
+        $user2 = User::factory()->create([
+            'name' => 'Another User',
+            'email' => 'target_email@example.com',
+            'nim' => '99990002',
+            'role' => 'student',
+        ]);
+
+        // Search by Name
+        $this->actingAs($admin)
+            ->get(route('users.index', ['search' => 'SearchNameTarget']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.name', 'SearchNameTarget')
+            );
+
+        // Search by Email
+        $this->actingAs($admin)
+            ->get(route('users.index', ['search' => 'target_email@example.com']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.email', 'target_email@example.com')
+            );
+
+        // Search by NIM
+        $this->actingAs($admin)
+            ->get(route('users.index', ['search' => '99990001']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.nim', '99990001')
+            );
+    });
+
+    it('can return all users when search query is empty', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        User::factory()->count(3)->create(['role' => 'student']);
+
+        $this->actingAs($admin)
+            ->get(route('users.index', ['search' => '']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 4)
+            );
+    });
+
+    it('can filter users by role', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $operator = User::factory()->create(['role' => 'operator']);
+        $student = User::factory()->create(['role' => 'student']);
+
+        $this->actingAs($admin)
+            ->get(route('users.index', ['role' => 'operator']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.role', 'operator')
+            );
+    });
+
+    it('can filter users by major', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $studentIF = User::factory()->create(['role' => 'student', 'major' => 'Teknik Informatika']);
+        $studentSI = User::factory()->create(['role' => 'student', 'major' => 'Sistem Informasi']);
+
+        $this->actingAs($admin)
+            ->get(route('users.index', ['major' => 'Teknik Informatika']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.major', 'Teknik Informatika')
+            );
+    });
+
+    it('can return majors sorted alphabetically', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        User::factory()->create(['role' => 'student', 'major' => 'Teknik Informatika']);
+        User::factory()->create(['role' => 'student', 'major' => 'Sistem Informasi']);
+        User::factory()->create(['role' => 'student', 'major' => 'Teknik Komputer']);
+
+        $this->actingAs($admin)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->where('majors', ['Sistem Informasi', 'Teknik Informatika', 'Teknik Komputer'])
+            );
+    });
+
+    it('can paginate users list', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        User::factory()->count(15)->create(['role' => 'student']); // Total 16 users
+
+        $this->actingAs($admin)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+                ->where('users.per_page', 10)
+                ->where('users.total', 16)
+                ->has('users.data', 10)
+            );
+    });
+
+    // --- Create & Edit Actions ---
+
+    it('can create a student with a custom password', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $this->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'Bob Student',
+                'email' => 'bob@student.example.com',
+                'role' => 'student',
+                'nim' => '10121010',
+                'major' => 'Teknik Informatika',
+                'gender' => 'L',
+                'password' => 'custom-secret-password',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil membuat pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $user = User::where('email', 'bob@student.example.com')->first();
+        expect($user)->not->toBeNull();
+        expect(Hash::check('custom-secret-password', $user->password))->toBeTrue();
+    });
+
+    it('can create a student without a password defaulting to nim', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $this->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'Alice Student',
+                'email' => 'alice@student.example.com',
+                'role' => 'student',
+                'nim' => '10121011',
+                'major' => 'Sistem Informasi',
+                'gender' => 'P',
+                'password' => '',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil membuat pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $user = User::where('email', 'alice@student.example.com')->first();
+        expect($user)->not->toBeNull();
+        expect(Hash::check('10121011', $user->password))->toBeTrue();
+    });
+
+    it('can fail to create a student without a nim', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this
+            ->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'Invalid Student',
+                'email' => 'invalid@student.example.com',
+                'role' => 'student',
+                'nim' => '',
+                'major' => 'Teknik Informatika',
+                'password' => '',
+            ]);
+
+        $response->assertSessionHasErrors('nim');
+    });
+
+    it('can create an administrator with a required password', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $this->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'New Admin',
+                'email' => 'newadmin@example.com',
+                'role' => 'administrator',
+                'password' => 'adminpass123',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil membuat pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $user = User::where('email', 'newadmin@example.com')->first();
+        expect($user)->not->toBeNull();
+        expect($user->role)->toBe('administrator');
+        expect(Hash::check('adminpass123', $user->password))->toBeTrue();
+    });
+
+    it('can create an operator with a required password', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $this->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'New Operator',
+                'email' => 'newoperator@example.com',
+                'role' => 'operator',
+                'password' => 'operatorpass123',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil membuat pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $user = User::where('email', 'newoperator@example.com')->first();
+        expect($user)->not->toBeNull();
+        expect($user->role)->toBe('operator');
+        expect(Hash::check('operatorpass123', $user->password))->toBeTrue();
+    });
+
+    it('can edit user details', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'name' => 'Old Name',
+            'email' => 'old@student.example.com',
+            'nim' => '10121012',
+            'major' => 'Teknik Informatika',
+        ]);
+
+        $oldPassword = $student->password;
+
+        $this->actingAs($admin)
+            ->patch(route('users.update', $student->id), [
+                'name' => 'Updated Name',
+                'email' => 'updated@student.example.com',
+                'role' => 'student',
+                'nim' => '10121012',
+                'major' => 'Teknik Informatika',
+                'password' => '', // Empty means unchanged
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil memperbarui pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $student->refresh();
+        expect($student->name)->toBe('Updated Name');
+        expect($student->email)->toBe('updated@student.example.com');
+        expect($student->password)->toBe($oldPassword);
+    });
+
+    it('can prevent editing email to an existing email', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $user1 = User::factory()->create(['email' => 'exist@example.com']);
+        $user2 = User::factory()->create(['email' => 'other@example.com']);
+
+        $response = $this
+            ->actingAs($admin)
+            ->patch(route('users.update', $user2->id), [
+                'name' => $user2->name,
+                'email' => 'exist@example.com',
+                'role' => $user2->role,
+            ]);
+
+        $response->assertSessionHasErrors('email');
+    });
+
+    // --- Delete & Deactivate Actions ---
+
+    it('can delete a user', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create(['role' => 'student']);
+
+        $this->actingAs($admin)
+            ->delete(route('users.destroy', $student->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil menghapus pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        expect(User::find($student->id))->toBeNull();
+    });
+
+    it('can prevent deleting their own administrator account', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this
+            ->actingAs($admin)
+            ->delete(route('users.destroy', $admin->id));
+
+        $response->assertSessionHasErrors('error');
+        expect(User::find($admin->id))->not->toBeNull();
+    });
+
+    it('can deactivate an active user', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create(['role' => 'student', 'is_active' => true]);
+
+        $this->actingAs($admin)
+            ->patch(route('users.toggle-active', $student->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil memperbarui status pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        expect($student->refresh()->is_active)->toBeFalse();
+    });
+
+    it('can activate a deactivated user', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create(['role' => 'student', 'is_active' => false]);
+
+        $this->actingAs($admin)
+            ->patch(route('users.toggle-active', $student->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil memperbarui status pengguna.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        expect($student->refresh()->is_active)->toBeTrue();
+    });
+
+    // --- Import Actions ---
+
+    it('can bulk import students from a CSV file using useHttp', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $csvContent = "name,nim,major,email\nCharlie Student,10121020,Teknik Informatika,charlie@student.maganghub.id\nDiana Student,10121021,Sistem Informasi,\n";
+        $file = UploadedFile::fake()->createWithContent('students.csv', $csvContent);
+
+        $response = $this
+            ->actingAs($admin)
+            ->postJson(route('users.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'success' => true,
+            'message' => 'Berhasil mengimpor 2 mahasiswa.',
+        ]);
+
+        $charlie = User::where('nim', '10121020')->first();
+        expect($charlie)->not->toBeNull();
+        expect($charlie->name)->toBe('Charlie Student');
+        expect($charlie->major)->toBe('Teknik Informatika');
+        expect($charlie->email)->toBe('charlie@student.maganghub.id');
+        expect(Hash::check('10121020', $charlie->password))->toBeTrue();
+
+        $diana = User::where('nim', '10121021')->first();
+        expect($diana)->not->toBeNull();
+        expect($diana->name)->toBe('Diana Student');
+        expect($diana->major)->toBe('Sistem Informasi');
+        expect($diana->email)->toBe('10121021@student.maganghub.id'); // Generated fallback email
+        expect(Hash::check('10121021', $diana->password))->toBeTrue();
+    });
+
+    it('can bulk import students from an XLSX file using useHttp', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        // Mock the Excel library response
+        Excel::shouldReceive('toArray')
+            ->once()
+            ->andReturn([
+                [
+                    ['name', 'nim', 'major', 'email'],
+                    ['Emily Student', '10121030', 'Teknik Komputer', 'emily@student.maganghub.id'],
+                ],
+            ]);
+
+        $file = UploadedFile::fake()->create('students.xlsx', 100); // 100 KB mock file
+
+        $response = $this
+            ->actingAs($admin)
+            ->postJson(route('users.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertSuccessful();
+        $response->assertJson([
+            'success' => true,
+            'message' => 'Berhasil mengimpor 1 mahasiswa.',
+        ]);
+
+        $emily = User::where('nim', '10121030')->first();
+        expect($emily)->not->toBeNull();
+        expect($emily->name)->toBe('Emily Student');
+        expect($emily->major)->toBe('Teknik Komputer');
+        expect($emily->email)->toBe('emily@student.maganghub.id');
+        expect(Hash::check('10121030', $emily->password))->toBeTrue();
+    });
+
+    it('can fail to import if required headers name, nim, or major are missing', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        // Invalid headers: missing 'major'
+        $csvContent = "name,nim,prodi\nJohn Doe,12345,Teknik Informatika\n";
+        $file = UploadedFile::fake()->createWithContent('invalid.csv', $csvContent);
+
+        $response = $this
+            ->actingAs($admin)
+            ->postJson(route('users.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('file');
+    });
+
+});

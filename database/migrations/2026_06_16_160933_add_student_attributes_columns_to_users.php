@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('role')->default('student');
             $table->enum('gender', ['L', 'P'])->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->boolean('is_active')->default(true);
         });
     }
 

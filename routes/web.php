@@ -9,4 +9,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('home', 'Dashboard')->name('home');
 });
 
+Route::inertia('deactivated', 'auth/Deactivated')->name('deactivated');
+
 require __DIR__.'/settings.php';
+require __DIR__.'/users.php';

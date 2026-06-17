@@ -24,6 +24,7 @@ const { isCurrentUrl } = useCurrentUrl();
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton
                     as-child
+                    size="lg"
                     :is-active="isCurrentUrl(item.href)"
                     :tooltip="item.title"
                 >

@@ -139,3 +139,39 @@ test('users are rate limited', function () {
 
     $response->assertTooManyRequests();
 });
+
+test('deactivated users cannot login and are redirected to deactivated route', function () {
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121001',
+        'is_active' => false,
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => '10121001',
+        'password' => 'password',
+    ]);
+
+    $response->assertRedirect(route('deactivated'));
+    $this->assertGuest();
+});
+
+test('logged in users that get deactivated are logged out and redirected to deactivated route', function () {
+    $user = User::factory()->create([
+        'role' => 'student',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user);
+
+    $response = $this->get(route('dashboard'));
+    $response->assertOk();
+
+    // Now deactivate the user in database
+    $user->update(['is_active' => false]);
+
+    // Send a new request to a protected route
+    $response = $this->get(route('dashboard'));
+    $response->assertRedirect(route('deactivated'));
+    $this->assertGuest();
+});
