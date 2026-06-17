@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm, useHttp, router } from '@inertiajs/vue3';
+import { Head, useForm, useHttp, router, usePage } from '@inertiajs/vue3';
 import { 
     Plus, 
     Upload, 
@@ -13,7 +13,7 @@ import {
     AlertTriangle,
     ShieldAlert
 } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -131,6 +131,46 @@ const importHttp = useHttp({
 
 const importError = ref<string | null>(null);
 const importSuccess = ref<string | null>(null);
+
+// Page user and permission helpers
+const page = usePage();
+const currentUser = computed(() => page.props.auth.user as any);
+
+const canEditUser = (targetUser: any) => {
+    if (!currentUser.value) {
+return false;
+}
+
+    if (currentUser.value.role === 'administrator') {
+        return true;
+    }
+
+    if (currentUser.value.role === 'operator') {
+        if (targetUser.role === 'administrator') {
+            return false;
+        }
+
+        if (targetUser.role === 'operator' && targetUser.id !== currentUser.value.id) {
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
+};
+
+const canDeleteUser = () => {
+    if (!currentUser.value) {
+        return false;
+    }
+
+    if (currentUser.value.role === 'administrator') {
+        return true;
+    }
+
+    return false; // Operators can't delete anyone
+};
 
 // Debounced search logic
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
@@ -421,7 +461,7 @@ const handlePageChange = (newPage: number) => {
                                 </Badge>
                             </TableCell>
                             <TableCell class="p-4 align-middle text-right">
-                                <DropdownMenu>
+                                <DropdownMenu v-if="canEditUser(user) || canDeleteUser()">
                                     <DropdownMenuTrigger as-child>
                                         <Button variant="ghost" class="h-8 w-8 p-0">
                                             <span class="sr-only">Buka menu</span>
@@ -429,16 +469,16 @@ const handlePageChange = (newPage: number) => {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" class="w-[160px]">
-                                        <DropdownMenuItem @click="openEditModal(user)">
+                                        <DropdownMenuItem v-if="canEditUser(user)" @click="openEditModal(user)">
                                             <Edit class="mr-2 h-4 w-4" />
                                             Edit Detail
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="toggleUserStatus(user)">
+                                        <DropdownMenuItem v-if="canEditUser(user)" @click="toggleUserStatus(user)">
                                             <component :is="user.is_active ? UserX : UserCheck" class="mr-2 h-4 w-4" />
                                             {{ user.is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem @click="confirmDelete(user)" class="text-destructive focus:text-destructive">
+                                        <DropdownMenuSeparator v-if="canEditUser(user) && canDeleteUser()" />
+                                        <DropdownMenuItem v-if="canDeleteUser()" @click="confirmDelete(user)" class="text-destructive focus:text-destructive">
                                             <Trash2 class="mr-2 h-4 w-4" />
                                             Hapus Pengguna
                                         </DropdownMenuItem>

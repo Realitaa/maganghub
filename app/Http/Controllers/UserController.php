@@ -10,6 +10,7 @@ use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,6 +27,8 @@ class UserController extends Controller
      */
     public function index(Request $request): Response
     {
+        Gate::authorize('viewAny', User::class);
+
         $query = User::query();
 
         // 1. Search filter (name, email, nim)
@@ -99,6 +102,8 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        Gate::authorize('delete', $user);
+
         $this->userService->deleteUser($user, auth()->user());
 
         return Inertia::flash('toast', [
@@ -112,6 +117,8 @@ class UserController extends Controller
      */
     public function toggleActive(User $user): RedirectResponse
     {
+        Gate::authorize('update', $user);
+
         $this->userService->toggleActiveStatus($user, auth()->user());
 
         return Inertia::flash('toast', [

@@ -19,6 +19,7 @@ import { index as userIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 
 const page = usePage();
+const userRole = computed(() => page.props.auth?.user?.role);
 
 const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -29,7 +30,7 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    if (page.props.auth?.user?.role === 'administrator') {
+    if (userRole.value === 'administrator' || userRole.value === 'operator') {
         items.push({
             title: 'Manajemen Pengguna',
             href: userIndex(),

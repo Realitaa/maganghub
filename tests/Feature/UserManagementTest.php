@@ -23,16 +23,6 @@ describe('administrator', function () {
             );
     });
 
-    it('can prevent operator from viewing user management page', function () {
-        $operator = User::factory()->create(['role' => 'operator']);
-
-        $response = $this
-            ->actingAs($operator)
-            ->get(route('users.index'));
-
-        $response->assertForbidden();
-    });
-
     it('can prevent student from viewing user management page', function () {
         $student = User::factory()->create(['role' => 'student']);
 
@@ -459,6 +449,141 @@ describe('administrator', function () {
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('file');
+    });
+
+});
+
+describe('operator', function () {
+
+    it('can view user management page if operator', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+
+        $response = $this
+            ->actingAs($operator)
+            ->get(route('users.index'));
+
+        $response->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('users/Index')
+            );
+    });
+
+    it('cannot delete other user or themselves', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $student = User::factory()->create(['role' => 'student']);
+
+        // Try to delete another user
+        $response = $this
+            ->actingAs($operator)
+            ->delete(route('users.destroy', $student->id));
+        $response->assertForbidden();
+
+        // Try to delete themselves
+        $response = $this
+            ->actingAs($operator)
+            ->delete(route('users.destroy', $operator->id));
+        $response->assertForbidden();
+    });
+
+    it('cannot update other administrator', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.update', $admin->id), [
+                'name' => 'Updated Name',
+                'email' => 'updated@admin.example.com',
+                'role' => 'administrator',
+            ]);
+        $response->assertForbidden();
+    });
+
+    it('cannot update other operator', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $otherOperator = User::factory()->create(['role' => 'operator']);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.update', $otherOperator->id), [
+                'name' => 'Updated Name',
+                'email' => 'updated@operator.example.com',
+                'role' => 'operator',
+            ]);
+        $response->assertForbidden();
+    });
+
+    it('can update student users', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'name' => 'Old Name',
+            'email' => 'old@student.example.com',
+            'nim' => '10121012',
+            'major' => 'Teknik Informatika',
+        ]);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.update', $student->id), [
+                'name' => 'Updated Name',
+                'email' => 'updated@student.example.com',
+                'role' => 'student',
+                'nim' => '10121012',
+                'major' => 'Teknik Informatika',
+            ]);
+        $response->assertRedirect();
+
+        $student->refresh();
+        expect($student->name)->toBe('Updated Name');
+    });
+
+    it('can update themselves', function () {
+        $operator = User::factory()->create([
+            'role' => 'operator',
+            'name' => 'Operator Name',
+            'email' => 'op@example.com',
+        ]);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.update', $operator->id), [
+                'name' => 'Updated Op Name',
+                'email' => 'op@example.com',
+                'role' => 'operator',
+            ]);
+        $response->assertRedirect();
+
+        $operator->refresh();
+        expect($operator->name)->toBe('Updated Op Name');
+    });
+
+    it('cannot toggle active status of other administrator or operator', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $admin = User::factory()->create(['role' => 'administrator', 'is_active' => true]);
+        $otherOperator = User::factory()->create(['role' => 'operator', 'is_active' => true]);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.toggle-active', $admin->id));
+        $response->assertForbidden();
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.toggle-active', $otherOperator->id));
+        $response->assertForbidden();
+    });
+
+    it('can toggle active status of student users', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $student = User::factory()->create(['role' => 'student', 'is_active' => true]);
+
+        $response = $this
+            ->actingAs($operator)
+            ->patch(route('users.toggle-active', $student->id));
+        $response->assertRedirect();
+
+        expect($student->refresh()->is_active)->toBeFalse();
     });
 
 });
