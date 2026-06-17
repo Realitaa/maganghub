@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { welcome } from '@/routes';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { welcome } from '@/routes';
 
 defineProps<{
     title?: string;

@@ -160,8 +160,7 @@ const rootClasses = computed(() => {
     'relative overflow-x-hidden group',
     '[--logoloop-gap:32px]',
     '[--logoloop-logoHeight:28px]',
-    '[--logoloop-fadeColorAuto:#ffffff]',
-    'dark:[--logoloop-fadeColorAuto:#0b0b0b]'
+    '[--logoloop-fadeColorAuto:hsl(var(--background))]'
   ];
 
   if (props.scaleOnHover) {

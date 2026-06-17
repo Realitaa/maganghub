@@ -17,18 +17,10 @@ import {
     Check,
     ArrowRight
 } from '@lucide/vue';
-import bankIndonesiaSvg from 'idn-finlogos/icons/bank-indonesia';
-import briSvg from 'idn-finlogos/icons/bri';
-import mandiri from 'idn-finlogos/icons/mandiri'
-import { ref, h } from 'vue';
+import { ref } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import CountUp from '@/components/landing/CountUp.vue';
-import Google from '@/components/landing/icons/Google.vue';
-import Goto from '@/components/landing/icons/Goto.vue';
-import Huawei from '@/components/landing/icons/Huawei.vue';
-import Ibm from '@/components/landing/icons/Ibm.vue';
-import IndosatOoredoHutsicon from '@/components/landing/icons/IndosatOoredoHutsicon.vue';
-import TelkomIndonesia from '@/components/landing/icons/TelkomIndonesia.vue';
+import { google, telkomIndonesia, bri, bankIndonesia, indosatOoredoHutsicon, mandiri, ibm, huawei, goto } from '@/components/landing/icons';
 import ImpactChart from '@/components/landing/ImpactChart.vue';
 import LogoLoop from '@/components/landing/LogoLoop.vue';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -36,7 +28,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stepper, StepperTrigger, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper';
-import { cn } from '@/lib/utils';
 import { dashboard, home, login } from '@/routes';
 
 // state
@@ -58,64 +49,50 @@ const navLinks = [
     { label: 'FAQ', href: '#faq' }
 ];
 
-const svgLogoWrapper = (node: any, className?: string) => () => h('div', {
-    class: cn(
-        "flex items-center gap-3 h-7 [&>svg]:h-7 [&>svg]:w-auto text-zinc-400 dark:text-zinc-500 select-none grayscale opacity-60 dark:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-200",
-        className
-    )
-}, [
-    h(node)
-]);
-
-const idnfinlogosWrapper = (logo: any) => {
-    return `<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500 font-bold text-lg select-none grayscale opacity-60 dark:opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-200">
-                <div class="h-7 w-auto flex items-center justify-center [&>svg]:h-7 [&>svg]:w-auto">${logo}</div>
-            </div>`
-};
 // Company logos loop items
 const companyLogos = [
     {
-        node: svgLogoWrapper(Google),
+        node: google,
         title: 'Google',
         href: 'https://google.com/'
     },
     {
-        node: svgLogoWrapper(TelkomIndonesia),
+        node: telkomIndonesia,
         title: 'Telkom Indonesia',
         href: 'https://www.telkom.co.id/'
     },
     {
-        node: idnfinlogosWrapper(briSvg),
+        node: bri,
         title: 'BRI',
         href: 'https://www.bri.co.id'
     },
     {
-        node: idnfinlogosWrapper(bankIndonesiaSvg),
+        node: bankIndonesia,
         title: 'Bank Indonesia',
         href: 'https://www.bi.go.id'
     },
     {
-        node: svgLogoWrapper(IndosatOoredoHutsicon),
+        node: indosatOoredoHutsicon,
         title: 'Indosat Ooredoo Hutchison',
         href: 'https://www.ioh.co.id'
     },
     {
-        node: idnfinlogosWrapper(mandiri),
+        node: mandiri,
         title: 'Bank Mandiri',
         href: 'https://www.bankmandiri.co.id'
     },
     {
-        node: svgLogoWrapper(Ibm),
+        node: ibm,
         title: 'IBM',
         href: 'https://www.ibm.com'
     },
     {
-        node: svgLogoWrapper(Huawei),
+        node: huawei,
         title: 'Huawei',
         href: 'https://www.huawei.com/'
     },
     {
-        node: svgLogoWrapper(Goto),
+        node: goto,
         title: 'Goto',
         href: 'https://www.goto.com/'
     }
@@ -763,7 +740,7 @@ const faqs = [
                         Kelola seluruh proses administrasi magang kampus Anda dalam satu platform yang terintegrasi dan terpantau dengan baik.
                     </p>
                     <div class="mt-8 flex justify-center">
-                        <Button as-child variant="secondary" size="xl" class="bg-background text-primary hover:bg-background/95 font-semibold shadow-sm">
+                        <Button as-child variant="secondary" size="xl" class="bg-background text-primary dark:text-primary-foreground hover:bg-background/95 font-semibold shadow-sm">
                             <Link 
                                 :href="user 
                                     ? role === 'student' ? home() : dashboard() 
@@ -830,15 +807,3 @@ const faqs = [
         </footer>
     </div>
 </template>
-
-<style>
-/* Auto-scroll marquee animations */
-@keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-marquee {
-  display: inline-flex;
-  animation: scroll 30s linear infinite;
-}
-</style>
