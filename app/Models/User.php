@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -43,5 +45,29 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the internship groups this user leads.
+     */
+    public function ledGroups(): HasMany
+    {
+        return $this->hasMany(InternshipGroup::class, 'leader_id');
+    }
+
+    /**
+     * Get the active group membership of this user.
+     */
+    public function groupMembership(): HasOne
+    {
+        return $this->hasOne(GroupMembership::class, 'user_id');
+    }
+
+    /**
+     * Get the join requests sent by this user.
+     */
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(GroupJoinRequest::class, 'user_id');
     }
 }

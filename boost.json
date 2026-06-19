@@ -1,7 +1,8 @@
 {
     "agents": [
         "antigravity",
-        "zed"
+        "zed",
+        "codex"
     ],
     "cloud": false,
     "guidelines": true,
