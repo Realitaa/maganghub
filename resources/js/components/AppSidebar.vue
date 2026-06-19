@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, House, Users } from '@lucide/vue';
+import { LayoutGrid, House, Users, ClipboardList } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { home } from '@/routes';
+import { index as submissionsIndex } from '@/routes/operator/submissions';
 import { index as userIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 
@@ -44,6 +45,11 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'Manajemen Pengguna',
             href: userIndex(),
             icon: Users,
+        },
+        {
+            title: 'Pengajuan Magang',
+            href: submissionsIndex(),
+            icon: ClipboardList,
         });
     }
 

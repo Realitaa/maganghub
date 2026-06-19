@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->string('supporting_document')->nullable();
             $table->string('status')->default('submitted');
+            $table->text('rejection_note')->nullable();
             $table->timestamps();
         });
     }

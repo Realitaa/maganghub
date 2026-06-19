@@ -15,3 +15,4 @@ Route::inertia('deactivated', 'auth/Deactivated')->name('deactivated');
 require __DIR__.'/settings.php';
 require __DIR__.'/users.php';
 require __DIR__.'/groups.php';
+require __DIR__.'/internship_submission.php';

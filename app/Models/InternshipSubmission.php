@@ -20,10 +20,11 @@ use Illuminate\Support\Carbon;
  * @property Carbon $end_date
  * @property string|null $supporting_document
  * @property string $status
+ * @property string|null $rejection_note
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['group_id', 'company_name', 'company_address', 'company_contact', 'division', 'start_date', 'end_date', 'supporting_document', 'status'])]
+#[Fillable(['group_id', 'company_name', 'company_address', 'company_contact', 'division', 'start_date', 'end_date', 'supporting_document', 'status', 'rejection_note'])]
 class InternshipSubmission extends Model
 {
     use HasFactory;
