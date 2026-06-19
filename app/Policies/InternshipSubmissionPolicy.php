@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\InternshipSubmission;
 use App\Models\User;
 
 class InternshipSubmissionPolicy
@@ -36,5 +37,29 @@ class InternshipSubmissionPolicy
     public function reject(User $user): bool
     {
         return in_array($user->role, ['operator', 'administrator']);
+    }
+
+    /**
+     * Determine whether the user can download the generated letter.
+     */
+    public function downloadLetter(User $user, InternshipSubmission $submission): bool
+    {
+        if ($submission->status !== 'letter_sent') {
+            return false;
+        }
+
+        $isCurrentLeader = $submission->group && $submission->group->leader_id === $user->id;
+        $isCurrentMember = $submission->group && $submission->group->memberships()->where('user_id', $user->id)->exists();
+        $isSnapshotMember = $submission->submissionMemberships()->where('user_id', $user->id)->exists();
+
+        return $isCurrentLeader || $isCurrentMember || $isSnapshotMember;
+    }
+
+    /**
+     * Determine whether the user can upload the company response.
+     */
+    public function uploadResponse(User $user, InternshipSubmission $submission): bool
+    {
+        return $submission->group && $submission->group->leader_id === $user->id;
     }
 }

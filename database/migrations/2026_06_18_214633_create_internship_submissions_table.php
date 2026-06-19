@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('supporting_document')->nullable();
             $table->string('status')->default('submitted');
             $table->text('rejection_note')->nullable();
+            $table->string('letter_path')->nullable();
+            $table->string('company_response_path')->nullable();
             $table->timestamps();
         });
     }

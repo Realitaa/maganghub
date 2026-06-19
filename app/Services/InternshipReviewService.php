@@ -77,6 +77,21 @@ class InternshipReviewService
                 'status' => 'letter_sent',
             ]);
 
+            // Generate document if not already generated
+            if (! $lockedSubmission->letter_path) {
+                try {
+                    $generator = app(DocumentGeneratorService::class);
+                    $path = $generator->generateLetter($lockedSubmission);
+                    $lockedSubmission->update([
+                        'letter_path' => $path,
+                    ]);
+                } catch (\Exception $e) {
+                    throw ValidationException::withMessages([
+                        'error' => 'Gagal membuat dokumen permohonan magang: '.$e->getMessage(),
+                    ]);
+                }
+            }
+
             return $lockedSubmission;
         });
     }

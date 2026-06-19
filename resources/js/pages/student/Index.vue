@@ -14,6 +14,7 @@ import {
     Clock,
     Link2,
     FileText,
+    CheckCircle2,
 } from '@lucide/vue';
 import { ref, onMounted, computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,8 @@ import {
 import {
     store as submissionStore,
     submit as submissionSubmit,
+    downloadLetter,
+    uploadResponse,
 } from '@/routes/groups/submissions';
 import {
     cancel as cancelRequest,
@@ -367,11 +370,37 @@ function submitSubmissionProposal() {
         onSuccess: () => {
             showSubmitConfirm.value = false;
         },
-        onFinish: () => {
-            isProcessing.value = false;
-            showSubmitConfirm.value = false;
-        },
     });
+}
+
+// ─── Company Response Upload Setup ─────────────────────────────────────────────
+
+const responseUploadForm = useForm({
+    file: null as File | null,
+});
+
+const fileInput = ref<HTMLInputElement | null>(null);
+
+function triggerUpload() {
+    fileInput.value?.click();
+}
+
+function handleResponseUpload(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0] && props.group?.active_submission) {
+        const file = target.files[0];
+        responseUploadForm.file = file;
+        responseUploadForm.post(uploadResponse.url(props.group.active_submission.id), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                responseUploadForm.reset();
+                if (fileInput.value) {
+                    fileInput.value.value = '';
+                }
+            },
+        });
+    }
 }
 
 // ─── Deep link: ?code=XXXXXXXXXX ─────────────────────────────────────────────
@@ -700,6 +729,72 @@ onMounted(() => {
 
                 <!-- Right: Members -->
                 <div class="space-y-4 lg:col-span-2">
+                    <!-- Card: Surat Permohonan & Balasan Perusahaan -->
+                    <Card v-if="group.active_submission?.status === 'letter_sent'" class="border-green-200 dark:border-green-900 bg-green-50/10 dark:bg-green-950/10">
+                        <CardHeader class="pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="rounded-full bg-green-100 dark:bg-green-900 p-2 text-green-700 dark:text-green-300">
+                                    <FileText class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <CardTitle class="text-base font-semibold text-green-900 dark:text-green-100">
+                                        Surat Permohonan Magang Tersedia
+                                    </CardTitle>
+                                    <CardDescription class="text-xs text-green-700/80 dark:text-green-300/80">
+                                        Unduh surat permohonan resmi dan unggah surat balasan setelah disetujui perusahaan.
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <p class="text-sm text-muted-foreground leading-relaxed">
+                                Surat permohonan magang untuk kelompok Anda telah berhasil diterbitkan. Silakan unduh dokumen untuk diserahkan ke instansi/perusahaan tujuan <strong>{{ group.active_submission.company_name }}</strong>.
+                            </p>
+
+                            <!-- Success banner if response is uploaded -->
+                            <div v-if="group.active_submission.company_response_path" class="flex items-center gap-2 rounded-lg bg-green-100/50 dark:bg-green-900/30 p-3 text-sm text-green-800 dark:text-green-200 border border-green-200/50 dark:border-green-800/50">
+                                <CheckCircle2 class="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <span>Surat balasan perusahaan telah berhasil diunggah.</span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 pt-2">
+                                <a 
+                                    :href="downloadLetter.url(group.active_submission.id)" 
+                                    class="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-700 transition-colors"
+                                    id="btn-download-letter"
+                                >
+                                    <FileText class="mr-2 h-4 w-4" />
+                                    Unduh Surat Permohonan
+                                </a>
+
+                                <template v-if="isLeader">
+                                    <input 
+                                        type="file" 
+                                        ref="fileInput" 
+                                        class="hidden" 
+                                        accept=".pdf,.docx,.png,.jpg,.jpeg" 
+                                        @change="handleResponseUpload" 
+                                    />
+                                    <Button 
+                                        variant="outline"
+                                        class="border-green-600 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-950"
+                                        @click="triggerUpload"
+                                        :disabled="responseUploadForm.processing"
+                                        id="btn-upload-response"
+                                    >
+                                        <Spinner v-if="responseUploadForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                                        <Plus v-else class="mr-2 h-4 w-4" />
+                                        {{ group.active_submission.company_response_path ? 'Unggah Ulang Surat Balasan' : 'Unggah Surat Balasan' }}
+                                    </Button>
+                                </template>
+                            </div>
+                            
+                            <p v-if="responseUploadForm.errors.file" class="text-xs text-destructive mt-1 font-medium">
+                                {{ responseUploadForm.errors.file }}
+                            </p>
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardHeader class="gap-4 pb-3">
                             <div
