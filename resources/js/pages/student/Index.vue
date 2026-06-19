@@ -43,11 +43,26 @@ import {
     destroy as groupDestroy,
 } from '@/routes/groups';
 import {
+    store as submissionStore,
+    submit as submissionSubmit,
+} from '@/routes/groups/submissions';
+import {
     cancel as cancelRequest,
     approve as approveRequest,
     reject as rejectRequest,
 } from '@/routes/groups/join-requests';
 import { dashboard } from '@/routes';
+import { useForm } from '@inertiajs/vue3';
+import { watch } from 'vue';
+import {
+    Save,
+    Send,
+    Building2,
+    MapPin,
+    Phone,
+    Calendar,
+    AlertCircle,
+} from '@lucide/vue';
 
 defineOptions({
     layout: {
@@ -77,6 +92,19 @@ interface JoinRequest {
     created_at: string;
 }
 
+interface Submission {
+    id: number;
+    group_id: number;
+    company_name: string;
+    company_address: string;
+    company_contact: string;
+    division: string;
+    start_date: string;
+    end_date: string;
+    supporting_document: string | null;
+    status: string;
+}
+
 interface Group {
     id: number;
     code: string;
@@ -85,6 +113,7 @@ interface Group {
     leader: Member;
     memberships: Array<{ user: Member }>;
     join_requests: JoinRequest[];
+    active_submission?: Submission | null;
 }
 
 interface PendingJoinRequest {
@@ -289,6 +318,60 @@ function rejectJoinRequest(requestId: number) {
 
 function setActiveGroupTab(tab: 'members' | 'requests' | 'submissions') {
     activeGroupTab.value = tab;
+}
+
+// ─── Submission Form Setup ───────────────────────────────────────────────────
+
+const showSubmitConfirm = ref(false);
+
+const submissionForm = useForm({
+    company_name: props.group?.active_submission?.company_name ?? '',
+    company_address: props.group?.active_submission?.company_address ?? '',
+    company_contact: props.group?.active_submission?.company_contact ?? '',
+    division: props.group?.active_submission?.division ?? '',
+    start_date: props.group?.active_submission?.start_date ? props.group.active_submission.start_date.substring(0, 10) : '',
+    end_date: props.group?.active_submission?.end_date ? props.group.active_submission.end_date.substring(0, 10) : '',
+});
+
+const isSubmissionEditable = computed(() => {
+    return isLeader.value && (props.group?.status === 'forming' || props.group?.status === 'company_rejected');
+});
+
+watch(
+    () => props.group?.active_submission,
+    (newSub) => {
+        submissionForm.company_name = newSub?.company_name ?? '';
+        submissionForm.company_address = newSub?.company_address ?? '';
+        submissionForm.company_contact = newSub?.company_contact ?? '';
+        submissionForm.division = newSub?.division ?? '';
+        submissionForm.start_date = newSub?.start_date ? newSub.start_date.substring(0, 10) : '';
+        submissionForm.end_date = newSub?.end_date ? newSub.end_date.substring(0, 10) : '';
+    },
+    { deep: true }
+);
+
+function saveSubmissionDraft() {
+    isProcessing.value = true;
+    submissionForm.post(submissionStore.url(), {
+        preserveScroll: true,
+        onFinish: () => {
+            isProcessing.value = false;
+        },
+    });
+}
+
+function submitSubmissionProposal() {
+    isProcessing.value = true;
+    submissionForm.post(submissionSubmit.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showSubmitConfirm.value = false;
+        },
+        onFinish: () => {
+            isProcessing.value = false;
+            showSubmitConfirm.value = false;
+        },
+    });
 }
 
 // ─── Deep link: ?code=XXXXXXXXXX ─────────────────────────────────────────────
@@ -539,7 +622,7 @@ onMounted(() => {
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
                     <Button
-                        v-if="isLeader"
+                        v-if="isLeader && (group.status === 'forming' || group.status === 'company_rejected')"
                         variant="destructive"
                         size="sm"
                         @click="showDisbandConfirm = true"
@@ -548,7 +631,7 @@ onMounted(() => {
                         Bubarkan Kelompok
                     </Button>
                     <Button
-                        v-else
+                        v-else-if="!isLeader && (group.status === 'forming' || group.status === 'company_rejected')"
                         variant="outline"
                         size="sm"
                         class="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -823,23 +906,186 @@ onMounted(() => {
                                 </div>
                             </div>
 
-                            <div
-                                v-else
-                                class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-8 text-center"
-                            >
-                                <div
-                                    class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
-                                >
-                                    <FileText class="h-5 w-5" />
+                            <!-- ───── SUBMISSIONS TAB (Form Pengajuan Magang) ───── -->
+                            <div v-else class="space-y-6">
+                                <!-- Status Banner / Alert -->
+                                <div v-if="group.status !== 'forming' && group.status !== 'company_rejected'" class="rounded-xl border border-primary/20 bg-primary/5 p-4 flex gap-3 text-sm text-foreground">
+                                    <AlertCircle class="h-5 w-5 text-primary flex-shrink-0" />
+                                    <div>
+                                        <h4 class="font-semibold mb-1">Status Pengajuan Magang: {{ groupStatusLabel }}</h4>
+                                        <p class="text-xs text-muted-foreground" v-if="group.status === 'submitted'">
+                                            Pengajuan kelompok Anda telah dikirim dan sedang menunggu verifikasi oleh admin/operator. Komposisi anggota kelompok dan data perusahaan telah dikunci.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'under_review'">
+                                            Pengajuan Anda sedang ditinjau oleh tim program studi / admin.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'letter_sent'">
+                                            Surat izin magang resmi telah diterbitkan oleh program studi dan siap untuk dikirimkan ke perusahaan.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'waiting_response'">
+                                            Surat telah dikirimkan ke instansi tujuan. Menunggu surat balasan dari perusahaan.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'internship_started'">
+                                            Kelompok Anda telah diterima dan masa magang resmi dimulai. Selamat melaksanakan magang!
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'partially_accepted'">
+                                            Penerimaan magang disetujui sebagian oleh perusahaan.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'completed'">
+                                            Masa magang kelompok ini telah selesai.
+                                        </p>
+                                    </div>
                                 </div>
-                                <p class="text-sm font-medium">
-                                    Fitur pengajuan akan tersedia di sini
-                                </p>
-                                <p class="mt-1 text-xs text-muted-foreground">
-                                    Setelah alur pengajuan kelompok disiapkan,
-                                    panel ini akan menampilkan status dan aksi
-                                    terkait.
-                                </p>
+                                <div v-else class="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 flex gap-3 text-sm text-foreground">
+                                    <AlertCircle class="h-5 w-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
+                                    <div>
+                                        <h4 class="font-semibold mb-1" v-if="isLeader">Persiapan Pengajuan Magang</h4>
+                                        <h4 class="font-semibold mb-1" v-else>Menunggu Pengajuan Ketua Kelompok</h4>
+                                        <p class="text-xs text-muted-foreground" v-if="isLeader">
+                                            Sebagai ketua kelompok, silakan isi data instansi/perusahaan tujuan magang di bawah ini. Anda dapat menyimpannya sebagai draf terlebih dahulu sebelum resmi mengajukan ke admin. Setelah diajukan, data perusahaan dan keanggotaan kelompok akan <strong>dikunci</strong>.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else>
+                                            Draf data pengajuan sedang diisi oleh ketua kelompok Anda ({{ group.leader.name }}). Data akan dikunci setelah diajukan ke admin.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Form -->
+                                <form @submit.prevent class="space-y-6">
+                                    <!-- Grid 2 Kolom -->
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <!-- Nama Instansi/Perusahaan -->
+                                        <div class="space-y-1.5">
+                                            <Label for="company_name" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <Building2 class="h-3.5 w-3.5" />
+                                                Nama Perusahaan / Instansi
+                                            </Label>
+                                            <Input
+                                                id="company_name"
+                                                v-model="submissionForm.company_name"
+                                                placeholder="Contoh: PT Teknologi Nusantara"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.company_name" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.company_name }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Bidang/Divisi Magang -->
+                                        <div class="space-y-1.5">
+                                            <Label for="division" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <Building2 class="h-3.5 w-3.5" />
+                                                Bidang / Divisi Pekerjaan
+                                            </Label>
+                                            <Input
+                                                id="division"
+                                                v-model="submissionForm.division"
+                                                placeholder="Contoh: Software Engineer / IT Infrastructure"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.division" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.division }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Grid 3 Kolom -->
+                                    <div class="grid gap-4 sm:grid-cols-3">
+                                        <!-- Kontak Perusahaan -->
+                                        <div class="space-y-1.5">
+                                            <Label for="company_contact" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <Phone class="h-3.5 w-3.5" />
+                                                Kontak Instansi (No. Telp / Email)
+                                            </Label>
+                                            <Input
+                                                id="company_contact"
+                                                v-model="submissionForm.company_contact"
+                                                placeholder="Contoh: hr@company.com / 021-xxxxxx"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.company_contact" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.company_contact }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Tanggal Mulai -->
+                                        <div class="space-y-1.5">
+                                            <Label for="start_date" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <Calendar class="h-3.5 w-3.5" />
+                                                Tanggal Mulai
+                                            </Label>
+                                            <Input
+                                                id="start_date"
+                                                type="date"
+                                                v-model="submissionForm.start_date"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.start_date" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.start_date }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Tanggal Selesai -->
+                                        <div class="space-y-1.5">
+                                            <Label for="end_date" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <Calendar class="h-3.5 w-3.5" />
+                                                Tanggal Selesai
+                                            </Label>
+                                            <Input
+                                                id="end_date"
+                                                type="date"
+                                                v-model="submissionForm.end_date"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.end_date" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.end_date }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Alamat Perusahaan -->
+                                    <div class="space-y-1.5">
+                                        <Label for="company_address" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <MapPin class="h-3.5 w-3.5" />
+                                            Alamat Lengkap Perusahaan
+                                        </Label>
+                                        <textarea
+                                            id="company_address"
+                                            v-model="submissionForm.company_address"
+                                            placeholder="Contoh: Jl. Jenderal Sudirman No. 12, Jakarta Selatan"
+                                            rows="3"
+                                            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                            :disabled="!isSubmissionEditable"
+                                        ></textarea>
+                                        <span v-if="submissionForm.errors.company_address" class="text-xs text-destructive">
+                                            {{ submissionForm.errors.company_address }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div v-if="isSubmissionEditable" class="flex justify-end gap-3 border-t border-border pt-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            @click="saveSubmissionDraft"
+                                            :disabled="isProcessing"
+                                            id="btn-save-draft"
+                                        >
+                                            <Spinner v-if="isProcessing" class="mr-2 h-4 w-4 animate-spin" />
+                                            <Save v-else class="mr-2 h-4 w-4" />
+                                            Simpan Draf
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            @click="showSubmitConfirm = true"
+                                            :disabled="isProcessing"
+                                            id="btn-submit-proposal"
+                                        >
+                                            <Send class="mr-2 h-4 w-4" />
+                                            Ajukan Magang
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
                         </CardContent>
                     </Card>
@@ -971,6 +1217,35 @@ onMounted(() => {
                             class="mr-2 h-4 w-4 animate-spin"
                         />
                         Ya, Keluar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Submit Proposal Confirm -->
+        <Dialog v-model:open="showSubmitConfirm">
+            <DialogContent class="sm:max-w-[400px]">
+                <DialogHeader>
+                    <DialogTitle>Ajukan Permohonan Magang</DialogTitle>
+                    <DialogDescription>
+                        Apakah Anda yakin ingin mengajukan permohonan magang?
+                        <span class="block mt-2 font-semibold text-destructive">
+                            Tindakan ini akan mengirimkan data pengajuan ke program studi dan mengunci komposisi anggota kelompok magang serta data perusahaan.
+                        </span>
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showSubmitConfirm = false">Batal</Button>
+                    <Button
+                        id="btn-confirm-submit-proposal"
+                        @click="submitSubmissionProposal"
+                        :disabled="isProcessing"
+                    >
+                        <Spinner
+                            v-if="isProcessing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
+                        Ya, Ajukan
                     </Button>
                 </DialogFooter>
             </DialogContent>

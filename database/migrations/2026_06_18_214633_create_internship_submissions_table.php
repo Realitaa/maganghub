@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('internship_submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained('internship_groups')->cascadeOnDelete();
-            $table->string('company_name');
-            $table->text('company_address');
-            $table->string('company_contact');
-            $table->string('division');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->string('company_name')->nullable();
+            $table->text('company_address')->nullable();
+            $table->string('company_contact')->nullable();
+            $table->string('division')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->string('supporting_document')->nullable();
             $table->string('status')->default('submitted');
             $table->timestamps();

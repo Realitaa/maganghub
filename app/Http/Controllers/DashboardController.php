@@ -20,6 +20,7 @@ class DashboardController extends Controller
             $membership = $user->groupMembership()->with([
                 'group.leader',
                 'group.memberships.user',
+                'group.activeSubmission',
             ])->first();
 
             $group = null;

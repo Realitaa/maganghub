@@ -1,0 +1,169 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\InternshipSubmission;
+use App\Models\SubmissionMembership;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
+class InternshipSubmissionService
+{
+    /**
+     * Save the internship submission data as a draft.
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws ValidationException
+     */
+    public function saveDraft(User $user, array $data): InternshipSubmission
+    {
+        $membership = $user->groupMembership()->with('group')->first();
+
+        if (! $membership) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
+            ]);
+        }
+
+        $group = $membership->group;
+
+        if ($group->leader_id !== $user->id) {
+            throw ValidationException::withMessages([
+                'error' => 'Hanya ketua kelompok yang dapat menyimpan draf pengajuan.',
+            ]);
+        }
+
+        $allowedStatuses = ['forming', 'company_rejected'];
+        if (! in_array($group->status, $allowedStatuses)) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu tidak dapat mengubah pengajuan pada status kelompok saat ini.',
+            ]);
+        }
+
+        // Validate basic draft data
+        $validated = Validator::make($data, [
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_address' => ['nullable', 'string'],
+            'company_contact' => ['nullable', 'string', 'max:255'],
+            'division' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+        ])->validate();
+
+        // Find existing draft submission or create a new one
+        $submission = InternshipSubmission::where('group_id', $group->id)
+            ->latest()
+            ->first();
+
+        if ($submission && $submission->status === 'draft') {
+            $submission->update(array_merge($validated, [
+                'status' => 'draft',
+            ]));
+        } else {
+            $submission = InternshipSubmission::create(array_merge($validated, [
+                'group_id' => $group->id,
+                'status' => 'draft',
+                'supporting_document' => null,
+            ]));
+        }
+
+        return $submission;
+    }
+
+    /**
+     * Submit the internship proposal to admin for review.
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws ValidationException
+     */
+    public function submitProposal(User $user, array $data): InternshipSubmission
+    {
+        $membership = $user->groupMembership()->with('group.memberships')->first();
+
+        if (! $membership) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
+            ]);
+        }
+
+        $group = $membership->group;
+
+        if ($group->leader_id !== $user->id) {
+            throw ValidationException::withMessages([
+                'error' => 'Hanya ketua kelompok yang dapat mengajukan magang.',
+            ]);
+        }
+
+        $allowedStatuses = ['forming', 'company_rejected'];
+        if (! in_array($group->status, $allowedStatuses)) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu tidak dapat mengajukan magang pada status kelompok saat ini.',
+            ]);
+        }
+
+        // Validate all required fields for submission
+        $validated = Validator::make($data, [
+            'company_name' => ['required', 'string', 'max:255'],
+            'company_address' => ['required', 'string'],
+            'company_contact' => ['required', 'string', 'max:255'],
+            'division' => ['required', 'string', 'max:255'],
+            'start_date' => ['required', 'date', 'date_format:Y-m-d'],
+            'end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:start_date'],
+        ], [
+            'company_name.required' => 'Nama perusahaan wajib diisi.',
+            'company_address.required' => 'Alamat perusahaan wajib diisi.',
+            'company_contact.required' => 'Kontak perusahaan wajib diisi.',
+            'division.required' => 'Bidang pekerjaan/divisi wajib diisi.',
+            'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'end_date.required' => 'Tanggal selesai wajib diisi.',
+            'end_date.after' => 'Tanggal selesai harus setelah tanggal mulai.',
+        ])->validate();
+
+        // Get active members of the group
+        $members = $group->memberships;
+        if ($members->count() < 2) {
+            throw ValidationException::withMessages([
+                'error' => 'Kelompok harus memiliki minimal dua anggota sebelum mengajukan magang.',
+            ]);
+        }
+
+        // Save or update submission
+        $submission = InternshipSubmission::where('group_id', $group->id)
+            ->latest()
+            ->first();
+
+        if ($submission && $submission->status === 'draft') {
+            $submission->update(array_merge($validated, [
+                'status' => 'submitted',
+            ]));
+        } else {
+            $submission = InternshipSubmission::create(array_merge($validated, [
+                'group_id' => $group->id,
+                'status' => 'submitted',
+                'supporting_document' => null,
+            ]));
+        }
+
+        // Update group status
+        $group->update([
+            'status' => 'submitted',
+        ]);
+
+        // Create snapshot membership records
+        // Clean up any existing submission memberships for this submission to avoid duplicate key issues if re-submitting
+        SubmissionMembership::where('submission_id', $submission->id)->delete();
+
+        foreach ($members as $member) {
+            SubmissionMembership::create([
+                'submission_id' => $submission->id,
+                'user_id' => $member->user_id,
+                'status' => 'pending',
+            ]);
+        }
+
+        return $submission;
+    }
+}

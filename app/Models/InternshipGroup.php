@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -61,5 +62,13 @@ class InternshipGroup extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(InternshipSubmission::class, 'group_id');
+    }
+
+    /**
+     * Get the active (latest) submission of this group.
+     */
+    public function activeSubmission(): HasOne
+    {
+        return $this->hasOne(InternshipSubmission::class, 'group_id')->latestOfMany();
     }
 }

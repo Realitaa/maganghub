@@ -562,3 +562,68 @@ describe('disbanding a group', function () {
     });
 
 });
+
+describe('group membership lifecycle', function () {
+    it('allows a student to join, leave, request to join again, and be approved again', function () {
+        $leader = User::factory()->create(['role' => 'student']);
+        $student = User::factory()->create(['role' => 'student']);
+
+        // 1. kelompok magang dibuat oleh seorang ketua
+        $this->actingAs($leader)
+            ->post(route('groups.store'))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $group = InternshipGroup::where('leader_id', $leader->id)->first();
+        expect($group)->not->toBeNull();
+
+        // 2. seorang mahasiswa bergabung ke kelompok magang
+        $this->actingAs($student)
+            ->post(route('groups.join'), ['code' => $group->code])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $joinRequest = GroupJoinRequest::where('group_id', $group->id)
+            ->where('user_id', $student->id)
+            ->where('status', 'pending')
+            ->first();
+        expect($joinRequest)->not->toBeNull();
+
+        // 3. mahasiswa tersebut diterima bergabung
+        $this->actingAs($leader)
+            ->post(route('groups.join-requests.approve', $joinRequest->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $student->id)->exists())->toBeTrue();
+
+        // 4. mahasiswa tersebut keluar dari kelompok
+        $this->actingAs($student)
+            ->post(route('groups.leave'))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $student->id)->exists())->toBeFalse();
+
+        // 5. mencoba bergabung kembali
+        $this->actingAs($student)
+            ->post(route('groups.join'), ['code' => $group->code])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $newJoinRequest = GroupJoinRequest::where('group_id', $group->id)
+            ->where('user_id', $student->id)
+            ->where('status', 'pending')
+            ->first();
+        expect($newJoinRequest)->not->toBeNull();
+
+        // 6. dapat diterima bergabung
+        $this->actingAs($leader)
+            ->post(route('groups.join-requests.approve', $newJoinRequest->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success');
+
+        // 7. menjadi anggota dari kelompok itu lagi
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $student->id)->exists())->toBeTrue();
+    });
+});

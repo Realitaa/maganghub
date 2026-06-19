@@ -81,11 +81,15 @@ class InternshipGroupService
             ]);
         }
 
-        return GroupJoinRequest::create([
-            'group_id' => $group->id,
-            'user_id' => $user->id,
-            'status' => 'pending',
-        ]);
+        return GroupJoinRequest::updateOrCreate(
+            [
+                'group_id' => $group->id,
+                'user_id' => $user->id,
+            ],
+            [
+                'status' => 'pending',
+            ]
+        );
     }
 
     /**
@@ -123,6 +127,12 @@ class InternshipGroupService
         if ($group->leader_id !== $leader->id) {
             throw ValidationException::withMessages([
                 'error' => 'Kamu tidak memiliki izin untuk menyetujui permintaan ini.',
+            ]);
+        }
+
+        if ($group->status !== 'forming') {
+            throw ValidationException::withMessages([
+                'error' => 'Kelompok ini sudah tidak menerima anggota baru.',
             ]);
         }
 
@@ -172,6 +182,12 @@ class InternshipGroupService
         if ($group->leader_id !== $leader->id) {
             throw ValidationException::withMessages([
                 'error' => 'Kamu tidak memiliki izin untuk menolak permintaan ini.',
+            ]);
+        }
+
+        if ($group->status !== 'forming') {
+            throw ValidationException::withMessages([
+                'error' => 'Kelompok ini sudah tidak menerima anggota baru.',
             ]);
         }
 
