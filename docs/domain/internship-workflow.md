@@ -34,9 +34,14 @@ Operator atau administrator memverifikasi:
 
 Pengajuan dapat:
 
-* Disetujui.
-* Dikembalikan untuk diperbaiki.
+* Diterima.
 * Ditolak.
+
+Jika pengajuan ditolak, kelompok kembali ke tahap Bentuk Kelompok.
+
+Ketua kelompok dapat memperbaiki data dan mengajukan kembali.
+
+Anggota kelompok diperbolehkan berubah kembali setelah pengajuan ditolak.
 
 ## Langkah 4 - Kirim Perusahaan
 
