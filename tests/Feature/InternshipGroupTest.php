@@ -549,7 +549,7 @@ describe('disbanding a group', function () {
     });
 
     it('prevents the leader from disbanding a locked group', function () {
-        foreach (['submitted', 'under_review', 'letter_sent'] as $status) {
+        foreach (['submitted', 'under_review', 'letter_published'] as $status) {
             ['group' => $group, 'leader' => $leader] = makeGroupWithMember($status);
 
             $this->actingAs($leader)

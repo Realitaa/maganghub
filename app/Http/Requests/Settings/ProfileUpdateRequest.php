@@ -23,13 +23,10 @@ class ProfileUpdateRequest extends FormRequest
         if ($this->user()->role === 'student') {
             $rules = array_merge($rules, [
                 'nim' => ['required', 'string', Rule::unique('users')->ignore($this->user()->id)],
-                'major' => ['required', 'string', 'max:255'],
                 'phone' => ['required', 'string', 'max:20'],
                 'address' => ['required', 'string'],
                 'gender' => ['required', 'in:L,P'],
                 'semester' => ['required', 'integer', 'min:1', 'max:14'],
-                'field_of_interest' => ['required', 'string', 'max:255'],
-                'division' => ['nullable', 'string', 'max:255'],
             ]);
         }
 

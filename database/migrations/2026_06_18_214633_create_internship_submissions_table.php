@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('company_address')->nullable();
             $table->string('company_contact')->nullable();
             $table->string('division')->nullable();
+            $table->string('field_of_interest')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('supporting_document')->nullable();

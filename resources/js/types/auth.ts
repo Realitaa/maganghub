@@ -7,15 +7,12 @@ export type User = {
     created_at: string;
     updated_at: string;
     nim: string;
-    major: string;
     phone: string;
     role: string;
     gender: 'L' | 'P';
     is_active: boolean;
     password_changed_at: string | null;
     semester: number | null;
-    field_of_interest: string | null;
-    division: string | null;
     [key: string]: unknown;
 };
 

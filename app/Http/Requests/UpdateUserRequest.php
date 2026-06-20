@@ -39,12 +39,10 @@ class UpdateUserRequest extends FormRequest
 
         if ($role === 'student') {
             $rules['nim'] = ['required', 'string', Rule::unique('users', 'nim')->ignore($userId)];
-            $rules['major'] = ['required', 'string', 'max:255'];
             $rules['password'] = ['nullable', 'string', 'min:8'];
         } else {
             $rules['password'] = ['nullable', 'string', 'min:8'];
             $rules['nim'] = ['nullable', 'string'];
-            $rules['major'] = ['nullable', 'string'];
         }
 
         return $rules;

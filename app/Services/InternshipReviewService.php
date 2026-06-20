@@ -49,7 +49,7 @@ class InternshipReviewService
     }
 
     /**
-     * Approve the internship submission and set status to letter_sent.
+     * Approve the internship submission and set status to letter_published.
      *
      * @throws ValidationException
      */
@@ -69,12 +69,12 @@ class InternshipReviewService
 
             // Approve the submission
             $lockedSubmission->update([
-                'status' => 'letter_sent',
+                'status' => 'letter_published',
             ]);
 
-            // Update group status to letter_sent
+            // Update group status to letter_published
             $lockedSubmission->group->update([
-                'status' => 'letter_sent',
+                'status' => 'letter_published',
             ]);
 
             // Generate document if not already generated

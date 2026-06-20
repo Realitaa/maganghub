@@ -172,6 +172,7 @@ describe('internship submission', function () {
                 'company_name' => '', // Empty
                 'company_address' => 'Sudirman 12',
                 'company_contact' => '021-12345',
+                'field_of_interest' => 'Web',
                 'division' => 'Web',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -183,6 +184,50 @@ describe('internship submission', function () {
             ]);
     });
 
+    it('requires field_of_interest when submitting proposal', function () {
+        ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => '', // Empty
+                'division' => 'Web',
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Bidang yang diminati wajib diisi.',
+            ]);
+    });
+
+    it('allows submitting proposal with nullable division', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => 'Web Dev',
+                'division' => null, // Optional
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'success',
+                'message' => 'Pengajuan magang berhasil dikirim untuk ditinjau.',
+            ]);
+
+        $submission = InternshipSubmission::where('group_id', $group->id)->first();
+        expect($submission->division)->toBeNull();
+        expect($submission->field_of_interest)->toBe('Web Dev');
+    });
+
     it('successfully submits proposal, locks group and takes memberships snapshot', function () {
         ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupForSubmission('forming');
 
@@ -191,6 +236,7 @@ describe('internship submission', function () {
                 'company_name' => 'PT Global Solusi',
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
+                'field_of_interest' => 'Data Engineering',
                 'division' => 'Data Analyst',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -275,6 +321,7 @@ describe('internship submission', function () {
                 'company_name' => 'PT Global Solusi',
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
+                'field_of_interest' => 'Data Analyst',
                 'division' => 'Data Analyst',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',

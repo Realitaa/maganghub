@@ -44,15 +44,11 @@ class InternshipSubmissionPolicy
      */
     public function downloadLetter(User $user, InternshipSubmission $submission): bool
     {
-        if ($submission->status !== 'letter_sent') {
+        if ($submission->status !== 'letter_published') {
             return false;
         }
 
-        $isCurrentLeader = $submission->group && $submission->group->leader_id === $user->id;
-        $isCurrentMember = $submission->group && $submission->group->memberships()->where('user_id', $user->id)->exists();
-        $isSnapshotMember = $submission->submissionMemberships()->where('user_id', $user->id)->exists();
-
-        return $isCurrentLeader || $isCurrentMember || $isSnapshotMember;
+        return in_array($user->role, ['operator', 'administrator']);
     }
 
     /**

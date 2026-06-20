@@ -117,35 +117,7 @@ describe('administrator', function () {
             );
     });
 
-    it('can filter users by major', function () {
-        $admin = User::factory()->create(['role' => 'administrator']);
-        $studentIF = User::factory()->create(['role' => 'student', 'major' => 'Teknik Informatika']);
-        $studentSI = User::factory()->create(['role' => 'student', 'major' => 'Sistem Informasi']);
-
-        $this->actingAs($admin)
-            ->get(route('users.index', ['major' => 'Teknik Informatika']))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('users/Index')
-                ->has('users.data', 1)
-                ->where('users.data.0.major', 'Teknik Informatika')
-            );
-    });
-
-    it('can return majors sorted alphabetically', function () {
-        $admin = User::factory()->create(['role' => 'administrator']);
-        User::factory()->create(['role' => 'student', 'major' => 'Teknik Informatika']);
-        User::factory()->create(['role' => 'student', 'major' => 'Sistem Informasi']);
-        User::factory()->create(['role' => 'student', 'major' => 'Teknik Komputer']);
-
-        $this->actingAs($admin)
-            ->get(route('users.index'))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('users/Index')
-                ->where('majors', ['Sistem Informasi', 'Teknik Informatika', 'Teknik Komputer'])
-            );
-    });
+    // Major filter and sorting tests removed because major has been removed from users schema.
 
     it('can paginate users list', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
@@ -173,7 +145,6 @@ describe('administrator', function () {
                 'email' => 'bob@student.example.com',
                 'role' => 'student',
                 'nim' => '10121010',
-                'major' => 'Teknik Informatika',
                 'gender' => 'L',
                 'password' => 'custom-secret-password',
             ])
@@ -195,7 +166,6 @@ describe('administrator', function () {
                 'email' => 'alice@student.example.com',
                 'role' => 'student',
                 'nim' => '10121011',
-                'major' => 'Sistem Informasi',
                 'gender' => 'P',
                 'password' => '',
             ])
@@ -218,7 +188,6 @@ describe('administrator', function () {
                 'email' => 'invalid@student.example.com',
                 'role' => 'student',
                 'nim' => '',
-                'major' => 'Teknik Informatika',
                 'password' => '',
             ]);
 
@@ -272,7 +241,6 @@ describe('administrator', function () {
             'name' => 'Old Name',
             'email' => 'old@student.example.com',
             'nim' => '10121012',
-            'major' => 'Teknik Informatika',
         ]);
 
         $oldPassword = $student->password;
@@ -283,7 +251,6 @@ describe('administrator', function () {
                 'email' => 'updated@student.example.com',
                 'role' => 'student',
                 'nim' => '10121012',
-                'major' => 'Teknik Informatika',
                 'password' => '', // Empty means unchanged
             ])
             ->assertRedirect()
@@ -369,7 +336,7 @@ describe('administrator', function () {
     it('can bulk import students from a CSV file using useHttp', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
-        $csvContent = "name,nim,major,email\nCharlie Student,10121020,Teknik Informatika,charlie@student.maganghub.id\nDiana Student,10121021,Sistem Informasi,\n";
+        $csvContent = "name,nim,email\nCharlie Student,10121020,charlie@student.maganghub.id\nDiana Student,10121021,\n";
         $file = UploadedFile::fake()->createWithContent('students.csv', $csvContent);
 
         $response = $this
@@ -387,15 +354,13 @@ describe('administrator', function () {
         $charlie = User::where('nim', '10121020')->first();
         expect($charlie)->not->toBeNull();
         expect($charlie->name)->toBe('Charlie Student');
-        expect($charlie->major)->toBe('Teknik Informatika');
         expect($charlie->email)->toBe('charlie@student.maganghub.id');
         expect(Hash::check('10121020', $charlie->password))->toBeTrue();
 
         $diana = User::where('nim', '10121021')->first();
         expect($diana)->not->toBeNull();
         expect($diana->name)->toBe('Diana Student');
-        expect($diana->major)->toBe('Sistem Informasi');
-        expect($diana->email)->toBe('10121021@student.maganghub.id'); // Generated fallback email
+        expect($diana->email)->toBeNull();
         expect(Hash::check('10121021', $diana->password))->toBeTrue();
     });
 
@@ -407,8 +372,8 @@ describe('administrator', function () {
             ->once()
             ->andReturn([
                 [
-                    ['name', 'nim', 'major', 'email'],
-                    ['Emily Student', '10121030', 'Teknik Komputer', 'emily@student.maganghub.id'],
+                    ['name', 'nim', 'email'],
+                    ['Emily Student', '10121030', 'emily@student.maganghub.id'],
                 ],
             ]);
 
@@ -429,16 +394,15 @@ describe('administrator', function () {
         $emily = User::where('nim', '10121030')->first();
         expect($emily)->not->toBeNull();
         expect($emily->name)->toBe('Emily Student');
-        expect($emily->major)->toBe('Teknik Komputer');
         expect($emily->email)->toBe('emily@student.maganghub.id');
         expect(Hash::check('10121030', $emily->password))->toBeTrue();
     });
 
-    it('can fail to import if required headers name, nim, or major are missing', function () {
+    it('can fail to import if required headers name or nim are missing', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
-        // Invalid headers: missing 'major'
-        $csvContent = "name,nim,prodi\nJohn Doe,12345,Teknik Informatika\n";
+        // Invalid headers: missing 'nim'
+        $csvContent = "name,email\nJohn Doe,john@example.com\n";
         $file = UploadedFile::fake()->createWithContent('invalid.csv', $csvContent);
 
         $response = $this
@@ -520,7 +484,6 @@ describe('operator', function () {
             'name' => 'Old Name',
             'email' => 'old@student.example.com',
             'nim' => '10121012',
-            'major' => 'Teknik Informatika',
         ]);
 
         $response = $this
@@ -530,7 +493,6 @@ describe('operator', function () {
                 'email' => 'updated@student.example.com',
                 'role' => 'student',
                 'nim' => '10121012',
-                'major' => 'Teknik Informatika',
             ]);
         $response->assertRedirect();
 

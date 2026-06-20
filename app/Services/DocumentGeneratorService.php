@@ -45,35 +45,64 @@ class DocumentGeneratorService
             throw new RuntimeException('Konten word/document.xml tidak ditemukan.');
         }
 
+        // Extract body content and section properties
+        if (! preg_match('/<w:body>(.*)(<w:sectPr[^>]*>.*<\/w:sectPr>)\s*<\/w:body>/s', $xmlContent, $matches)) {
+            $zip->close();
+            unlink($tempFile);
+            throw new RuntimeException('Gagal memproses struktur w:body berkas template.');
+        }
+
+        $repeatingContent = $matches[1];
+        $sectPr = $matches[2];
+
         // Prepare placeholder data
         $number = '00'.$submission->id.'/UN33.4/KM/'.now()->format('Y');
         $today = $this->formatIndonesianDate(now());
-        $dear = 'Pimpinan '.($submission->company_name ?? '');
-        $place = $submission->company_name ?? '';
+        $companyName = $submission->company_name ?? '';
         $monthDuration = $this->calculateMonthDuration($submission->start_date, $submission->end_date);
         $startDate = $this->formatIndonesianDate($submission->start_date);
         $endDate = $this->formatIndonesianDate($submission->end_date);
-        $typedName = $submission->group->leader->name ?? '';
-        $nim = $submission->group->leader->nim ?? '';
+        $fieldOfInterest = $submission->field_of_interest ?? '';
+        $division = $submission->division ?? '';
+        $divisionOrInterest = ! empty($division) ? $division : $fieldOfInterest;
 
-        // Generate snapshot members table XML
         $memberships = $submission->submissionMemberships()->with('user')->get();
-        $internTableXml = $this->generateInternTableXml($memberships);
+        $pages = [];
 
-        // Replace basic placeholders
-        $xmlContent = str_replace('{{number}}', htmlspecialchars($number), $xmlContent);
-        $xmlContent = str_replace('{{today}}', htmlspecialchars($today), $xmlContent);
-        $xmlContent = str_replace('{{dear}}', htmlspecialchars($dear), $xmlContent);
-        $xmlContent = str_replace('{{place}}', htmlspecialchars($place), $xmlContent);
-        $xmlContent = str_replace('{{monthDuration}}', htmlspecialchars($monthDuration), $xmlContent);
-        $xmlContent = str_replace('{{startDate}}', htmlspecialchars($startDate), $xmlContent);
-        $xmlContent = str_replace('{{endDate}}', htmlspecialchars($endDate), $xmlContent);
-        $xmlContent = str_replace('{{typedName}}', htmlspecialchars($typedName), $xmlContent);
-        $xmlContent = str_replace('{{nim}}', htmlspecialchars($nim), $xmlContent);
+        foreach ($memberships as $membership) {
+            $user = $membership->user;
+            if (! $user) {
+                continue;
+            }
 
-        // Replace table placeholder by splitting the paragraph run tags
-        $tableReplacement = '</w:t></w:r></w:p>'.$internTableXml.'<w:p><w:r><w:t xml:space="preserve">';
-        $xmlContent = str_replace('{{internTable}}', $tableReplacement, $xmlContent);
+            $pageXml = $repeatingContent;
+
+            // Replace student placeholders
+            $pageXml = str_replace('{{name}}', htmlspecialchars($user->name ?? ''), $pageXml);
+            $pageXml = str_replace('{{nim}}', htmlspecialchars($user->nim ?? ''), $pageXml);
+            $pageXml = str_replace('{{semester}}', htmlspecialchars((string) ($user->semester ?? '')), $pageXml);
+            $pageXml = str_replace('{{phone}}', htmlspecialchars($user->phone ?? ''), $pageXml);
+            $pageXml = str_replace('{{email}}', htmlspecialchars($user->email ?? ''), $pageXml);
+
+            // Replace submission placeholders
+            $pageXml = str_replace('{{number}}', htmlspecialchars($number), $pageXml);
+            $pageXml = str_replace('{{today}}', htmlspecialchars($today), $pageXml);
+            $pageXml = str_replace('{{company_name}}', htmlspecialchars($companyName), $pageXml);
+            $pageXml = str_replace('{{start_date}}', htmlspecialchars($startDate), $pageXml);
+            $pageXml = str_replace('{{end_date}}', htmlspecialchars($endDate), $pageXml);
+            $pageXml = str_replace('{{calculateDuration}}', htmlspecialchars($monthDuration), $pageXml);
+            $pageXml = str_replace('{{field_of_interest}}', htmlspecialchars($fieldOfInterest), $pageXml);
+            $pageXml = str_replace('{{division ? Division : field_of_interest}}', htmlspecialchars($divisionOrInterest), $pageXml);
+
+            $pages[] = $pageXml;
+        }
+
+        // Join each page using an OpenXML page break
+        $pageBreak = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+        $newBodyXml = '<w:body>'.implode($pageBreak, $pages).$sectPr.'</w:body>';
+
+        // Reconstruct the XML content
+        $xmlContent = preg_replace('/<w:body>.*<\/w:body>/s', $newBodyXml, $xmlContent);
 
         // Save XML back to the ZIP
         $zip->addFromString('word/document.xml', $xmlContent);
@@ -95,59 +124,6 @@ class DocumentGeneratorService
     }
 
     /**
-     * Generate OpenXML table for memberships snapshot.
-     */
-    private function generateInternTableXml($memberships): string
-    {
-        $xml = '<w:tbl>';
-
-        // Table properties
-        $xml .= '<w:tblPr>';
-        $xml .= '<w:tblW w:w="5000" w:type="pct"/>';
-        $xml .= '<w:tblBorders>';
-        $xml .= '<w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '<w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '<w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '<w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '<w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto"/>';
-        $xml .= '</w:tblBorders>';
-        $xml .= '</w:tblPr>';
-
-        // Grid columns
-        $xml .= '<w:tblGrid>';
-        $xml .= '<w:gridCol w:w="800"/>';
-        $xml .= '<w:gridCol w:w="4200"/>';
-        $xml .= '<w:gridCol w:w="2500"/>';
-        $xml .= '</w:tblGrid>';
-
-        // Header Row
-        $xml .= '<w:tr>';
-        $xml .= '<w:tc><w:tcPr><w:tcW w:w="800" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>No</w:t></w:r></w:p></w:tc>';
-        $xml .= '<w:tc><w:tcPr><w:tcW w:w="4200" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Nama</w:t></w:r></w:p></w:tc>';
-        $xml .= '<w:tc><w:tcPr><w:tcW w:w="2500" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>NIM</w:t></w:r></w:p></w:tc>';
-        $xml .= '</w:tr>';
-
-        // Data Rows
-        $index = 1;
-        foreach ($memberships as $membership) {
-            $name = htmlspecialchars($membership->user->name ?? '');
-            $nim = htmlspecialchars($membership->user->nim ?? '');
-
-            $xml .= '<w:tr>';
-            $xml .= '<w:tc><w:tcPr><w:tcW w:w="800" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:t>'.$index.'</w:t></w:r></w:p></w:tc>';
-            $xml .= '<w:tc><w:tcPr><w:tcW w:w="4200" w:type="dxa"/></w:tcPr><w:p><w:r><w:t>'.$name.'</w:t></w:r></w:p></w:tc>';
-            $xml .= '<w:tc><w:tcPr><w:tcW w:w="2500" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:t>'.$nim.'</w:t></w:r></w:p></w:tc>';
-            $xml .= '</w:tr>';
-            $index++;
-        }
-
-        $xml .= '</w:tbl>';
-
-        return $xml;
-    }
-
-    /**
      * Format a date into Indonesian format.
      */
     private function formatIndonesianDate($date): string
@@ -155,23 +131,8 @@ class DocumentGeneratorService
         if (! $date) {
             return '-';
         }
-        $carbon = Carbon::parse($date);
-        $months = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ];
 
-        return $carbon->day.' '.$months[$carbon->month].' '.$carbon->year;
+        return Carbon::parse($date)->locale('id')->isoFormat('D MMMM YYYY');
     }
 
     /**

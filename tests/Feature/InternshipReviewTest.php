@@ -186,7 +186,7 @@ describe('reject submission', function () {
 
 describe('approve submission', function () {
 
-    it('successfully approves submission and changes status to letter_sent', function () {
+    it('successfully approves submission and changes status to letter_published', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group] = makeSubmittedSubmission();
 
@@ -198,8 +198,8 @@ describe('approve submission', function () {
                 'message' => 'Pengajuan magang berhasil disetujui.',
             ]);
 
-        expect($submission->fresh()->status)->toBe('letter_sent');
-        expect($group->fresh()->status)->toBe('letter_sent');
+        expect($submission->fresh()->status)->toBe('letter_published');
+        expect($group->fresh()->status)->toBe('letter_published');
     });
 
 });
@@ -227,7 +227,7 @@ describe('edge cases and race conditions', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeSubmittedSubmission();
 
-        $submission->update(['status' => 'letter_sent']);
+        $submission->update(['status' => 'letter_published']);
 
         $this->actingAs($operator)
             ->post(route('operator.submissions.approve', $submission->id))

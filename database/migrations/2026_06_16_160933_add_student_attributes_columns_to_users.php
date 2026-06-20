@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('nim')->unique()->nullable();
-            $table->string('major')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
             $table->string('role')->default('student');
@@ -21,8 +20,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('password_changed_at')->nullable();
             $table->integer('semester')->nullable();
-            $table->string('field_of_interest')->nullable();
-            $table->string('division')->nullable();
         });
     }
 
@@ -33,8 +30,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'nim', 'major', 'phone', 'address', 'role', 'gender', 'is_active',
-                'password_changed_at', 'semester', 'field_of_interest', 'division',
+                'nim', 'phone', 'address', 'role', 'gender', 'is_active',
+                'password_changed_at', 'semester',
             ]);
         });
     }

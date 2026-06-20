@@ -173,11 +173,11 @@ const groupStatusLabel = computed(() => {
         forming: 'Pembentukan',
         submitted: 'Diajukan',
         under_review: 'Direview',
-        letter_sent: 'Surat Dikirim',
-        waiting_response: 'Menunggu Respons',
-        internship_started: 'Magang Dimulai',
+        letter_published: 'Surat Diterbitkan',
+        accepted: 'Diterima',
         partially_accepted: 'Diterima Sebagian',
-        company_rejected: 'Ditolak Perusahaan',
+        rejected: 'Ditolak Perusahaan',
+        internship_started: 'Magang Dimulai',
         completed: 'Selesai',
     };
     return labels[props.group?.status ?? ''] ?? props.group?.status ?? '-';
@@ -192,11 +192,11 @@ const groupStatusVariant = computed(
             forming: 'secondary',
             submitted: 'default',
             under_review: 'default',
-            letter_sent: 'default',
-            waiting_response: 'outline',
-            internship_started: 'default',
+            letter_published: 'default',
+            accepted: 'default',
             partially_accepted: 'outline',
-            company_rejected: 'destructive',
+            rejected: 'destructive',
+            internship_started: 'default',
             completed: 'default',
         };
         return variants[props.group?.status ?? ''] ?? 'outline';
@@ -345,6 +345,7 @@ const submissionForm = useForm({
     company_address: props.group?.active_submission?.company_address ?? '',
     company_contact: props.group?.active_submission?.company_contact ?? '',
     division: props.group?.active_submission?.division ?? '',
+    field_of_interest: props.group?.active_submission?.field_of_interest ?? '',
     start_date: props.group?.active_submission?.start_date ? props.group.active_submission.start_date.substring(0, 10) : '',
     end_date: props.group?.active_submission?.end_date ? props.group.active_submission.end_date.substring(0, 10) : '',
 });
@@ -360,6 +361,7 @@ watch(
         submissionForm.company_address = newSub?.company_address ?? '';
         submissionForm.company_contact = newSub?.company_contact ?? '';
         submissionForm.division = newSub?.division ?? '';
+        submissionForm.field_of_interest = newSub?.field_of_interest ?? '';
         submissionForm.start_date = newSub?.start_date ? newSub.start_date.substring(0, 10) : '';
         submissionForm.end_date = newSub?.end_date ? newSub.end_date.substring(0, 10) : '';
     },
@@ -780,7 +782,7 @@ onMounted(() => {
                 <!-- Right: Members -->
                 <div class="space-y-4 lg:col-span-2">
                     <!-- Card: Surat Permohonan & Balasan Perusahaan -->
-                    <Card v-if="group.active_submission?.status === 'letter_sent'" class="border-green-200 dark:border-green-900 bg-green-50/10 dark:bg-green-950/10">
+                    <Card v-if="group.active_submission?.status === 'letter_published'" class="border-green-200 dark:border-green-900 bg-green-50/10 dark:bg-green-950/10">
                         <CardHeader class="pb-3">
                             <div class="flex items-center gap-3">
                                 <div class="rounded-full bg-green-100 dark:bg-green-900 p-2 text-green-700 dark:text-green-300">
@@ -788,17 +790,17 @@ onMounted(() => {
                                 </div>
                                 <div>
                                     <CardTitle class="text-base font-semibold text-green-900 dark:text-green-100">
-                                        Surat Permohonan Magang Tersedia
+                                        Surat Permohonan Magang Diterbitkan
                                     </CardTitle>
                                     <CardDescription class="text-xs text-green-700/80 dark:text-green-300/80">
-                                        Unduh surat permohonan resmi dan unggah surat balasan setelah disetujui perusahaan.
+                                        Unggah surat balasan resmi setelah disetujui perusahaan.
                                     </CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <p class="text-sm text-muted-foreground leading-relaxed">
-                                Surat permohonan magang untuk kelompok Anda telah berhasil diterbitkan. Silakan unduh dokumen untuk diserahkan ke instansi/perusahaan tujuan <strong>{{ group.active_submission.company_name }}</strong>.
+                                Surat permohonan magang untuk kelompok Anda telah berhasil diterbitkan. Silakan berkoordinasi dengan administrator/operator untuk pengiriman ke instansi/perusahaan tujuan <strong>{{ group.active_submission.company_name }}</strong>.
                             </p>
 
                             <!-- Success banner if response is uploaded -->
@@ -808,15 +810,6 @@ onMounted(() => {
                             </div>
 
                             <div class="flex flex-wrap gap-3 pt-2">
-                                <a 
-                                    :href="downloadLetter.url(group.active_submission.id)" 
-                                    class="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-700 transition-colors"
-                                    id="btn-download-letter"
-                                >
-                                    <FileText class="mr-2 h-4 w-4" />
-                                    Unduh Surat Permohonan
-                                </a>
-
                                 <template v-if="isLeader">
                                     <input 
                                         type="file" 
@@ -1064,17 +1057,20 @@ onMounted(() => {
                                         <p class="text-xs text-muted-foreground" v-else-if="group.status === 'under_review'">
                                             Pengajuan Anda sedang ditinjau oleh tim program studi / admin.
                                         </p>
-                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'letter_sent'">
-                                            Surat izin magang resmi telah diterbitkan oleh program studi dan siap untuk dikirimkan ke perusahaan.
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'letter_published'">
+                                            Surat izin magang resmi telah diterbitkan oleh program studi.
                                         </p>
-                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'waiting_response'">
-                                            Surat telah dikirimkan ke instansi tujuan. Menunggu surat balasan dari perusahaan.
-                                        </p>
-                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'internship_started'">
-                                            Kelompok Anda telah diterima dan masa magang resmi dimulai. Selamat melaksanakan magang!
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'accepted'">
+                                            Kelompok Anda telah diterima magang oleh instansi tujuan.
                                         </p>
                                         <p class="text-xs text-muted-foreground" v-else-if="group.status === 'partially_accepted'">
-                                            Penerimaan magang disetujui sebagian oleh perusahaan.
+                                            Penerimaan magang disetujui sebagian oleh instansi tujuan.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'rejected'">
+                                            Pengajuan kelompok Anda ditolak oleh instansi tujuan.
+                                        </p>
+                                        <p class="text-xs text-muted-foreground" v-else-if="group.status === 'internship_started'">
+                                            Masa magang resmi dimulai. Selamat melaksanakan magang!
                                         </p>
                                         <p class="text-xs text-muted-foreground" v-else-if="group.status === 'completed'">
                                             Masa magang kelompok ini telah selesai.
@@ -1097,8 +1093,8 @@ onMounted(() => {
 
                                 <!-- Form -->
                                 <form @submit.prevent class="space-y-6">
-                                    <!-- Grid 2 Kolom -->
-                                    <div class="grid gap-4 sm:grid-cols-2">
+                                    <!-- Grid 3 Kolom -->
+                                    <div class="grid gap-4 sm:grid-cols-3">
                                         <!-- Nama Instansi/Perusahaan -->
                                         <div class="space-y-1.5">
                                             <Label for="company_name" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -1116,16 +1112,33 @@ onMounted(() => {
                                             </span>
                                         </div>
 
+                                        <!-- Bidang yang Diminati -->
+                                        <div class="space-y-1.5">
+                                            <Label for="field_of_interest" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                                <FileText class="h-3.5 w-3.5" />
+                                                Bidang yang Diminati
+                                            </Label>
+                                            <Input
+                                                id="field_of_interest"
+                                                v-model="submissionForm.field_of_interest"
+                                                placeholder="Contoh: Web Developer, UI/UX"
+                                                :disabled="!isSubmissionEditable"
+                                            />
+                                            <span v-if="submissionForm.errors.field_of_interest" class="text-xs text-destructive">
+                                                {{ submissionForm.errors.field_of_interest }}
+                                            </span>
+                                        </div>
+
                                         <!-- Bidang/Divisi Magang -->
                                         <div class="space-y-1.5">
                                             <Label for="division" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                                 <Building2 class="h-3.5 w-3.5" />
-                                                Bidang / Divisi Pekerjaan
+                                                Divisi Pekerjaan (Opsional)
                                             </Label>
                                             <Input
                                                 id="division"
                                                 v-model="submissionForm.division"
-                                                placeholder="Contoh: Software Engineer / IT Infrastructure"
+                                                placeholder="Contoh: Frontend, Backend"
                                                 :disabled="!isSubmissionEditable"
                                             />
                                             <span v-if="submissionForm.errors.division" class="text-xs text-destructive">

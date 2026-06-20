@@ -46,25 +46,13 @@ class UserController extends Controller
             $query->where('role', $request->input('role'));
         }
 
-        // 3. Major filter
-        if ($request->filled('major')) {
-            $query->where('major', $request->input('major'));
-        }
-
         // Paginate users and keep query parameters
         $users = $query->latest()->paginate(10)->withQueryString();
 
-        // Retrieve alphabetically sorted majors list from users table
-        $majors = User::whereNotNull('major')
-            ->where('major', '!=', '')
-            ->distinct()
-            ->orderBy('major', 'asc')
-            ->pluck('major');
-
         return Inertia::render('users/Index', [
             'users' => $users,
-            'majors' => $majors,
-            'filters' => $request->only(['search', 'role', 'major']),
+            'majors' => [],
+            'filters' => $request->only(['search', 'role']),
             'breadcrumbs' => [
                 ['title' => 'Manajemen Pengguna', 'href' => route('users.index')],
             ],

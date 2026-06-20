@@ -18,10 +18,10 @@ test('model helpers compute completeness and password changes correctly', functi
     expect($student2->hasChangedPassword())->toBeFalse();
     expect($student2->isProfileComplete())->toBeTrue();
 
-    // 3. Student with incomplete profile data (missing major)
+    // 3. Student with incomplete profile data (missing semester)
     $student3 = User::factory()->create([
         'role' => 'student',
-        'major' => null,
+        'semester' => null,
     ]);
     expect($student3->hasChangedPassword())->toBeTrue();
     expect($student3->isProfileComplete())->toBeFalse();
@@ -176,13 +176,11 @@ test('student profile validation enforces all student biodata fields', function 
             'name' => 'New Name',
             'email' => 'new@example.com',
             'nim' => '', // missing
-            'major' => '', // missing
             'gender' => 'X', // invalid option
             'semester' => 15, // too high
-            'field_of_interest' => '',
         ]);
 
-    $response->assertSessionHasErrors(['nim', 'major', 'gender', 'semester', 'field_of_interest']);
+    $response->assertSessionHasErrors(['nim', 'gender', 'semester']);
 
     // 2. Succeed validation with correct student details
     $response2 = $this
@@ -192,13 +190,10 @@ test('student profile validation enforces all student biodata fields', function 
             'name' => 'New Name',
             'email' => 'new@example.com',
             'nim' => '10121999',
-            'major' => 'Sistem Informasi',
             'gender' => 'P',
             'phone' => '081234567890',
             'address' => 'Bandung, Indonesia',
             'semester' => 5,
-            'field_of_interest' => 'Data Engineering',
-            'division' => 'Analytics',
         ]);
 
     $response2->assertSessionHasNoErrors()->assertRedirect(route('profile.edit'));
@@ -206,9 +201,6 @@ test('student profile validation enforces all student biodata fields', function 
     $student->refresh();
     expect($student->name)->toBe('New Name');
     expect($student->nim)->toBe('10121999');
-    expect($student->major)->toBe('Sistem Informasi');
     expect($student->gender)->toBe('P');
     expect($student->semester)->toBe(5);
-    expect($student->field_of_interest)->toBe('Data Engineering');
-    expect($student->division)->toBe('Analytics');
 });

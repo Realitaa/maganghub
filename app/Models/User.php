@@ -26,7 +26,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'nim', 'major', 'phone', 'address', 'role', 'gender', 'is_active', 'password_changed_at', 'semester', 'field_of_interest', 'division'])]
+#[Fillable(['name', 'email', 'password', 'nim', 'phone', 'address', 'role', 'gender', 'is_active', 'password_changed_at', 'semester'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -70,12 +70,10 @@ class User extends Authenticatable
         return ! empty($this->name) &&
             ! empty($this->email) &&
             ! empty($this->nim) &&
-            ! empty($this->major) &&
             ! empty($this->phone) &&
             ! empty($this->address) &&
             ! empty($this->gender) &&
-            ! empty($this->semester) &&
-            ! empty($this->field_of_interest);
+            ! empty($this->semester);
     }
 
     /**

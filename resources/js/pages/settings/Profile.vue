@@ -89,19 +89,7 @@ const user = computed(() => page.props.auth.user);
                     <InputError class="mt-2" :message="errors.nim" />
                 </div>
 
-                <!-- Major -->
-                <div class="grid gap-2">
-                    <Label for="major">Program Studi</Label>
-                    <Input
-                        id="major"
-                        class="mt-1 block w-full"
-                        name="major"
-                        :default-value="user.major"
-                        required
-                        placeholder="Program Studi"
-                    />
-                    <InputError class="mt-2" :message="errors.major" />
-                </div>
+
 
                 <!-- Gender (Radio Group) -->
                 <div class="grid gap-2">
@@ -164,46 +152,7 @@ const user = computed(() => page.props.auth.user);
                     <InputError class="mt-2" :message="errors.semester" />
                 </div>
 
-                <!-- Field of Interest -->
-                <div class="grid gap-2">
-                    <Label for="field_of_interest">Bidang yang Diminati</Label>
-                    <Input
-                        id="field_of_interest"
-                        class="mt-1 block w-full"
-                        name="field_of_interest"
-                        :default-value="(user.field_of_interest as string) || ''"
-                        required
-                        placeholder="Contoh: Pengembangan Perangkat Lunak, Analisis Data, Kecerdasan Buatan, Jaringan Komputer, Keamanan Siber atau bidang lainnya"
-                    />
-                    <InputError class="mt-2" :message="errors.field_of_interest" />
-                </div>
 
-                <!-- Division -->
-                <div class="grid gap-2">
-                    <Label for="division">
-                        Divisi
-                        <TooltipProvider :content="{ side: 'top' }">
-                            <Tooltip>
-                            <TooltipTrigger>
-                                <CircleQuestionMark class="h-4 w-4" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p class="max-w-screen">
-                                    Divisi yang dituju di perusahaan tujuan, jika tidak diisi akan menggunakan kolom "Bidang yang Diminati" sebagai gantinya
-                                </p>
-                            </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </Label>
-                    <Input
-                        id="division"
-                        class="mt-1 block w-full"
-                        name="division"
-                        :default-value="(user.division as string) || ''"
-                        placeholder="Contoh: Frontend, Backend, UI/UX"
-                    />
-                    <InputError class="mt-2" :message="errors.division" />
-                </div>
             </template>
 
             <div class="flex items-center gap-4">

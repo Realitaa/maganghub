@@ -18,7 +18,7 @@ function setupFakeTemplate(): string
     $tempFile = tempnam(sys_get_temp_dir(), 'test_docx_');
     $zip = new ZipArchive;
     $zip->open($tempFile, ZipArchive::CREATE);
-    $zip->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{number}} {{today}} {{dear}} {{place}} {{monthDuration}} {{startDate}} {{endDate}} {{typedName}} {{nim}} {{internTable}}</w:t></w:r></w:p></w:body></w:document>');
+    $zip->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{name}} {{nim}} {{semester}} {{phone}} {{email}} {{number}} {{today}} {{company_name}} {{start_date}} {{end_date}} {{calculateDuration}} {{field_of_interest}} {{division ? Division : field_of_interest}}</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>');
     $zip->close();
     $dummyDocxContent = file_get_contents($tempFile);
     unlink($tempFile);
@@ -125,7 +125,7 @@ describe('Generate Letter', function () {
             ->post(route('operator.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        expect($submission->fresh()->status)->toBe('letter_sent');
+        expect($submission->fresh()->status)->toBe('letter_published');
         expect($submission->fresh()->letter_path)->not->toBeNull();
     });
 
@@ -165,9 +165,6 @@ describe('Generate Letter', function () {
         $zip->close();
         unlink($tempFile);
 
-        expect($xml)->toContain('No</w:t>');
-        expect($xml)->toContain('Nama</w:t>');
-        expect($xml)->toContain('NIM</w:t>');
         // Leader name & member name from snapshot should be inside
         expect($xml)->toContain($group->leader->name);
         $members = $submission->submissionMemberships()->with('user')->get();
@@ -204,7 +201,32 @@ describe('Download Letter', function () {
         Storage::fake();
     });
 
-    it('leader can download generated letter', function () {
+    it('administrator can download generated letter', function () {
+        setupFakeTemplate();
+        $operator = User::factory()->create(['role' => 'operator']);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        ['submission' => $submission] = makeSubmittedSubmissionForLetter();
+
+        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+
+        $this->actingAs($admin)
+            ->get(route('groups.submissions.download-letter', $submission->id))
+            ->assertOk();
+    });
+
+    it('operator can download generated letter', function () {
+        setupFakeTemplate();
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['submission' => $submission] = makeSubmittedSubmissionForLetter();
+
+        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+
+        $this->actingAs($operator)
+            ->get(route('groups.submissions.download-letter', $submission->id))
+            ->assertOk();
+    });
+
+    it('leader cannot download generated letter', function () {
         setupFakeTemplate();
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
@@ -213,10 +235,10 @@ describe('Download Letter', function () {
 
         $this->actingAs($leader)
             ->get(route('groups.submissions.download-letter', $submission->id))
-            ->assertOk();
+            ->assertForbidden();
     });
 
-    it('member can download generated letter', function () {
+    it('member cannot download generated letter', function () {
         setupFakeTemplate();
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'member' => $member] = makeSubmittedSubmissionForLetter();
@@ -225,7 +247,7 @@ describe('Download Letter', function () {
 
         $this->actingAs($member)
             ->get(route('groups.submissions.download-letter', $submission->id))
-            ->assertOk();
+            ->assertForbidden();
     });
 
     it('non member cannot download generated letter', function () {
@@ -283,7 +305,7 @@ describe('Student Dashboard', function () {
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
                 ->has('group')
-                ->where('group.active_submission.status', 'letter_sent')
+                ->where('group.active_submission.status', 'letter_published')
             );
     });
 
@@ -503,7 +525,7 @@ describe('Edge Cases', function () {
         // Delete generated file from Storage
         Storage::delete($submission->fresh()->letter_path);
 
-        $this->actingAs($leader)
+        $this->actingAs($operator)
             ->get(route('groups.submissions.download-letter', $submission->id))
             ->assertNotFound();
     });

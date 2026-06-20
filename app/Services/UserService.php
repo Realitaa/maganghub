@@ -41,7 +41,6 @@ class UserService
 
         if ($role !== 'student') {
             $data['nim'] = null;
-            $data['major'] = null;
         }
 
         if (! empty($data['password'])) {
@@ -117,12 +116,11 @@ class UserService
 
             $nameIdx = array_search('name', $headers);
             $nimIdx = array_search('nim', $headers);
-            $majorIdx = array_search('major', $headers);
             $emailIdx = array_search('email', $headers);
 
-            if ($nameIdx === false || $nimIdx === false || $majorIdx === false) {
+            if ($nameIdx === false || $nimIdx === false) {
                 throw ValidationException::withMessages([
-                    'file' => ['File harus mengandung kolom "name", "nim", dan "major".'],
+                    'file' => ['File harus mengandung kolom "name" dan "nim".'],
                 ]);
             }
 
@@ -130,12 +128,11 @@ class UserService
             foreach ($sheet as $row) {
                 $name = trim((string) ($row[$nameIdx] ?? ''));
                 $nim = trim((string) ($row[$nimIdx] ?? ''));
-                $major = trim((string) ($row[$majorIdx] ?? ''));
                 $email = $emailIdx !== false && ! empty($row[$emailIdx])
                     ? trim((string) $row[$emailIdx])
-                    : $nim.'@student.maganghub.id';
+                    : null;
 
-                if (empty($name) || empty($nim) || empty($major)) {
+                if (empty($name) || empty($nim)) {
                     continue;
                 }
 
@@ -144,7 +141,6 @@ class UserService
                     [
                         'name' => $name,
                         'email' => $email,
-                        'major' => $major,
                         'role' => 'student',
                         'password' => Hash::make($nim),
                         'is_active' => true,

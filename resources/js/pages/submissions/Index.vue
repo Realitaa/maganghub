@@ -71,7 +71,6 @@ interface MemberDetail {
     name: string;
     email: string;
     nim?: string;
-    major?: string;
 }
 
 interface SubmissionMembership {
@@ -86,6 +85,7 @@ interface SubmissionDetail {
     company_address: string;
     company_contact: string;
     division: string;
+    field_of_interest: string;
     start_date: string;
     end_date: string;
     status: string;
@@ -311,8 +311,12 @@ function formatDate(dateStr?: string) {
                                 <p class="font-medium mt-0.5">{{ submissionDetail.company_name }}</p>
                             </div>
                             <div>
-                                <Label class="text-xs text-muted-foreground">Divisi / Bidang Pekerjaan</Label>
-                                <p class="font-medium mt-0.5">{{ submissionDetail.division }}</p>
+                                <Label class="text-xs text-muted-foreground">Bidang yang Diminati</Label>
+                                <p class="font-medium mt-0.5">{{ submissionDetail.field_of_interest }}</p>
+                            </div>
+                            <div>
+                                <Label class="text-xs text-muted-foreground">Divisi Pekerjaan (Opsional)</Label>
+                                <p class="font-medium mt-0.5">{{ submissionDetail.division || '-' }}</p>
                             </div>
                             <div>
                                 <Label class="text-xs text-muted-foreground">Kontak Hubungan</Label>
@@ -359,7 +363,7 @@ function formatDate(dateStr?: string) {
                                             {{ membership.user.name }}
                                         </p>
                                         <p class="text-xs text-muted-foreground">
-                                            {{ membership.user.nim }} &bull; {{ membership.user.major ?? '-' }}
+                                            {{ membership.user.nim }}
                                         </p>
                                     </div>
                                 </div>
@@ -448,7 +452,7 @@ function formatDate(dateStr?: string) {
                     <DialogDescription>
                         Apakah Anda yakin ingin menyetujui pengajuan permohonan magang kelompok ini?
                         <strong class="block mt-2 text-foreground font-semibold">
-                            Status kelompok akan dikunci dan berkas pengantar magang akan ditandai siap dikirim (LETTER_SENT).
+                            Status kelompok akan dikunci dan berkas pengantar magang akan ditandai siap dikirim (LETTER_PUBLISHED).
                         </strong>
                     </DialogDescription>
                 </DialogHeader>
