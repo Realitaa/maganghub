@@ -1,66 +1,72 @@
-# Internship Workflow
+# Alur Pengajuan Magang (Internship Workflow)
 
-Dokumen ini menjelaskan alur utama pengajuan magang MagangHub.
+Dokumen ini menjelaskan alur lengkap pengajuan magang di MagangHub dari awal hingga keputusan akhir penerimaan.
 
-## Langkah 1 - Bentuk Kelompok
+---
 
-Mahasiswa dapat:
+### Langkah 1 - Impor Data Mahasiswa
+Administrator atau operator mengimpor data mahasiswa ke dalam sistem MagangHub.
 
-* Membuat kelompok magang.
-* Bergabung ke kelompok magang menggunakan kode kelompok.
+### Langkah 2 - Login Pertama Kali
+Mahasiswa masuk ke sistem menggunakan Nomor Induk Mahasiswa (**NIM**) baik sebagai *username* maupun *password* default awal.
 
-Pada tahap ini anggota kelompok masih dapat berubah.
+### Langkah 3 - Mengisi Profil dan Ganti Password
+Sebelum mahasiswa diperbolehkan membuat kelompok baru atau bergabung ke kelompok lain, sistem akan mengunci halaman utama dan mewajibkan mereka untuk:
+- Mengganti password default.
+- Mengisi dan melengkapi biodata profil (termasuk **semester** dan **field of interest**; kolom **division** bersifat opsional).
 
-Secara paralel, ketua kelompok mengisi:
+### Langkah 4 - Membuat Kelompok Magang
+Mahasiswa yang ingin menjadi Ketua Kelompok membuat kelompok magang baru di sistem. Setelah kelompok dibuat, sistem menghasilkan kode kelompok unik yang dapat dibagikan kepada calon anggota kelompok lainnya.
 
-* Nama perusahaan.
-* Alamat perusahaan.
-* Kontak perusahaan.
-* Bidang pekerjaan.
-* Tanggal pelaksanaan.
-* Berkas pendukung.
+### Langkah 4.5 - Menggabungkan Anggota Kelompok
+Mahasiswa lain yang ingin bergabung memasukkan kode kelompok tersebut. Penggabungan ini tidak otomatis:
+- Permintaan bergabung masuk ke daftar antrean (*Join Requests*) kelompok tersebut.
+- Ketua kelompok harus meninjau dan memilih untuk **menyetujui** atau **menolak** mahasiswa tersebut.
 
-## Langkah 2 - Ajukan Magang
+### Langkah 5 - Mengisi Pengajuan Magang (Draf)
+Secara paralel selama pembentukan kelompok, Ketua kelompok mengisi data pengisian magang, seperti:
+- Nama Perusahaan
+- Alamat Perusahaan
+- Kontak Perusahaan
+- Bidang Pekerjaan / Divisi (Division)
+- Bidang Minat Kelompok (Field of Interest)
+- Tanggal Pelaksanaan
+- Berkas Pendukung (Surat Pengantar/Proposal)
 
-Setelah pengajuan dilakukan, komposisi anggota kelompok dan data perusahaan dikunci.
+Ketua kelompok dapat menyimpan pengisian ini sebagai **Draf** kapan saja.
 
-## Langkah 3 - Review Admin
+### Langkah 6 - Mengajukan Magang
+Setelah seluruh anggota terkumpul (minimal 2 anggota kelompok) dan data pengajuan sudah lengkap, Ketua kelompok mengirimkan pengajuan magang.
+- **Validasi**: Semua kolom wajib diisi, kecuali kolom **Divisi (Division)** yang bersifat opsional.
+- Setelah diajukan, komposisi anggota kelompok dan data pengajuan dikunci untuk keperluan verifikasi.
 
-Operator atau administrator memverifikasi:
+### Langkah 7 - Peninjauan oleh Administrator / Operator
+Administrator atau operator melihat daftar pengajuan magang masuk di panel admin dalam bentuk tabel kelompok magang yang mengajukan. Admin dapat membuka modal untuk melihat detail pengajuan dan daftar anggota kelompok beserta profil lengkap masing-masing.
 
-* Kelengkapan data.
-* Kelengkapan berkas.
-* Kesesuaian persyaratan.
+### Langkah 8 - Keputusan Peninjauan Admin (Review)
+Administrator/Operator menentukan hasil review pengajuan:
+- **Ditolak**: Pengajuan dikembalikan ke fase awal (`forming`). Data pengajuan dikunci kembali ke status draf, kunci anggota dibuka, sehingga Ketua dapat memodifikasi anggota (tambah/keluarkan) atau memperbaiki data pengajuan sebelum diajukan kembali.
+- **Diterima**: Status pengajuan dan kelompok diubah menjadi `letter_published`. Keanggotaan pada saat disetujui disimpan sebagai **snapshot** resmi.
 
-Pengajuan dapat:
+### Langkah 9 - Mencetak Surat Permohonan Magang
+Setelah disetujui, Administrator atau Operator dapat mencetak/mengunduh Surat Permohonan Magang resmi yang dihasilkan oleh sistem menggunakan template Word yang disesuaikan (sesuai format pada berkas `Contoh Surat Permohonan Magang.docx`). Surat ini kemudian dikirimkan ke perusahaan tujuan.
 
-* Diterima.
-* Ditolak.
+### Langkah 10 - Penerimaan Surat Balasan & Manajemen Hasil Akhir
+Setelah perusahaan memberikan surat balasan (yang nantinya dapat diunggah ke sistem atau diarsipkan), Administrator/Operator membuka halaman Manajemen Magang untuk menentukan hasil akhir penempatan kelompok tersebut.
 
-Jika pengajuan ditolak, kelompok kembali ke tahap Bentuk Kelompok.
+### Langkah 11 - Keputusan Penempatan Akhir (3 Opsi)
+Admin memilih salah satu opsi berdasarkan balasan perusahaan:
 
-Ketua kelompok dapat memperbaiki data dan mengajukan kembali.
+1. **Diterima Perusahaan (`accepted`)**:
+   - Klik opsi diterima perusahaan. Proses selesai, status kelompok berlanjut ke `internship_started`.
+2. **Sebagian Anggota Diterima (`partially_accepted`)**:
+   - Admin atau operator memilih secara spesifik siapa saja anggota kelompok yang diterima dan ditolak.
+   - Anggota yang ditolak otomatis dikeluarkan dari kelompok agar dapat mencari kelompok baru.
+   - Administrator atau operator dapat memasukkan alasan penolakan untuk anggota yang ditolak.
+   - **Pergantian Ketua**: Jika Ketua kelompok termasuk yang ditolak, sistem mewajibkan admin menunjuk ketua baru dari sisa anggota yang diterima sebelum perubahan disimpan.
+   - Setelah selesai, status kelompok berlanjut ke `internship_started` bagi anggota yang diterima.
+3. **Ditolak Perusahaan (`rejected`)**:
+   - Klik opsi ditolak perusahaan. Status kelompok diubah menjadi `company_rejected`.
+   - **Pencabutan Jabatan Ketua**: Anggota kelompok tetap dipertahankan di dalam kelompok tersebut sebagai histori, namun status Ketua dicabut (menjadi anggota biasa) sehingga mantan Ketua dapat bebas membuat atau bergabung dengan kelompok baru.
 
-Anggota kelompok diperbolehkan berubah kembali setelah pengajuan ditolak.
-
-## Langkah 4 - Kirim Perusahaan
-
-Mahasiswa mendownload dan print surat permohonan magang yang diterbitkan oleh sistem dan mengirimkannya kepada perusahaan tujuan.
-
-## Langkah 5 - Terima Respons
-
-Perusahaan memberikan respons terhadap pengajuan.
-
-Kemungkinan hasil:
-
-* Seluruh anggota diterima.
-* Sebagian anggota diterima.
-* Seluruh anggota ditolak.
-
-Bukti penerimaan dapat diunggah ke sistem oleh mahasiswa ketua kelompok magang.
-
-## Langkah 6 - Mulai Magang
-
-Mahasiswa yang diterima memulai kegiatan magang.
-
-Selama masa magang mahasiswa mengisi logbook dan menjalankan aktivitas magang sesuai ketentuan.
+*Catatan Histori*: Penolakan tidak menghapus catatan pengajuan; sistem menyimpannya sebagai histori pelaporan magang.
