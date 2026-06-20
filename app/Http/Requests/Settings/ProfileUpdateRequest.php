@@ -5,6 +5,7 @@ namespace App\Http\Requests\Settings;
 use App\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -17,6 +18,21 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->profileRules($this->user()->id);
+        $rules = $this->profileRules($this->user()->id);
+
+        if ($this->user()->role === 'student') {
+            $rules = array_merge($rules, [
+                'nim' => ['required', 'string', Rule::unique('users')->ignore($this->user()->id)],
+                'major' => ['required', 'string', 'max:255'],
+                'phone' => ['required', 'string', 'max:20'],
+                'address' => ['required', 'string'],
+                'gender' => ['required', 'in:L,P'],
+                'semester' => ['required', 'integer', 'min:1', 'max:14'],
+                'field_of_interest' => ['required', 'string', 'max:255'],
+                'division' => ['nullable', 'string', 'max:255'],
+            ]);
+        }
+
+        return $rules;
     }
 }

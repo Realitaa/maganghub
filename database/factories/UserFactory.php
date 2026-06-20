@@ -31,7 +31,35 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'is_active' => true,
+            'password_changed_at' => now(), // Default to password changed
+            'nim' => fake()->unique()->numerify('10######'),
+            'major' => 'Teknik Informatika',
+            'phone' => fake()->phoneNumber(),
+            'address' => fake()->address(),
+            'gender' => fake()->randomElement(['L', 'P']),
+            'semester' => fake()->numberBetween(1, 8),
+            'field_of_interest' => 'Web Development',
+            'division' => 'Frontend',
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (User $user) {
+            if ($user->role !== 'student') {
+                $user->nim = null;
+                $user->major = null;
+                $user->phone = null;
+                $user->address = null;
+                $user->gender = null;
+                $user->semester = null;
+                $user->field_of_interest = null;
+                $user->division = null;
+            }
+        });
     }
 
     /**

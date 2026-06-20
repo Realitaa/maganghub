@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string('role')->default('student');
             $table->enum('gender', ['L', 'P'])->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamp('password_changed_at')->nullable();
+            $table->integer('semester')->nullable();
+            $table->string('field_of_interest')->nullable();
+            $table->string('division')->nullable();
         });
     }
 
@@ -28,7 +32,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['nim', 'major', 'phone', 'address', 'role', 'gender', 'is_active']);
+            $table->dropColumn([
+                'nim', 'major', 'phone', 'address', 'role', 'gender', 'is_active',
+                'password_changed_at', 'semester', 'field_of_interest', 'division',
+            ]);
         });
     }
 };

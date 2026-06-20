@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage, Link } from '@inertiajs/vue3';
 import {
     Users,
     Plus,
@@ -15,7 +15,11 @@ import {
     Link2,
     FileText,
     CheckCircle2,
+    Lock,
+    XCircle,
 } from '@lucide/vue';
+import { edit as editSecurity } from '@/routes/security';
+import { edit as editProfile } from '@/routes/profile';
 import { ref, onMounted, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -105,6 +109,7 @@ interface Submission {
     start_date: string;
     end_date: string;
     supporting_document: string | null;
+    company_response_path?: string | null;
     status: string;
 }
 
@@ -153,6 +158,11 @@ const activeGroupTab = ref<'members' | 'requests' | 'submissions'>('members');
 // ─── Computed ─────────────────────────────────────────────────────────────────
 
 const page = usePage();
+
+const isLocked = computed(() => {
+    const requirements = (page.props.auth as any)?.requirements;
+    return !requirements?.password_changed || !requirements?.profile_completed;
+});
 
 const isLeader = computed(() => {
     return props.group?.leader_id === (page.props.auth as any)?.user?.id;
@@ -236,6 +246,9 @@ function copyLink() {
 }
 
 function createGroup() {
+    if (isLocked.value) {
+        return;
+    }
     isProcessing.value = true;
     router.post(
         groupStore.url(),
@@ -250,7 +263,7 @@ function createGroup() {
 }
 
 function sendJoinRequest() {
-    if (!joinCode.value.trim()) {
+    if (!joinCode.value.trim() || isLocked.value) {
         return;
     }
     isProcessing.value = true;
@@ -408,7 +421,7 @@ function handleResponseUpload(event: Event) {
 onMounted(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    if (code && !props.group && props.pendingJoinRequests.length === 0) {
+    if (code && !props.group && props.pendingJoinRequests.length === 0 && !isLocked.value) {
         joinConfirmCode.value = code;
         showJoinConfirmDialog.value = true;
     }
@@ -421,7 +434,44 @@ onMounted(() => {
     <div class="flex-1 space-y-6 p-4 pt-6 md:p-8">
         <!-- ───── NO GROUP STATE (Google Meet style) ───── -->
         <div v-if="!group">
-            <div class="grid items-start gap-8 lg:grid-cols-2">
+            <div v-if="isLocked" class="flex justify-center py-8">
+                <Card class="border-destructive/30 bg-destructive/5 max-w-2xl w-full">
+                    <CardHeader class="pb-3 text-center">
+                        <div class="mx-auto rounded-full bg-destructive/10 p-3 text-destructive w-12 h-12 flex items-center justify-center mb-2">
+                            <Lock class="h-6 w-6" />
+                        </div>
+                        <CardTitle class="text-xl font-bold">Akses Terkunci</CardTitle>
+                        <CardDescription>
+                            Anda belum memenuhi persyaratan untuk dapat mengakses fitur kelompok magang.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-6 text-center">
+                        <p class="text-sm text-muted-foreground leading-relaxed">
+                            Untuk dapat bergabung atau membuat kelompok magang baru, Anda wajib:
+                        </p>
+                        <div class="flex flex-col items-center gap-3 text-sm font-medium">
+                            <div class="flex items-center gap-2">
+                                <component :is="page.props.auth.requirements?.password_changed ? CheckCircle2 : XCircle" class="h-5 w-5" :class="page.props.auth.requirements?.password_changed ? 'text-green-500' : 'text-destructive'" />
+                                <span>Mengubah password default</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <component :is="page.props.auth.requirements?.profile_completed ? CheckCircle2 : XCircle" class="h-5 w-5" :class="page.props.auth.requirements?.profile_completed ? 'text-green-500' : 'text-destructive'" />
+                                <span>Melengkapi data biodata mahasiswa</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                            <Link v-if="!page.props.auth.requirements?.password_changed" :href="editSecurity()">
+                                <Button variant="destructive" id="btn-lock-password">Ubah Password</Button>
+                            </Link>
+                            <Link v-if="!page.props.auth.requirements?.profile_completed" :href="editProfile()">
+                                <Button variant="outline" class="border-primary/30 text-primary" id="btn-lock-profile">Lengkapi Biodata</Button>
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div v-else class="grid items-start gap-8 lg:grid-cols-2">
                 <!-- Left Column: Actions -->
                 <div class="space-y-8">
                     <div class="space-y-2">
@@ -457,7 +507,7 @@ onMounted(() => {
                             <Button
                                 id="btn-create-group"
                                 class="w-full"
-                                @click="showCreateConfirm = true"
+                                @click="createGroup"
                             >
                                 <Plus class="mr-2 h-4 w-4" />
                                 Buat Kelompok Magang

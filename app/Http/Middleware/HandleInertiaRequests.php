@@ -40,6 +40,10 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'requirements' => $request->user() && $request->user()->role === 'student' ? [
+                    'password_changed' => $request->user()->hasChangedPassword(),
+                    'profile_completed' => $request->user()->isProfileComplete(),
+                ] : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

@@ -18,6 +18,12 @@ class InternshipGroupService
      */
     public function createGroup(User $user): InternshipGroup
     {
+        if (! $user->hasChangedPassword() || ! $user->isProfileComplete()) {
+            throw ValidationException::withMessages([
+                'error' => 'Anda harus mengubah password default dan melengkapi biodata terlebih dahulu.',
+            ]);
+        }
+
         if ($user->groupMembership()->exists()) {
             throw ValidationException::withMessages([
                 'error' => 'Kamu sudah tergabung dalam kelompok magang.',
@@ -50,6 +56,12 @@ class InternshipGroupService
      */
     public function requestToJoin(User $user, string $code): GroupJoinRequest
     {
+        if (! $user->hasChangedPassword() || ! $user->isProfileComplete()) {
+            throw ValidationException::withMessages([
+                'error' => 'Anda harus mengubah password default dan melengkapi biodata terlebih dahulu.',
+            ]);
+        }
+
         if ($user->groupMembership()->exists()) {
             throw ValidationException::withMessages([
                 'error' => 'Kamu sudah tergabung dalam kelompok magang.',
