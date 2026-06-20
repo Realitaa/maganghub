@@ -17,7 +17,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Profile settings',
+                title: 'Pengaturan Profil',
                 href: edit(),
             },
         ],
@@ -29,15 +29,15 @@ const user = computed(() => page.props.auth.user);
 </script>
 
 <template>
-    <Head title="Profile settings" />
+    <Head title="Pengaturan Profil" />
 
-    <h1 class="sr-only">Profile settings</h1>
+    <h1 class="sr-only">Pengaturan Profil</h1>
 
     <div class="flex flex-col space-y-6">
         <Heading
             variant="small"
-            title="Profile"
-            description="Update your name and email address"
+            title="Pengaturan Profil"
+            description="Ubah pengaturan profil Anda"
         />
 
         <Form
