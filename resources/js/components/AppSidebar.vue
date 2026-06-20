@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, House, Users, ClipboardList, FileText } from '@lucide/vue';
+import { LayoutGrid, House, Users, ClipboardList, FileText, CheckCircle2 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -16,8 +16,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { home } from '@/routes';
-import { index as submissionsIndex } from '@/routes/operator/submissions';
-import { index as templateIndex } from '@/routes/operator/templates';
+import { index as submissionsIndex } from '@/routes/review/submissions';
+import { index as templateIndex } from '@/routes/review/templates';
+import { index as readyIndex } from '@/routes/review/ready';
 import { index as userIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 
@@ -51,6 +52,11 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'Pengajuan Magang',
             href: submissionsIndex(),
             icon: ClipboardList,
+        },
+        {
+            title: 'Siap Magang',
+            href: readyIndex(),
+            icon: CheckCircle2,
         },
         {
             title: 'Kelola Template',

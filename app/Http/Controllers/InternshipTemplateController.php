@@ -25,7 +25,7 @@ class InternshipTemplateController extends Controller
         $size = $exists ? $this->formatBytes(Storage::size($path)) : null;
         $updatedAt = $exists ? Carbon::createFromTimestamp(Storage::lastModified($path))->timezone('Asia/Jakarta')->translatedFormat('d F Y H:i') : null;
 
-        return Inertia::render('operator/templates/Index', [
+        return Inertia::render('review/templates/Index', [
             'template' => compact('exists', 'size', 'updatedAt'),
         ]);
     }

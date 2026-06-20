@@ -46,7 +46,7 @@ class InternshipReviewController extends Controller
                 ];
             });
 
-        return Inertia::render('submissions/Index', [
+        return Inertia::render('review/submissions/Index', [
             'submissions' => $submissions,
         ]);
     }
@@ -59,8 +59,8 @@ class InternshipReviewController extends Controller
         Gate::authorize('view', $submission);
 
         $submission->load([
-            'group.leader:id,name,email,nim,major',
-            'submissionMemberships.user:id,name,email,nim,major',
+            'group.leader:id,name,email,nim',
+            'submissionMemberships.user:id,name,email,nim',
         ]);
 
         return response()->json([
@@ -109,6 +109,89 @@ class InternshipReviewController extends Controller
             return Inertia::flash('toast', [
                 'type' => 'success',
                 'message' => 'Pengajuan magang berhasil ditolak.',
+            ])->back();
+        } catch (ValidationException $e) {
+            return Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => collect($e->errors())->flatten()->first(),
+            ])->back();
+        }
+    }
+
+    /**
+     * Display a listing of submissions ready for internship.
+     */
+    public function readyIndex(Request $request): Response
+    {
+        Gate::authorize('viewAny', InternshipSubmission::class);
+
+        $query = InternshipSubmission::with([
+            'group' => function ($q) {
+                $q->select('id', 'leader_id', 'code')->withCount('memberships');
+            },
+            'group.leader:id,name,nim',
+            'submissionMemberships.user:id,name,email,nim,phone,address,gender,semester',
+        ]);
+
+        $allSubmissions = $query->latest('updated_at')->get();
+
+        $readyToPrint = $allSubmissions->filter(fn ($sub) => $sub->status === 'letter_published')->values();
+        $waitingResponse = $allSubmissions->filter(fn ($sub) => $sub->status === 'applying')->values();
+        $receivedResponse = $allSubmissions->filter(fn ($sub) => $sub->status === 'applying' && ! empty($sub->company_response_path))->values();
+
+        return Inertia::render('review/Ready', [
+            'readyToPrint' => $readyToPrint,
+            'waitingResponse' => $waitingResponse,
+            'receivedResponse' => $receivedResponse,
+        ]);
+    }
+
+    /**
+     * Mark the submission as actively applying to the company.
+     */
+    public function markApplying(InternshipSubmission $submission): RedirectResponse
+    {
+        Gate::authorize('approve', $submission);
+
+        try {
+            $this->reviewService->markAsApplying($submission);
+
+            return Inertia::flash('toast', [
+                'type' => 'success',
+                'message' => 'Status kelompok berhasil diubah menjadi sedang mengajukan.',
+            ])->back();
+        } catch (ValidationException $e) {
+            return Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => collect($e->errors())->flatten()->first(),
+            ])->back();
+        }
+    }
+
+    /**
+     * Process the company placement outcome decision.
+     */
+    public function companyDecision(Request $request, InternshipSubmission $submission): RedirectResponse
+    {
+        Gate::authorize('approve', $submission);
+
+        $request->validate([
+            'decision' => ['required', 'string', 'in:all_accepted,all_rejected,partially_accepted'],
+            'member_decisions' => ['nullable', 'array'],
+            'new_leader_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
+        try {
+            $this->reviewService->processCompanyDecision(
+                $submission,
+                $request->input('decision'),
+                $request->input('member_decisions', []),
+                $request->input('new_leader_id')
+            );
+
+            return Inertia::flash('toast', [
+                'type' => 'success',
+                'message' => 'Keputusan penempatan perusahaan berhasil diproses.',
             ])->back();
         } catch (ValidationException $e) {
             return Inertia::flash('toast', [

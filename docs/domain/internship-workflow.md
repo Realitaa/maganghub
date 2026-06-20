@@ -48,25 +48,27 @@ Administrator/Operator menentukan hasil review pengajuan:
 - **Ditolak**: Pengajuan dikembalikan ke fase awal (`forming`). Data pengajuan dikunci kembali ke status draf, kunci anggota dibuka, sehingga Ketua dapat memodifikasi anggota (tambah/keluarkan) atau memperbaiki data pengajuan sebelum diajukan kembali.
 - **Diterima**: Status pengajuan dan kelompok diubah menjadi `letter_published`. Keanggotaan pada saat disetujui disimpan sebagai **snapshot** resmi.
 
-### Langkah 9 - Mencetak Surat Permohonan Magang
-Setelah disetujui, Administrator atau Operator dapat mencetak/mengunduh Surat Permohonan Magang resmi yang dihasilkan oleh sistem menggunakan template Word yang disesuaikan (sesuai format pada berkas `Contoh Surat Permohonan Magang.docx`). Surat ini kemudian dikirimkan ke perusahaan tujuan.
+### Langkah 9 - Mencetak Surat Permohonan Magang dan Menandai Sedang Mengajukan
+Setelah disetujui, Administrator atau Operator dapat mengakses menu **"Siap Magang"** (Siap Cetak Surat). Di sini admin/operator dapat:
+- Mencetak Surat Permohonan Magang resmi menggunakan template Word yang disesuaikan.
+- Menandai kelompok sedang mengajukan ke perusahaan. Hal ini akan mengubah status kelompok dan pengajuan menjadi `applying`.
 
-### Langkah 10 - Penerimaan Surat Balasan & Manajemen Hasil Akhir
-Setelah perusahaan memberikan surat balasan (yang nantinya dapat diunggah ke sistem atau diarsipkan), Administrator/Operator membuka halaman Manajemen Magang untuk menentukan hasil akhir penempatan kelompok tersebut.
+### Langkah 10 - Penerimaan Surat Balasan & Unggah Respons
+Setelah kelompok berstatus `applying`, mereka akan mengajukan surat permohonan ke perusahaan. Mahasiswa dapat mengunggah berkas surat balasan resmi dari perusahaan ke sistem. 
+Setelah berkas balasan diunggah, pengajuan kelompok tersebut akan berpindah ke tabel **"Menerima Balasan"** pada menu **"Siap Magang"** di sisi Administrator/Operator.
 
 ### Langkah 11 - Keputusan Penempatan Akhir (3 Opsi)
-Admin memilih salah satu opsi berdasarkan balasan perusahaan:
+Administrator/Operator meninjau berkas balasan dan memproses keputusan akhir dengan 3 opsi:
 
 1. **Diterima Perusahaan (`accepted`)**:
-   - Klik opsi diterima perusahaan. Proses selesai, status kelompok berlanjut ke `internship_started`.
+   - Status kelompok dan pengajuan berlanjut ke `accepted` (kemudian `internship_started`).
 2. **Sebagian Anggota Diterima (`partially_accepted`)**:
-   - Admin atau operator memilih secara spesifik siapa saja anggota kelompok yang diterima dan ditolak.
-   - Anggota yang ditolak otomatis dikeluarkan dari kelompok agar dapat mencari kelompok baru.
-   - Administrator atau operator dapat memasukkan alasan penolakan untuk anggota yang ditolak.
-   - **Pergantian Ketua**: Jika Ketua kelompok termasuk yang ditolak, sistem mewajibkan admin menunjuk ketua baru dari sisa anggota yang diterima sebelum perubahan disimpan.
-   - Setelah selesai, status kelompok berlanjut ke `internship_started` bagi anggota yang diterima.
+   - Administrator/Operator memilih secara spesifik anggota yang diterima dan yang ditolak.
+   - Anggota yang ditolak otomatis dikeluarkan dari keanggotaan aktif kelompok dan dapat memasukkan alasan/catatan penolakan (`rejection_note`) untuk setiap anggota tersebut agar dibaca mahasiswa.
+   - **Pergantian Ketua**: Jika Ketua kelompok termasuk yang ditolak, sistem mewajibkan admin menunjuk ketua baru dari sisa anggota yang diterima.
+   - Sisa anggota yang diterima berlanjut dengan kelompok berstatus `partially_accepted` (dan kemudian `internship_started`).
 3. **Ditolak Perusahaan (`rejected`)**:
-   - Klik opsi ditolak perusahaan. Status kelompok diubah menjadi `company_rejected`.
-   - **Pencabutan Jabatan Ketua**: Anggota kelompok tetap dipertahankan di dalam kelompok tersebut sebagai histori, namun status Ketua dicabut (menjadi anggota biasa) sehingga mantan Ketua dapat bebas membuat atau bergabung dengan kelompok baru.
+   - Semua anggota ditolak. Status kelompok dan pengajuan diubah menjadi `rejected`.
+   - **Pencabutan Jabatan Ketua**: Keanggotaan kelompok dipertahankan sebagai histori, namun jabatan Ketua dicabut (menjadi anggota biasa) sehingga mantan Ketua bisa membuat/bergabung kelompok baru.
 
 *Catatan Histori*: Penolakan tidak menghapus catatan pengajuan; sistem menyimpannya sebagai histori pelaporan magang.

@@ -92,7 +92,7 @@ class DocumentGeneratorService
             $pageXml = str_replace('{{end_date}}', htmlspecialchars($endDate), $pageXml);
             $pageXml = str_replace('{{calculateDuration}}', htmlspecialchars($monthDuration), $pageXml);
             $pageXml = str_replace('{{field_of_interest}}', htmlspecialchars($fieldOfInterest), $pageXml);
-            $pageXml = str_replace('{{division ? Division : field_of_interest}}', htmlspecialchars($divisionOrInterest), $pageXml);
+            $pageXml = str_replace('{{division}}', htmlspecialchars($divisionOrInterest), $pageXml);
 
             $pages[] = $pageXml;
         }

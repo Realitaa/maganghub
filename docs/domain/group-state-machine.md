@@ -27,23 +27,28 @@ Kelompok magang memiliki siklus hidup yang diwakili oleh kolom `status` di tabel
   - `submitted` → `letter_published` jika pengajuan disetujui oleh administrator.
 
 ### 3. `letter_published` (Surat Permohonan Terbit)
-* **Kondisi**: Surat permohonan magang resmi telah diterbitkan oleh sistem. Surat siap dicetak oleh Administrator/Operator atau didownload untuk dikirimkan ke perusahaan.
+* **Kondisi**: Surat permohonan magang resmi telah diterbitkan oleh sistem. Surat siap dicetak oleh Administrator/Operator.
 * **Transisi**:
-  - `letter_published` → `accepted` jika seluruh anggota kelompok diterima magang oleh perusahaan.
-  - `letter_published` → `partially_accepted` (dengan modifikasi keanggotaan) jika sebagian anggota diterima (anggota yang ditolak dikeluarkan dari kelompok aktif).
-  - `letter_published` → `rejected` jika seluruh anggota ditolak oleh perusahaan.
+  - `letter_published` → `applying` saat Administrator/Operator menandai kelompok sedang mengajukan ke perusahaan.
 
-### 4. `accepted` (Diterima Perusahaan)
-* **Kondisi**: 
+### 4. `applying` (Sedang Mengajukan)
+* **Kondisi**: Kelompok sedang aktif memproses pengajuan/surat permohonan ke perusahaan tujuan dan menunggu balasan.
 * **Transisi**:
-  - `accepted` → `internship_started` jika seluruh anggota kelompok diterima magang oleh perusahaan.
+  - `applying` → `accepted` jika seluruh anggota kelompok diterima magang oleh perusahaan.
+  - `applying` → `partially_accepted` (dengan modifikasi keanggotaan) jika sebagian anggota diterima (anggota yang ditolak dikeluarkan dari kelompok aktif).
+  - `applying` → `rejected` jika seluruh anggota ditolak oleh perusahaan.
 
-### 5. `partially_accepted` (Diterima Sebagian Perusahaan)
-* **Kondisi**: 
+### 5. `accepted` (Diterima Perusahaan)
+* **Kondisi**: Seluruh anggota kelompok diterima secara resmi oleh perusahaan.
 * **Transisi**:
-  - `partially_accepted` → `internship_started` (dengan modifikasi keanggotaan) jika sebagian anggota diterima (anggota yang ditolak dikeluarkan dari kelompok aktif).
+  - `accepted` → `internship_started` jika periode magang dimulai.
 
-### 6. `rejected` (Ditolak Perusahaan)
+### 6. `partially_accepted` (Diterima Sebagian Perusahaan)
+* **Kondisi**: Sebagian anggota kelompok diterima oleh perusahaan, sedangkan sebagian lainnya ditolak.
+* **Transisi**:
+  - `partially_accepted` → `internship_started` (dengan sisa anggota yang diterima).
+
+### 7. `rejected` (Ditolak Perusahaan)
 * **Kondisi**: Seluruh pengajuan kelompok ditolak oleh perusahaan.
 * **Penanganan**: 
   - Keanggotaan kelompok dipertahankan untuk histori.
@@ -51,7 +56,7 @@ Kelompok magang memiliki siklus hidup yang diwakili oleh kolom `status` di tabel
 * **Transisi**:
   - Kelompok tetap berada pada state ini sebagai histori.
 
-### 6. `internship_started` (Magang Dimulai)
+### 8. `internship_started` (Magang Dimulai)
 * **Kondisi**: Kelompok (atau sisa anggota yang diterima) telah memulai kegiatan magang mereka secara resmi.
 * **Transisi**:
   - `internship_started` → `completed` saat periode magang berakhir dan laporan diselesaikan.

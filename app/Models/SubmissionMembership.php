@@ -13,10 +13,11 @@ use Illuminate\Support\Carbon;
  * @property int $submission_id
  * @property int $user_id
  * @property string $status
+ * @property string|null $rejection_note
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['submission_id', 'user_id', 'status'])]
+#[Fillable(['submission_id', 'user_id', 'status', 'rejection_note'])]
 class SubmissionMembership extends Model
 {
     use HasFactory;

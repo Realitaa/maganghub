@@ -15,8 +15,9 @@ stateDiagram-v2
     submitted --> rejected_by_admin : Admin menolak pengajuan (review)
     rejected_by_admin --> draft : Diperbaiki oleh Ketua
     submitted --> letter_published : Admin menyetujui pengajuan (review)
+    letter_published --> applying : Admin menandai sedang mengajukan
     
-    state letter_published {
+    state applying {
         [*] --> waiting_response
         waiting_response --> accepted : Semua Diterima Perusahaan
         waiting_response --> partially_accepted : Sebagian Diterima Perusahaan
@@ -48,18 +49,23 @@ stateDiagram-v2
   - `rejected_by_admin` → `draft` (Otomatis saat kelompok kembali ke status `forming` agar Ketua dapat mengedit ulang data pengajuan).
 
 ### 4. `letter_published` (Surat Permohonan Terbit)
-* **Deskripsi**: Surat permohonan resmi telah terbit. Tahap ini juga mencakup masa tunggu respons perusahaan (*waiting response*).
+* **Deskripsi**: Surat permohonan resmi telah terbit.
 * **Transisi**:
-  - `letter_published` → `accepted` (Jika seluruh anggota diterima magang oleh perusahaan).
-  - `letter_published` → `partially_accepted` (Jika sebagian anggota diterima).
-  - `letter_published` → `rejected` (Jika seluruh anggota ditolak oleh perusahaan).
+  - `letter_published` → `applying` (Saat admin menandai kelompok sudah mengajukan ke perusahaan).
 
-### 5. `accepted` (Diterima Perusahaan)
+### 5. `applying` (Sedang Mengajukan)
+* **Deskripsi**: Kelompok sedang aktif dalam proses pengajuan ke perusahaan tujuan dan menunggu surat balasan resmi dari perusahaan.
+* **Transisi**:
+  - `applying` → `accepted` (Jika seluruh anggota diterima magang oleh perusahaan).
+  - `applying` → `partially_accepted` (Jika sebagian anggota diterima).
+  - `applying` → `rejected` (Jika seluruh anggota ditolak oleh perusahaan).
+
+### 6. `accepted` (Diterima Perusahaan)
 * **Deskripsi**: Seluruh anggota kelompok diterima secara resmi oleh perusahaan.
 * **Transisi**:
   - `accepted` → `internship_started` (Kelompok resmi memulai magang).
 
-### 6. `partially_accepted` (Diterima Sebagian Perusahaan)
+### 7. `partially_accepted` (Diterima Sebagian Perusahaan)
 * **Deskripsi**: Sebagian anggota kelompok diterima, sedangkan sebagian lainnya ditolak.
 * **Tindakan**:
   - Anggota yang ditolak otomatis dikeluarkan dari kelompok.
@@ -67,13 +73,13 @@ stateDiagram-v2
 * **Transisi**:
   - `partially_accepted` → `internship_started` (Sisa anggota yang diterima resmi memulai magang).
 
-### 7. `rejected` (Ditolak Perusahaan)
+### 8. `rejected` (Ditolak Perusahaan)
 * **Deskripsi**: Seluruh anggota kelompok ditolak secara resmi oleh perusahaan.
 * **Tindakan**:
   - Jabatan Ketua dicabut (menjadi anggota biasa) agar mantan Ketua bisa bergabung/membuat kelompok baru.
   - Data pengajuan disimpan sebagai catatan histori.
 
-### 8. `internship_started` (Magang Dimulai)
+### 9. `internship_started` (Magang Dimulai)
 * **Deskripsi**: Kelompok atau sisa anggota yang diterima telah resmi ditempatkan dan memulai aktivitas magang mereka.
 
 ---

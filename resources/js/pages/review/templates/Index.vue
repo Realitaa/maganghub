@@ -23,7 +23,7 @@ import { Spinner } from '@/components/ui/spinner';
 import {
     index as templateIndex,
     store as templateStore,
-} from '@/routes/operator/templates';
+} from '@/routes/review/templates';
 
 // Define layout breadcrumbs
 defineOptions({

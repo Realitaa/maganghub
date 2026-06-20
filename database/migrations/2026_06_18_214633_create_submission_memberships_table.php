@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('submission_id')->constrained('internship_submissions')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('pending');
+            $table->text('rejection_note')->nullable();
             $table->timestamps();
 
             $table->unique(['submission_id', 'user_id']);

@@ -41,7 +41,7 @@ import {
     show as showSubmission,
     approve as approveSubmission,
     reject as rejectSubmission,
-} from '@/routes/operator/submissions';
+} from '@/routes/review/submissions';
 
 // Define layout breadcrumbs
 defineOptions({

@@ -44,7 +44,7 @@ class InternshipSubmissionPolicy
      */
     public function downloadLetter(User $user, InternshipSubmission $submission): bool
     {
-        if ($submission->status !== 'letter_published') {
+        if (! $submission->letter_path) {
             return false;
         }
 

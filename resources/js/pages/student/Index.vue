@@ -174,6 +174,7 @@ const groupStatusLabel = computed(() => {
         submitted: 'Diajukan',
         under_review: 'Direview',
         letter_published: 'Surat Diterbitkan',
+        applying: 'Sedang Mengajukan',
         accepted: 'Diterima',
         partially_accepted: 'Diterima Sebagian',
         rejected: 'Ditolak Perusahaan',
@@ -193,6 +194,7 @@ const groupStatusVariant = computed(
             submitted: 'default',
             under_review: 'default',
             letter_published: 'default',
+            applying: 'default',
             accepted: 'default',
             partially_accepted: 'outline',
             rejected: 'destructive',
@@ -782,7 +784,7 @@ onMounted(() => {
                 <!-- Right: Members -->
                 <div class="space-y-4 lg:col-span-2">
                     <!-- Card: Surat Permohonan & Balasan Perusahaan -->
-                    <Card v-if="group.active_submission?.status === 'letter_published'" class="border-green-200 dark:border-green-900 bg-green-50/10 dark:bg-green-950/10">
+                    <Card v-if="group.active_submission?.status === 'letter_published' || group.active_submission?.status === 'applying'" class="border-green-200 dark:border-green-900 bg-green-50/10 dark:bg-green-950/10">
                         <CardHeader class="pb-3">
                             <div class="flex items-center gap-3">
                                 <div class="rounded-full bg-green-100 dark:bg-green-900 p-2 text-green-700 dark:text-green-300">

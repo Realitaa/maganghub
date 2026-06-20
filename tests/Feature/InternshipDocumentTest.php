@@ -63,10 +63,10 @@ describe('Template Management Upload', function () {
         $operator = User::factory()->create(['role' => 'operator']);
 
         $this->actingAs($operator)
-            ->get(route('operator.templates.index'))
+            ->get(route('review.templates.index'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('operator/templates/Index')
+                ->component('review/templates/Index')
                 ->has('template')
                 ->where('template.exists', false)
             );
@@ -76,7 +76,7 @@ describe('Template Management Upload', function () {
         $student = User::factory()->create(['role' => 'student']);
 
         $this->actingAs($student)
-            ->get(route('operator.templates.index'))
+            ->get(route('review.templates.index'))
             ->assertForbidden();
     });
 
@@ -86,7 +86,7 @@ describe('Template Management Upload', function () {
         $file = UploadedFile::fake()->create('letter_template.docx', 500);
 
         $this->actingAs($operator)
-            ->post(route('operator.templates.store'), [
+            ->post(route('review.templates.store'), [
                 'file' => $file,
             ])
             ->assertRedirect()
@@ -104,7 +104,7 @@ describe('Template Management Upload', function () {
         $file = UploadedFile::fake()->create('letter_template.txt', 100);
 
         $this->actingAs($operator)
-            ->post(route('operator.templates.store'), [
+            ->post(route('review.templates.store'), [
                 'file' => $file,
             ])
             ->assertSessionHasErrors(['file']);
@@ -122,7 +122,7 @@ describe('Generate Letter', function () {
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         expect($submission->fresh()->status)->toBe('letter_published');
@@ -135,7 +135,7 @@ describe('Generate Letter', function () {
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         $path = $submission->fresh()->letter_path;
@@ -151,7 +151,7 @@ describe('Generate Letter', function () {
         GroupMembership::where('group_id', $group->id)->where('user_id', '!=', $group->leader_id)->delete();
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         // Read XML from generated DOCX and assert there are 2 members listed in table
@@ -166,9 +166,9 @@ describe('Generate Letter', function () {
         unlink($tempFile);
 
         // Leader name & member name from snapshot should be inside
-        expect($xml)->toContain($group->leader->name);
+        expect(html_entity_decode($xml))->toContain($group->leader->name);
         $members = $submission->submissionMemberships()->with('user')->get();
-        expect($xml)->toContain($members[1]->user->name);
+        expect(html_entity_decode($xml))->toContain($members[1]->user->name);
     });
 
     it('generates document only once and does not regenerate on re-approval attempts', function () {
@@ -178,7 +178,7 @@ describe('Generate Letter', function () {
 
         // 1. Approve
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         $firstPath = $submission->fresh()->letter_path;
@@ -189,7 +189,7 @@ describe('Generate Letter', function () {
 
         // 2. Approve again
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         expect($submission->fresh()->letter_path)->toBe($firstPath);
@@ -207,7 +207,7 @@ describe('Download Letter', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($admin)
             ->get(route('groups.submissions.download-letter', $submission->id))
@@ -219,7 +219,7 @@ describe('Download Letter', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($operator)
             ->get(route('groups.submissions.download-letter', $submission->id))
@@ -231,7 +231,7 @@ describe('Download Letter', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($leader)
             ->get(route('groups.submissions.download-letter', $submission->id))
@@ -243,7 +243,7 @@ describe('Download Letter', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'member' => $member] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($member)
             ->get(route('groups.submissions.download-letter', $submission->id))
@@ -255,7 +255,7 @@ describe('Download Letter', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $outsider = User::factory()->create(['role' => 'student']);
         $this->actingAs($outsider)
@@ -279,6 +279,10 @@ describe('Download Letter', function () {
 });
 
 describe('Student Dashboard', function () {
+    beforeEach(function () {
+        Storage::fake();
+    });
+
     it('document card is hidden before approval', function () {
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
@@ -297,7 +301,7 @@ describe('Student Dashboard', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($leader)
             ->get(route('dashboard'))
@@ -314,7 +318,7 @@ describe('Student Dashboard', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader, 'member' => $member] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         // Check leader view
         $this->actingAs($leader)
@@ -348,7 +352,7 @@ describe('Upload Company Response', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $file = UploadedFile::fake()->create('balasan.pdf', 500);
 
@@ -371,7 +375,7 @@ describe('Upload Company Response', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'member' => $member] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $file = UploadedFile::fake()->create('balasan.pdf', 500);
 
@@ -396,7 +400,7 @@ describe('Upload Company Response', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $file = UploadedFile::fake()->create('balasan.txt', 500);
 
@@ -412,7 +416,7 @@ describe('Upload Company Response', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $file = UploadedFile::fake()->create('balasan.pdf', 3000); // 3 MB (limit is 2 MB)
 
@@ -428,7 +432,7 @@ describe('Upload Company Response', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         // 1st upload
         $file1 = UploadedFile::fake()->create('balasan1.pdf', 100);
@@ -466,7 +470,7 @@ describe('Edge Cases', function () {
         GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $newMember->id]);
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         // The generated XML should NOT contain the new member, only the snapshot members (leader and original member)
@@ -492,7 +496,7 @@ describe('Edge Cases', function () {
         GroupMembership::where('group_id', $group->id)->delete();
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
         expect($submission->fresh()->letter_path)->not->toBeNull();
@@ -504,7 +508,7 @@ describe('Edge Cases', function () {
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($operator)
-            ->post(route('operator.submissions.approve', $submission->id))
+            ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',
@@ -520,7 +524,7 @@ describe('Edge Cases', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
-        $this->actingAs($operator)->post(route('operator.submissions.approve', $submission->id))->assertRedirect();
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         // Delete generated file from Storage
         Storage::delete($submission->fresh()->letter_path);
