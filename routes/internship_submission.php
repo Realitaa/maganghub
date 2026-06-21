@@ -15,6 +15,9 @@ Route::middleware(['auth', 'verified'])->prefix('review')->group(function () {
     Route::post('submissions/{submission}/mark-applying', [InternshipReviewController::class, 'markApplying'])->name('review.submissions.mark-applying');
     Route::post('submissions/{submission}/company-decision', [InternshipReviewController::class, 'companyDecision'])->name('review.submissions.company-decision');
 
+    // New Internship Groups (Kelompok Magang) route
+    Route::get('groups', [InternshipReviewController::class, 'groupsIndex'])->name('review.groups.index');
+
     // Template management
     Route::get('templates', [InternshipTemplateController::class, 'index'])->name('review.templates.index');
     Route::post('templates', [InternshipTemplateController::class, 'store'])->name('review.templates.store');

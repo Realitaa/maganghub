@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Services\InternshipReviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -199,5 +201,73 @@ class InternshipReviewController extends Controller
                 'message' => collect($e->errors())->flatten()->first(),
             ])->back();
         }
+    }
+
+    /**
+     * Display a listing of groups that have completed their administration.
+     */
+    public function groupsIndex(Request $request): Response
+    {
+        Gate::authorize('viewAny', InternshipSubmission::class);
+
+        $today = Carbon::today();
+
+        $groups = InternshipGroup::whereIn('status', ['accepted', 'partially_accepted', 'internship_started', 'completed'])
+            ->with([
+                'leader:id,name,nim',
+                'activeSubmission',
+                'memberships.user:id,name,nim',
+            ])
+            ->get()
+            ->map(function ($group) use ($today) {
+                $sub = $group->activeSubmission;
+                $computedStatus = 'selesai_magang';
+                if ($sub) {
+                    if ($today->lt($sub->start_date)) {
+                        $computedStatus = 'segera_magang';
+                    } elseif ($today->gte($sub->start_date) && $today->lte($sub->end_date)) {
+                        $computedStatus = 'melaksanakan_magang';
+                    } else {
+                        $computedStatus = 'selesai_magang';
+                    }
+                }
+                $group->computed_status = $computedStatus;
+
+                return $group;
+            });
+
+        // Apply filters
+        $statusFilter = $request->input('status');
+        if ($statusFilter && in_array($statusFilter, ['segera_magang', 'melaksanakan_magang', 'selesai_magang'])) {
+            $groups = $groups->filter(fn ($g) => $g->computed_status === $statusFilter);
+        }
+
+        $search = $request->input('search');
+        if (! empty($search)) {
+            $groups = $groups->filter(function ($g) use ($search) {
+                $companyName = $g->activeSubmission?->company_name ?? '';
+
+                return str_contains(strtolower($g->code), strtolower($search)) ||
+                       str_contains(strtolower($g->leader?->name ?? ''), strtolower($search)) ||
+                       str_contains(strtolower($companyName), strtolower($search));
+            });
+        }
+
+        // Sort: Segera Magang (1), Melaksanakan Magang (2), Selesai Magang (3)
+        $sortWeights = [
+            'segera_magang' => 1,
+            'melaksanakan_magang' => 2,
+            'selesai_magang' => 3,
+        ];
+
+        $sortedGroups = $groups->sortBy(fn ($g) => $sortWeights[$g->computed_status] ?? 99)->values();
+
+        return Inertia::render('review/groups/Index', [
+            'groups' => $sortedGroups,
+            'filters' => [
+                'search' => $search ?? '',
+                'status' => $statusFilter ?? 'all',
+            ],
+        ]);
     }
 }

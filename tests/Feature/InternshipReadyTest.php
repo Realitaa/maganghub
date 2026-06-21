@@ -289,4 +289,45 @@ describe('ready to print / siap magang workflow', function () {
         expect($group->memberships()->where('user_id', $member->id)->exists())->toBeTrue();
     });
 
+    it('allows operators to download individual student letters', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['submission' => $submission, 'leader' => $leader] = makeReadySubmission();
+
+        setupFakeReadyTemplate();
+
+        $submission->update([
+            'status' => 'letter_published',
+            'letter_path' => 'letters/permohonan_magang_test.docx',
+        ]);
+        Storage::put('letters/permohonan_magang_test.docx', 'dummy content');
+
+        $response = $this->actingAs($operator)
+            ->get(route('groups.submissions.download-letter', [
+                'submission' => $submission->id,
+                'user_id' => $leader->id,
+            ]));
+
+        $response->assertSuccessful();
+        $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.str_replace(' ', '_', $leader->name).'_'.$submission->group->code.'.docx');
+    });
+
+    it('prevents downloading an individual letter for a non-member of the group', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['submission' => $submission] = makeReadySubmission();
+        $nonMember = User::factory()->create(['role' => 'student']);
+
+        $submission->update([
+            'status' => 'letter_published',
+            'letter_path' => 'letters/permohonan_magang_test.docx',
+        ]);
+        Storage::put('letters/permohonan_magang_test.docx', 'dummy content');
+
+        $this->actingAs($operator)
+            ->get(route('groups.submissions.download-letter', [
+                'submission' => $submission->id,
+                'user_id' => $nonMember->id,
+            ]))
+            ->assertForbidden();
+    });
+
 });

@@ -172,6 +172,10 @@ function handleDownloadLetter(subId: number) {
     window.open(downloadLetter.url({ submission: subId }), '_blank');
 }
 
+function handleDownloadIndividualLetter(subId: number, userId: number) {
+    window.open(downloadLetter.url({ submission: subId, user_id: userId }), '_blank');
+}
+
 function handleMarkApplying(subId: number) {
     localProcessing.value = true;
     router.post(markApplying.url({ submission: subId }), {}, {
@@ -611,13 +615,24 @@ function formatDate(dateStr?: string) {
                                             <p class="text-[10px] text-muted-foreground">{{ membership.user.nim }} | Semester {{ membership.user.semester ?? '-' }}</p>
                                         </div>
                                     </div>
-                                    <Badge
-                                        v-if="membership.user.id === selectedSubmission.group.leader_id"
-                                        variant="secondary"
-                                        class="text-[9px] py-0.5 px-2"
-                                    >
-                                        Ketua Kelompok
-                                    </Badge>
+                                    <div class="flex items-center gap-2">
+                                        <Badge
+                                            v-if="membership.user.id === selectedSubmission.group.leader_id"
+                                            variant="secondary"
+                                            class="text-[9px] py-0.5 px-2"
+                                        >
+                                            Ketua Kelompok
+                                        </Badge>
+                                        <Button
+                                            size="xs"
+                                            variant="outline"
+                                            class="h-7 gap-1 font-medium cursor-pointer border-primary/20 text-primary hover:bg-primary/5"
+                                            @click="handleDownloadIndividualLetter(selectedSubmission.id, membership.user.id)"
+                                        >
+                                            <Printer class="h-3 w-3" />
+                                            Cetak Surat
+                                        </Button>
+                                    </div>
                                 </div>
                                 <div class="mt-2 pl-11 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground border-t border-border/20 pt-2">
                                     <div>Email: <span class="font-medium text-foreground">{{ membership.user.email }}</span></div>
@@ -637,7 +652,7 @@ function formatDate(dateStr?: string) {
                             id="btn-print-letter"
                         >
                             <Printer class="mr-2 h-4 w-4" />
-                            Cetak Surat Permohonan
+                            Unduh Semua Surat sekaligus
                         </Button>
                         
                         <div class="flex gap-2">

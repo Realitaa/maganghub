@@ -117,7 +117,6 @@ const crudForm = useForm({
     email: '',
     role: 'student',
     nim: '',
-    major: '',
     gender: 'L' as 'L' | 'P',
     phone: '',
     address: '',
@@ -207,10 +206,6 @@ watch(selectedRole, () => {
     applyFilters();
 });
 
-watch(selectedMajor, () => {
-    applyFilters();
-});
-
 // Form Actions
 const openAddModal = () => {
     crudForm.reset();
@@ -228,7 +223,6 @@ const openEditModal = (user: any) => {
     crudForm.email = user.email;
     crudForm.role = user.role;
     crudForm.nim = user.nim || '';
-    crudForm.major = user.major || '';
     crudForm.gender = user.gender || 'L';
     crudForm.phone = user.phone || '';
     crudForm.address = user.address || '';
@@ -345,7 +339,6 @@ const handlePageChange = (newPage: number) => {
             page: newPage,
             search: searchQuery.value || undefined,
             role: selectedRole.value === 'all' ? undefined : selectedRole.value,
-            major: selectedMajor.value === 'all' ? undefined : selectedMajor.value,
         },
         {
             preserveState: true,
@@ -386,25 +379,8 @@ const handlePageChange = (newPage: number) => {
                     </div>
                 </div>
 
-                <div class="w-full lg:w-140 flex gap-2">
-                    <div class="w-1/2 lg:w-50 space-y-1.5">
-                        <Label class="text-xs font-semibold">Program Studi</Label>
-                        <Select v-model="selectedMajor">
-                            <SelectTrigger class="w-full">
-                                <SelectValue placeholder="Pilih Prodi" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="all">Semua Prodi</SelectItem>
-                                    <SelectItem v-for="major in majors" :key="major" :value="major">
-                                        {{ major }}
-                                    </SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div class="w-1/2 lg:w-50 space-y-1.5">
+                <div class="w-full lg:w-70 flex gap-2">
+                    <div class="w-full space-y-1.5">
                         <Label class="text-xs font-semibold">Peran</Label>
                         <Select v-model="selectedRole">
                             <SelectTrigger class="w-full">
@@ -433,7 +409,6 @@ const handlePageChange = (newPage: number) => {
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Nama</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Email</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">NIM</TableHead>
-                            <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Program Studi</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Peran</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Status</TableHead>
                             <TableHead class="h-10 px-4 text-right align-middle font-medium text-xs uppercase tracking-wider">Aksi</TableHead>
@@ -449,7 +424,6 @@ const handlePageChange = (newPage: number) => {
                             <TableCell class="p-4 align-middle font-medium text-foreground">{{ user.name }}</TableCell>
                             <TableCell class="p-4 align-middle text-muted-foreground">{{ user.email }}</TableCell>
                             <TableCell class="p-4 align-middle text-muted-foreground">{{ user.nim || '-' }}</TableCell>
-                            <TableCell class="p-4 align-middle text-muted-foreground">{{ user.major || '-' }}</TableCell>
                             <TableCell class="p-4 align-middle">
                                 <Badge :variant="getRoleBadgeVariant(user.role)">
                                     {{ getRoleLabel(user.role) }}

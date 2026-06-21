@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\InternshipSubmission;
+use App\Models\User;
+use App\Services\DocumentGeneratorService;
 use App\Services\InternshipSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -61,9 +63,33 @@ class InternshipSubmissionController extends Controller
     /**
      * Download the generated internship application letter.
      */
-    public function downloadLetter(InternshipSubmission $submission)
+    public function downloadLetter(Request $request, InternshipSubmission $submission)
     {
         Gate::authorize('downloadLetter', $submission);
+
+        $userId = $request->integer('user_id');
+
+        if ($userId) {
+            $hasMember = $submission->submissionMemberships()->where('user_id', $userId)->exists();
+            if (! $hasMember) {
+                abort(403, 'Mahasiswa bukan merupakan anggota kelompok pengajuan ini.');
+            }
+
+            $user = User::findOrFail($userId);
+
+            try {
+                $generator = app(DocumentGeneratorService::class);
+                $path = $generator->generateLetter($submission, $userId);
+                $absolutePath = Storage::path($path);
+
+                $safeName = str_replace([' ', '/', '\\'], '_', $user->name);
+                $filename = 'surat_permohonan_magang_'.$safeName.'_'.($submission->group->code ?? $submission->id).'.docx';
+
+                return response()->download($absolutePath, $filename)->deleteFileAfterSend(true);
+            } catch (\Exception $e) {
+                abort(500, 'Gagal membuat dokumen permohonan magang: '.$e->getMessage());
+            }
+        }
 
         if (! $submission->letter_path || ! Storage::exists($submission->letter_path)) {
             abort(404, 'Berkas surat permohonan magang tidak ditemukan.');

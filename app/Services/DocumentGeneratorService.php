@@ -15,7 +15,7 @@ class DocumentGeneratorService
      *
      * @throws RuntimeException
      */
-    public function generateLetter(InternshipSubmission $submission): string
+    public function generateLetter(InternshipSubmission $submission, ?int $userId = null): string
     {
         $templatePath = 'templates/letter_template.docx';
 
@@ -66,7 +66,18 @@ class DocumentGeneratorService
         $division = $submission->division ?? '';
         $divisionOrInterest = ! empty($division) ? $division : $fieldOfInterest;
 
-        $memberships = $submission->submissionMemberships()->with('user')->get();
+        $query = $submission->submissionMemberships()->with('user');
+        if ($userId !== null) {
+            $query->where('user_id', $userId);
+        }
+        $memberships = $query->get();
+
+        if ($memberships->isEmpty()) {
+            $zip->close();
+            unlink($tempFile);
+            throw new RuntimeException('Tidak ada anggota kelompok yang ditemukan untuk pengajuan ini.');
+        }
+
         $pages = [];
 
         foreach ($memberships as $membership) {
