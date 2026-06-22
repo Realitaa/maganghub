@@ -17,7 +17,7 @@ import {
     Check,
     ArrowRight
 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import CountUp from '@/components/landing/CountUp.vue';
 import { google, telkomIndonesia, bri, bankIndonesia, indosatOoredoHutsicon, mandiri, ibm, huawei, goto } from '@/components/landing/icons';
@@ -28,7 +28,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stepper, StepperTrigger, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper';
-import { useAppearance } from '@/composables/useAppearance';
 import { dashboard, home, login } from '@/routes';
 
 // state
@@ -41,9 +40,6 @@ const toggleMobileMenu = () => {
 const page = usePage();
 const user = page.props.auth?.user;
 const role = user?.role;
-
-const { resolvedAppearance } = useAppearance();
-const isLight = computed(() => resolvedAppearance.value === 'light');
 
 // Navigation links
 const navLinks = [
@@ -301,10 +297,10 @@ const faqs = [
             <div class="absolute top-0 right-0 -z-10 h-[600px] w-[600px] rounded-full bg-emerald-50/20 blur-3xl dark:bg-emerald-950/5"></div>
             <div class="absolute -top-40 -left-40 -z-10 h-[600px] w-[600px] rounded-full bg-emerald-50/10 blur-3xl dark:bg-emerald-950/5"></div>
 
-            <div class="mx-auto max-w-7xl px-6 lg:pl-8 lg:pr-0 w-full">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     <!-- Left: Hero Text -->
-                    <div class="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+                    <div class="text-center lg:text-left flex flex-col items-center lg:items-start">
                         <!-- Yellow Badge (matching CTA) -->
                         <Badge variant="outline" class="mb-6 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300 gap-1.5">
                             <span class="flex h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-yellow-300 animate-pulse"></span>
@@ -346,21 +342,17 @@ const faqs = [
                     </div>
 
                     <!-- Right: Mockup Dashboard -->
-                    <div class="lg:col-span-6 relative w-full flex justify-center lg:justify-start lg:translate-x-[15%] xl:translate-x-[25%] lg:w-[135%] shrink-0 select-none pt-3">
-                        <div class="relative w-full max-w-[540px] lg:max-w-none rounded-2xl border-[6px] border-emerald-500/20 bg-emerald-500/5 p-1.5 shadow-2xl dark:border-emerald-400/10 dark:bg-emerald-400/5">
-                            <div class="overflow-hidden rounded-xl border-2 border-emerald-500/80 bg-card shadow-lg dark:border-emerald-500/80">
-                                <!-- Window Header -->
-                                <div class="flex items-center gap-1.5 border-b border-emerald-500/20 bg-muted/60 px-4 py-2.5 dark:border-emerald-500/20">
-                                    <div class="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
-                                    <div class="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></div>
-                                    <div class="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
-                                    <div class="ml-4 h-4 w-36 rounded bg-muted/80 text-[10px] text-muted-foreground flex items-center justify-center">maganghub.csunimed.com</div>
-                                </div>
+                    <div class="relative w-full flex justify-center lg:justify-end pt-3">
+                        <div class="relative w-full max-w-[590px]">
+                            <!-- Shadow di bawah saja ratakan (emerald shadow) -->
+                            <div class="absolute bottom-[-14px] left-[5%] right-[5%] h-4 bg-gradient-to-r from-emerald-500/20 via-emerald-500/40 to-emerald-500/20 blur-md rounded-full pointer-events-none"></div>
+
+                            <div class="overflow-hidden rounded-xl border-2 border-emerald-500/30 bg-card shadow-xl dark:border-emerald-500/50">
                                 <!-- Image Content -->
                                 <div class="relative bg-background">
                                     <img 
-                                        :src="`/assets/images/hero-student-home-preview-${isLight ? 'light' : 'dark'}.png`" 
-                                        alt="Mockup Dashboard Mahasiswa" 
+                                        src="/assets/images/akreditasi-unimed.webp" 
+                                        alt="Gedung Fakultas Matematika dan Ilmu Pengetahuan Alam" 
                                         class="w-full h-auto object-cover object-top hover:scale-[1.01] transition-transform duration-500"
                                     />
                                 </div>
@@ -370,7 +362,7 @@ const faqs = [
                 </div>
 
                 <!-- Scrolling Logo Cloud -->
-                <div class="mt-24 border-t border-border/55 pt-12 lg:pr-8 text-left w-full">
+                <div class="mt-24 border-t border-border/55 pt-12 text-left w-full">
                     <p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-6 text-left">
                         Dipersiapkan untuk Mendukung Kolaborasi Kampus dan Dunia Industri
                     </p>
