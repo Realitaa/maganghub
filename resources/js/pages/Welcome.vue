@@ -292,50 +292,82 @@ const faqs = [
         </header>
 
         <!-- Hero Section -->
-        <section id="home" class="relative overflow-hidden bg-background min-h-[calc(100vh-2rem)] flex flex-col justify-center py-12 md:py-20">
-            <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center w-full">
-                <!-- Badge -->
-                <Badge variant="outline" class="mx-auto mb-8 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary dark:border-primary/30 dark:bg-primary/10">
-                    <span class="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-                    Platform Pengelolaan Magang Mahasiswa
-                </Badge>
+        <section id="home" class="relative overflow-hidden bg-background min-h-[calc(100vh-2rem)] flex flex-col justify-center py-20 md:py-24">
+            <!-- Ambient Glows -->
+            <div class="absolute top-0 right-0 -z-10 h-[600px] w-[600px] rounded-full bg-emerald-50/20 blur-3xl dark:bg-emerald-950/5"></div>
+            <div class="absolute -top-40 -left-40 -z-10 h-[600px] w-[600px] rounded-full bg-emerald-50/10 blur-3xl dark:bg-emerald-950/5"></div>
 
-                <!-- Headline -->
-                <h1 class="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.15]">
-                    Kelola Pengajuan Magang Lebih <span class="text-primary">Mudah</span> dan <span class="text-primary">Terstruktur</span>
-                </h1>
+            <div class="mx-auto max-w-7xl px-6 lg:pl-8 lg:pr-0 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                    <!-- Left: Hero Text -->
+                    <div class="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+                        <!-- Yellow Badge (matching CTA) -->
+                        <Badge variant="outline" class="mb-6 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300 gap-1.5">
+                            <span class="flex h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-yellow-300 animate-pulse"></span>
+                            Platform Pengelolaan Magang Mahasiswa
+                        </Badge>
 
-                <!-- Subheadline -->
-                <p class="mx-auto mt-8 max-w-3xl text-base text-muted-foreground sm:text-lg lg:text-xl leading-relaxed">
-                    MagangHub membantu mahasiswa, kelompok magang, dan administrator kampus mengelola proses pengajuan, monitoring, dan pelaporan magang dalam satu platform terpadu.
-                </p>
+                        <!-- Headline -->
+                        <h1 class="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.15]">
+                            Kelola Pengajuan Magang Lebih <span class="text-primary">Mudah</span> dan <span class="text-primary">Terstruktur</span>
+                        </h1>
 
-                <!-- CTA Buttons -->
-                <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-                    <Button as-child size="lg" class="h-12 px-7 text-base font-medium shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-150">
-                        <Link 
-                            :href="user 
-                                ? role === 'student' ? home() : dashboard() 
-                                : login()"
-                        >
-                            Masuk ke 
-                            {{ user 
-                                ? role === 'student' ? 'Beranda' : 'Dashboard' 
-                                : 'Sistem' 
-                            }}
-                            <ArrowRight class="ml-2 h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <Button as-child variant="outline" size="lg" class="h-12 px-7 text-base font-medium transition-all duration-150">
-                        <a href="#features">
-                            Pelajari Fitur
-                        </a>
-                    </Button>
+                        <!-- Subheadline -->
+                        <p class="mt-6 text-base text-muted-foreground sm:text-lg lg:text-xl leading-relaxed">
+                            MagangHub membantu mahasiswa, kelompok magang, dan administrator kampus mengelola proses pengajuan, monitoring, dan pelaporan magang dalam satu platform terpadu.
+                        </p>
+
+                        <!-- CTA Buttons -->
+                        <div class="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                            <Button as-child size="lg" class="h-12 px-7 text-base font-medium shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-150">
+                                <Link 
+                                    :href="user 
+                                        ? role === 'student' ? home() : dashboard() 
+                                        : login()"
+                                >
+                                    Masuk ke 
+                                    {{ user 
+                                        ? role === 'student' ? 'Beranda' : 'Dashboard' 
+                                        : 'Sistem' 
+                                    }}
+                                    <ArrowRight class="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button as-child variant="outline" size="lg" class="h-12 px-7 text-base font-medium transition-all duration-150">
+                                <a href="#features">
+                                    Pelajari Fitur
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Mockup Dashboard -->
+                    <div class="lg:col-span-6 relative w-full flex justify-center lg:justify-start lg:translate-x-[15%] xl:translate-x-[25%] lg:w-[135%] shrink-0 select-none pt-3">
+                        <div class="relative w-full max-w-[540px] lg:max-w-none rounded-2xl border-[6px] border-emerald-500/20 bg-emerald-500/5 p-1.5 shadow-2xl dark:border-emerald-400/10 dark:bg-emerald-400/5">
+                            <div class="overflow-hidden rounded-xl border-2 border-emerald-500/80 bg-card shadow-lg dark:border-emerald-500/80">
+                                <!-- Window Header -->
+                                <div class="flex items-center gap-1.5 border-b border-emerald-500/20 bg-muted/60 px-4 py-2.5 dark:border-emerald-500/20">
+                                    <div class="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
+                                    <div class="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></div>
+                                    <div class="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
+                                    <div class="ml-4 h-4 w-36 rounded bg-muted/80 text-[10px] text-muted-foreground flex items-center justify-center">maganghub.csunimed.com</div>
+                                </div>
+                                <!-- Image Content -->
+                                <div class="relative bg-background">
+                                    <img 
+                                        src="/assets/images/hero-student-home-preview.png" 
+                                        alt="Mockup Dashboard Mahasiswa" 
+                                        class="w-full h-auto object-cover object-top hover:scale-[1.01] transition-transform duration-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Scrolling Logo Cloud -->
-                <div class="mt-26 border-t border-border/55 pt-12">
-                    <p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-6">
+                <div class="mt-24 border-t border-border/55 pt-12 lg:pr-8 text-left w-full">
+                    <p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-6 text-left">
                         Dipersiapkan untuk Mendukung Kolaborasi Kampus dan Dunia Industri
                     </p>
                     <div class="relative w-full overflow-hidden py-6">
@@ -356,14 +388,16 @@ const faqs = [
         </section>
 
         <!-- Impact Section -->
-        <section class="bg-muted/50 dark:bg-zinc-900/30 py-20 md:py-24 border-y border-border/30">
+        <section class="relative overflow-hidden bg-emerald-50/20 dark:bg-emerald-950/5 py-20 md:py-24 border-y border-emerald-100/30 dark:border-emerald-950/20">
+            <!-- Decorative light blob -->
+            <div class="absolute -right-20 -bottom-20 -z-10 h-72 w-72 rounded-full bg-emerald-100/30 blur-3xl dark:bg-emerald-900/5"></div>
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
                     <!-- Left: Why Internships Matter -->
                     <div>
-                        <div class="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-4">
+                        <Badge variant="outline" class="mb-4 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300">
                             Dampak & Relevansi
-                        </div>
+                        </Badge>
                         <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                             Mengapa Magang Penting?
                         </h2>
@@ -421,9 +455,9 @@ const faqs = [
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <!-- Section Header -->
                 <div class="mx-auto max-w-3xl text-center mb-16">
-                    <div class="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-3">
+                    <Badge variant="outline" class="mb-3 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300">
                         Fitur Utama
-                    </div>
+                    </Badge>
                     <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         Segala Kemudahan dalam Satu Dasbor
                     </h2>
@@ -456,13 +490,15 @@ const faqs = [
         </section>
 
         <!-- Workflow Section -->
-        <section id="workflow" class="bg-muted/50 dark:bg-zinc-900/30 py-20 md:py-24 border-y border-border/30">
+        <section id="workflow" class="relative overflow-hidden bg-zinc-50/70 dark:bg-zinc-900/10 py-20 md:py-24 border-y border-border/20">
+            <!-- Decorative light blob -->
+            <div class="absolute -left-20 -bottom-20 -z-10 h-72 w-72 rounded-full bg-zinc-200/30 blur-3xl dark:bg-zinc-800/10"></div>
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <!-- Section Header -->
                 <div class="mx-auto max-w-3xl text-center mb-16">
-                    <div class="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-3">
+                    <Badge variant="outline" class="mb-3 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300">
                         Alur Kerja
-                    </div>
+                    </Badge>
                     <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         Alur Pengajuan yang Terintegrasi
                     </h2>
@@ -523,162 +559,31 @@ const faqs = [
             </div>
         </section>
 
-        <!-- Dashboard Preview Section -->
-        <section class="bg-background py-20 md:py-24">
-            <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <!-- Section Header -->
-                <div class="mx-auto max-w-3xl text-center mb-16">
-                    <div class="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-3">
-                        Tinjauan Dasbor
-                    </div>
-                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                        Dasbor Khusus Berdasarkan Kebutuhan Anda
-                    </h2>
-                    <p class="mt-4 text-base text-muted-foreground">
-                        Sistem dirancang dengan antarmuka yang disesuaikan untuk kebutuhan Mahasiswa maupun Administrator Kampus.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-8 items-start">
-                    <!-- Left: Student Dashboard Preview -->
-                    <div class="flex flex-col bg-card border border-border/80 rounded-2xl p-6 shadow-sm dark:bg-zinc-950">
-                        <div class="flex items-center justify-between border-b border-border pb-4 mb-6">
-                            <div class="flex items-center gap-3">
-                                <span class="h-8.5 w-8.5 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm">
-                                    RM
-                                </span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-foreground leading-none">Reza Mulia Putra</h4>
-                                    <span class="text-[11px] text-muted-foreground">Mahasiswa - Ilmu Komputer</span>
-                                </div>
-                            </div>
-                            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                Magang Aktif
-                            </span>
-                        </div>
-
-                        <!-- Card Info: Status Pengajuan -->
-                        <div class="space-y-4">
-                            <div class="bg-muted/40 border border-border/50 rounded-xl p-4 dark:bg-zinc-900/40">
-                                <span class="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">Perusahaan Tujuan</span>
-                                <h5 class="text-sm font-bold text-foreground mt-0.5">PT Telekomunikasi Indonesia</h5>
-                                <div class="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                                    <span>Status Pengusulan</span>
-                                    <span class="font-semibold text-emerald-600 dark:text-emerald-400">Diterima Perusahaan</span>
-                                </div>
-                            </div>
-
-                            <!-- Group Info -->
-                            <div class="border border-border/80 rounded-xl p-4">
-                                <h5 class="text-xs font-bold text-foreground mb-3">Informasi Kelompok (Kelompok 12)</h5>
-                                <div class="space-y-2.5">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="text-muted-foreground">Reza Mulia Putra (Ketua)</span>
-                                        <span class="text-emerald-600 dark:text-emerald-400 font-medium">Ready</span>
-                                    </div>
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="text-muted-foreground">Jon Doe</span>
-                                        <span class="text-emerald-600 dark:text-emerald-400 font-medium">Ready</span>
-                                    </div>
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="text-muted-foreground">Jane Doe</span>
-                                        <span class="text-emerald-600 dark:text-emerald-400 font-medium">Ready</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submission Progress -->
-                            <div class="border border-border/80 rounded-xl p-4">
-                                <h5 class="text-xs font-bold text-foreground mb-3">Progress Pengajuan</h5>
-                                <div class="flex items-center justify-between text-[11px] text-muted-foreground mb-2">
-                                    <span>Review Akademik</span>
-                                    <span class="font-bold text-foreground">Selesai</span>
-                                </div>
-                                <div class="w-full bg-border rounded-full h-1.5 overflow-hidden">
-                                    <div class="bg-primary h-1.5 rounded-full" style="width: 100%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Administrator Dashboard Preview -->
-                    <div class="flex flex-col bg-card border border-border/80 rounded-2xl p-6 shadow-sm dark:bg-zinc-950">
-                        <div class="flex items-center justify-between border-b border-border pb-4 mb-6">
-                            <div class="flex items-center gap-3">
-                                <span class="h-8.5 w-8.5 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                                    DK
-                                </span>
-                                <div>
-                                    <h4 class="text-sm font-bold text-foreground leading-none">Dedy Kiswanto S.Kom, M.Kom</h4>
-                                    <span class="text-[11px] text-muted-foreground">Admin Koordinator Magang</span>
-                                </div>
-                            </div>
-                            <span class="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                                Level Administrator
-                            </span>
-                        </div>
-
-                        <!-- Statistics Overview Card -->
-                        <div class="grid grid-cols-2 gap-3 mb-5">
-                            <div class="border border-border/85 rounded-xl p-3 bg-muted/20 dark:bg-zinc-900/20">
-                                <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Butuh Review</span>
-                                <div class="text-xl font-extrabold text-foreground mt-0.5">14</div>
-                            </div>
-                            <div class="border border-border/85 rounded-xl p-3 bg-muted/20 dark:bg-zinc-900/20">
-                                <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Total Kelompok</span>
-                                <div class="text-xl font-extrabold text-foreground mt-0.5">112</div>
-                            </div>
-                        </div>
-
-                        <!-- Recent Activity Stream -->
-                        <div class="border border-border/80 rounded-xl p-4">
-                            <h5 class="text-xs font-bold text-foreground mb-4">Aktivitas Terbaru Sistem</h5>
-                            <div class="space-y-4">
-                                <div class="flex gap-3 text-xs">
-                                    <span class="h-2 w-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
-                                    <div>
-                                        <p class="text-muted-foreground"><strong class="text-foreground font-semibold">Kelompok 15 (Teknik Informatika)</strong> mengajukan permohonan magang di PT Solusi Tekno.</p>
-                                        <span class="text-[10px] text-muted-foreground mt-1 block">5 menit yang lalu</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-3 text-xs">
-                                    <span class="h-2 w-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
-                                    <div>
-                                        <p class="text-muted-foreground"><strong class="text-foreground font-semibold">Admin</strong> menyetujui surat pengantar magang Kelompok 12 ke PT Solusi Awan.</p>
-                                        <span class="text-[10px] text-muted-foreground mt-1 block">2 jam yang lalu</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-3 text-xs">
-                                    <span class="h-2 w-2 rounded-full bg-indigo-500 mt-1.5 shrink-0"></span>
-                                    <div>
-                                        <p class="text-muted-foreground"><strong class="text-foreground font-semibold">Mahasiswa (Rizal Utama)</strong> memperbarui logbook aktivitas hari ke-15.</p>
-                                        <span class="text-[10px] text-muted-foreground mt-1 block">4 jam yang lalu</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Statistics Section -->
-        <section class="bg-[#f0faf5] dark:bg-[#061f16]/30 py-16 md:py-20 border-y border-emerald-100/50 dark:border-emerald-950/20">
-            <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <div class="grid grid-cols-2 gap-y-12 gap-x-8 md:grid-cols-4 text-center">
-                    <div v-for="stat in stats" :key="stat.label" class="flex flex-col items-center">
-                        <div class="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">
+        <section class="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 py-16 md:py-20 text-white dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950 border-y border-emerald-500/25">
+            <!-- Decorative vector patterns inside statistics section for texture -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
+                <svg viewBox="0 0 100 100" class="w-full h-full fill-current">
+                    <circle cx="20" cy="20" r="30" />
+                    <circle cx="80" cy="80" r="40" />
+                </svg>
+            </div>
+
+            <div class="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+                <div class="grid grid-cols-2 gap-y-12 gap-x-8 md:grid-cols-4 text-center divide-x-0 md:divide-x md:divide-white/10">
+                    <div v-for="stat in stats" :key="stat.label" class="flex flex-col items-center px-4">
+                        <div class="text-5xl font-black tracking-tight text-yellow-300 drop-shadow-md sm:text-6xl">
                             <CountUp
                                 :from="0"
                                 :to="stat.target"
                                 :suffix="stat.suffix"
                                 separator="."
                                 direction="up"
-                                :duration="1"
-                                :delay="0.25"
+                                :duration="1.5"
+                                :delay="0.1"
                             />
                         </div>
-                        <div class="mt-2 text-sm font-semibold text-muted-foreground">
+                        <div class="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-100/90">
                             {{ stat.label }}
                         </div>
                     </div>
@@ -691,9 +596,9 @@ const faqs = [
             <div class="mx-auto max-w-4xl px-6 lg:px-8">
                 <!-- Section Header -->
                 <div class="mx-auto max-w-3xl text-center mb-16">
-                    <div class="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-3">
+                    <Badge variant="outline" class="mb-3 bg-yellow-500/10 border-yellow-500/20 text-amber-600 dark:text-yellow-300 dark:bg-yellow-400/10 dark:border-yellow-400/20 px-3.5 py-1 font-semibold hover:bg-yellow-500/10 hover:text-amber-600 dark:hover:text-yellow-300">
                         Tanya Jawab
-                    </div>
+                    </Badge>
                     <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         Pertanyaan yang Sering Diajukan
                     </h2>
@@ -723,24 +628,28 @@ const faqs = [
 
         <!-- CTA Jumbotron -->
         <section class="mx-6 my-12 max-w-7xl lg:mx-auto">
-            <div class="relative overflow-hidden bg-primary px-8 py-16 text-center text-primary-foreground rounded-2xl shadow-xl dark:bg-emerald-950 dark:border dark:border-emerald-900/40">
+            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 px-8 py-16 text-center text-primary-foreground rounded-2xl shadow-xl dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950 border border-emerald-500/20">
+                <!-- Soft yellow radial glow accents (Unimed identity) -->
+                <div class="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-yellow-300/20 blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-yellow-300/10 blur-3xl pointer-events-none"></div>
+
                 <!-- Vector shapes background -->
-                <div class="absolute inset-0 opacity-15 pointer-events-none">
+                <div class="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
                     <svg viewBox="0 0 100 100" class="w-full h-full fill-current">
                         <circle cx="10" cy="10" r="30" />
                         <circle cx="90" cy="90" r="40" />
                     </svg>
                 </div>
                 
-                <div class="relative z-10 max-w-2xl mx-auto">
+                <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
                     <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
                         Siap Memulai Magang?
                     </h2>
-                    <p class="mt-4 text-base text-primary-foreground/85 leading-relaxed">
+                    <p class="mt-4 text-base text-emerald-50/90 leading-relaxed">
                         Kelola seluruh proses administrasi magang kampus Anda dalam satu platform yang terintegrasi dan terpantau dengan baik.
                     </p>
                     <div class="mt-8 flex justify-center">
-                        <Button as-child variant="secondary" size="xl" class="bg-background text-primary dark:text-primary-foreground hover:bg-background/95 font-semibold shadow-sm">
+                        <Button as-child size="xl" class="bg-white text-emerald-800 hover:bg-yellow-50 dark:bg-zinc-100 dark:text-emerald-950 dark:hover:bg-yellow-100 font-semibold shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]">
                             <Link 
                                 :href="user 
                                     ? role === 'student' ? home() : dashboard() 

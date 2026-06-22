@@ -31,7 +31,7 @@ const mainNavItems = computed<NavItem[]>(() => {
 
     if (userRole.value === 'student') {
         items.push({
-            title: 'Home',
+            title: 'Beranda',
             href: home(),
             icon: House,
         })

@@ -473,7 +473,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Beranda" />
 
     <div class="flex-1">
         <!-- ───── NO GROUP STATE ───── -->
@@ -695,7 +695,7 @@ onMounted(() => {
                     <div class="flex-1 space-y-2">
                         <div class="flex flex-wrap items-center gap-2">
                             <h1 class="text-2xl font-bold tracking-tight md:text-3xl">
-                                Kelompok Magang {{ group.leader.name }}
+                                Kelompok Magang {{ group?.active_submission?.company_name || group.leader.name }}
                             </h1>
                         </div>
                         <p class="text-sm text-muted-foreground">
