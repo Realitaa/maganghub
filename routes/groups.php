@@ -4,10 +4,14 @@ use App\Http\Controllers\InternshipGroupController;
 use App\Http\Controllers\InternshipSubmissionController;
 use Illuminate\Support\Facades\Route;
 
+// Public invite / OG splash page — no auth required so social crawlers can read OG tags
+Route::get('join/{code}', [InternshipGroupController::class, 'invite'])->name('groups.invite');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups', [InternshipGroupController::class, 'store'])->name('groups.store');
     Route::post('groups/join', [InternshipGroupController::class, 'join'])->name('groups.join');
     Route::post('groups/leave', [InternshipGroupController::class, 'leave'])->name('groups.leave');
+    Route::post('groups/{group}/banner', [InternshipGroupController::class, 'updateBanner'])->name('groups.banner.update');
     Route::delete('groups/{group}', [InternshipGroupController::class, 'destroy'])->name('groups.destroy');
 
     Route::post('groups/submissions', [InternshipSubmissionController::class, 'store'])->name('groups.submissions.store');

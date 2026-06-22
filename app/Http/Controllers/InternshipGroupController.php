@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\GroupJoinRequest;
 use App\Models\InternshipGroup;
+use App\Models\User;
 use App\Services\InternshipGroupService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -157,5 +160,74 @@ class InternshipGroupController extends Controller
                 'message' => collect($e->errors())->flatten()->first(),
             ])->back();
         }
+    }
+
+    /**
+     * Update the banner image for the internship group.
+     * Also accepts an optional og_image for WhatsApp/social OG preview.
+     */
+    public function updateBanner(Request $request, InternshipGroup $group): RedirectResponse
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        if ($group->leader_id !== $user->id) {
+            abort(403, 'Hanya ketua kelompok yang dapat mengubah banner.');
+        }
+
+        $request->validate([
+            'image' => ['required', 'file', 'mimes:webp,png,jpg,jpeg', 'max:3072'],
+            'og_image' => ['nullable', 'file', 'mimes:webp,png,jpg,jpeg', 'max:512'],
+        ]);
+
+        $oldBannerPath = $group->banner_path;
+        $oldOgPath = $group->og_image_path;
+
+        $bannerPath = $request->file('image')->store('banners', 'public');
+
+        $updates = ['banner_path' => $bannerPath];
+
+        if ($request->hasFile('og_image')) {
+            $ogPath = $request->file('og_image')->store('og-banners', 'public');
+            $updates['og_image_path'] = $ogPath;
+
+            if ($oldOgPath && Storage::disk('public')->exists($oldOgPath)) {
+                Storage::disk('public')->delete($oldOgPath);
+            }
+        }
+
+        $group->update($updates);
+
+        if ($oldBannerPath && Storage::disk('public')->exists($oldBannerPath)) {
+            Storage::disk('public')->delete($oldBannerPath);
+        }
+
+        return Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Banner kelompok berhasil diperbarui.',
+        ])->back();
+    }
+
+    /**
+     * Serve the OG/invite splash page for a group by its code.
+     * This is a plain Blade view (not Inertia) so that crawlers (WhatsApp, etc.)
+     * can read the OG meta tags. Real users are auto-redirected to the dashboard.
+     */
+    public function invite(string $code): View|RedirectResponse
+    {
+        $group = InternshipGroup::with('leader')->where('code', $code)->first();
+
+        if (! $group) {
+            return redirect()->route('home');
+        }
+
+        return view('invite', [
+            'groupCode' => $group->code,
+            'leaderName' => $group->leader->name,
+            'ogImageUrl' => $group->ogImageUrl(),
+            'appName' => config('app.name', 'MagangHub'),
+            'appUrl' => config('app.url'),
+            'redirectUrl' => route('home').'?code='.$group->code,
+        ]);
     }
 }

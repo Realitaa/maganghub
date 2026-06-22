@@ -553,12 +553,6 @@ const handlePageChange = (newPage: number) => {
                             <Input id="form-nim" v-model="crudForm.nim" placeholder="Nomor Induk Mahasiswa" required />
                             <InputError :message="crudForm.errors.nim" />
                         </div>
-
-                        <div class="space-y-1.5">
-                            <Label>Program Studi</Label>
-                            <Input id="form-major" v-model="crudForm.major" placeholder="Teknik Informatika" required />
-                            <InputError :message="crudForm.errors.major" />
-                        </div>
                     </template>
 
                     <div class="grid grid-cols-2 gap-3">

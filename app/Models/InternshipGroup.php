@@ -10,19 +10,48 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
  * @property int $leader_id
  * @property string $code
  * @property string $status
+ * @property string|null $banner_path
+ * @property string|null $og_image_path
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['leader_id', 'code', 'status'])]
+#[Fillable(['leader_id', 'code', 'status', 'banner_path', 'og_image_path'])]
 class InternshipGroup extends Model
 {
     use HasFactory;
+
+    /**
+     * Get the public URL for the group banner.
+     * Falls back to the default company background image.
+     */
+    public function bannerUrl(): string
+    {
+        if ($this->banner_path && Storage::disk('public')->exists($this->banner_path)) {
+            return Storage::disk('public')->url($this->banner_path);
+        }
+
+        return asset('assets/images/default-company-background.png');
+    }
+
+    /**
+     * Get the public URL for the OG image (used in WhatsApp/social previews).
+     * Falls back to the dedicated default OG image asset.
+     */
+    public function ogImageUrl(): string
+    {
+        if ($this->og_image_path && Storage::disk('public')->exists($this->og_image_path)) {
+            return Storage::disk('public')->url($this->og_image_path);
+        }
+
+        return asset('assets/images/default-company-background-og.png');
+    }
 
     /**
      * Get the leader of the group.

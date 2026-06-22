@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('leader_id')->constrained('users')->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('status')->default('forming');
+            $table->string('banner_path')->nullable();
+            $table->string('og_image_path')->nullable();
             $table->timestamps();
         });
     }

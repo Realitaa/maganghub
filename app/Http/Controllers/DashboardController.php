@@ -50,7 +50,11 @@ class DashboardController extends Controller
             }
 
             return Inertia::render('student/Index', [
-                'group' => $group,
+                'group' => $group ? array_merge($group->toArray(), [
+                    'banner_url' => $group->bannerUrl(),
+                    'og_image_url' => $group->ogImageUrl(),
+                    'invite_url' => route('groups.invite', $group->code),
+                ]) : null,
                 'pendingJoinRequests' => $pendingJoinRequests ?? collect(),
             ]);
         }
