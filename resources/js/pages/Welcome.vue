@@ -17,7 +17,7 @@ import {
     Check,
     ArrowRight
 } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import CountUp from '@/components/landing/CountUp.vue';
 import { google, telkomIndonesia, bri, bankIndonesia, indosatOoredoHutsicon, mandiri, ibm, huawei, goto } from '@/components/landing/icons';
@@ -28,6 +28,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Stepper, StepperTrigger, StepperItem, StepperIndicator, StepperTitle, StepperDescription, StepperSeparator } from '@/components/ui/stepper';
+import { useAppearance } from '@/composables/useAppearance';
 import { dashboard, home, login } from '@/routes';
 
 // state
@@ -40,6 +41,9 @@ const toggleMobileMenu = () => {
 const page = usePage();
 const user = page.props.auth?.user;
 const role = user?.role;
+
+const { resolvedAppearance } = useAppearance();
+const isLight = computed(() => resolvedAppearance.value === 'light');
 
 // Navigation links
 const navLinks = [
@@ -355,7 +359,7 @@ const faqs = [
                                 <!-- Image Content -->
                                 <div class="relative bg-background">
                                     <img 
-                                        src="/assets/images/hero-student-home-preview.png" 
+                                        :src="`/assets/images/hero-student-home-preview-${isLight ? 'light' : 'dark'}.png`" 
                                         alt="Mockup Dashboard Mahasiswa" 
                                         class="w-full h-auto object-cover object-top hover:scale-[1.01] transition-transform duration-500"
                                     />
