@@ -13,6 +13,8 @@ export type User = {
     is_active: boolean;
     password_changed_at: string | null;
     semester: number | null;
+    student_class_id: number | null;
+    student_class?: { id: number; name: string } | null;
     [key: string]: unknown;
 };
 

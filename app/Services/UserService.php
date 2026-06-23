@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\StudentClass;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,7 @@ class UserService
 
         if ($role !== 'student') {
             $data['nim'] = null;
+            $data['student_class_id'] = null;
         }
 
         if (! empty($data['password'])) {
@@ -117,10 +119,11 @@ class UserService
             $nameIdx = array_search('name', $headers);
             $nimIdx = array_search('nim', $headers);
             $emailIdx = array_search('email', $headers);
+            $kelasIdx = array_search('kelas', $headers);
 
-            if ($nameIdx === false || $nimIdx === false) {
+            if ($nameIdx === false || $nimIdx === false || $kelasIdx === false) {
                 throw ValidationException::withMessages([
-                    'file' => ['File harus mengandung kolom "name" dan "nim".'],
+                    'file' => ['File harus mengandung kolom "name", "nim", dan "kelas".'],
                 ]);
             }
 
@@ -131,10 +134,13 @@ class UserService
                 $email = $emailIdx !== false && ! empty($row[$emailIdx])
                     ? trim((string) $row[$emailIdx])
                     : null;
+                $kelasVal = trim((string) ($row[$kelasIdx] ?? ''));
 
-                if (empty($name) || empty($nim)) {
+                if (empty($name) || empty($nim) || empty($kelasVal)) {
                     continue;
                 }
+
+                $studentClass = StudentClass::firstOrCreate(['name' => $kelasVal]);
 
                 User::updateOrCreate(
                     ['nim' => $nim],
@@ -144,6 +150,7 @@ class UserService
                         'role' => 'student',
                         'password' => Hash::make($nim),
                         'is_active' => true,
+                        'student_class_id' => $studentClass->id,
                     ]
                 );
                 $importedCount++;

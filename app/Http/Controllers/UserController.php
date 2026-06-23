@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ImportUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\StudentClass;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -29,7 +33,7 @@ class UserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $query = User::query();
+        $query = User::query()->with('studentClass');
 
         // 1. Search filter (name, email, nim)
         if ($request->filled('search')) {
@@ -52,6 +56,7 @@ class UserController extends Controller
         return Inertia::render('users/Index', [
             'users' => $users,
             'majors' => [],
+            'classes' => StudentClass::orderBy('name')->get(),
             'filters' => $request->only(['search', 'role']),
             'breadcrumbs' => [
                 ['title' => 'Manajemen Pengguna', 'href' => route('users.index')],
@@ -132,5 +137,41 @@ class UserController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         }
+    }
+
+    /**
+     * Download the template for importing students.
+     */
+    public function downloadTemplate()
+    {
+        Gate::authorize('create', User::class);
+
+        $export = new class implements FromArray, WithHeadings
+        {
+            /**
+             * Return the data array for the export.
+             *
+             * @return array<int, array<int, string>>
+             */
+            public function array(): array
+            {
+                return [
+                    ['Charlie Student', '10121020', 'charlie@student.maganghub.id', 'PSIK25A'],
+                    ['Diana Student', '10121021', '', 'PSIK25B'],
+                ];
+            }
+
+            /**
+             * Return the headers for the export.
+             *
+             * @return array<int, string>
+             */
+            public function headings(): array
+            {
+                return ['name', 'nim', 'email', 'kelas'];
+            }
+        };
+
+        return Excel::download($export, 'template_import_mahasiswa.xlsx');
     }
 }

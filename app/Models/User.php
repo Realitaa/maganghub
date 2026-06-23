@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,8 +26,9 @@ use Illuminate\Support\Carbon;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property int|null $student_class_id
  */
-#[Fillable(['name', 'email', 'password', 'nim', 'phone', 'address', 'role', 'gender', 'is_active', 'password_changed_at', 'semester'])]
+#[Fillable(['name', 'email', 'password', 'nim', 'phone', 'address', 'role', 'gender', 'is_active', 'password_changed_at', 'semester', 'student_class_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -98,5 +100,15 @@ class User extends Authenticatable
     public function joinRequests(): HasMany
     {
         return $this->hasMany(GroupJoinRequest::class, 'user_id');
+    }
+
+    /**
+     * Get the academic class this user belongs to.
+     *
+     * @return BelongsTo<StudentClass, $this>
+     */
+    public function studentClass(): BelongsTo
+    {
+        return $this->belongsTo(StudentClass::class, 'student_class_id');
     }
 }

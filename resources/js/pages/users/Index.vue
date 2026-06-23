@@ -11,12 +11,18 @@ import {
     MoreVertical, 
     FileDown, 
     AlertTriangle,
-    ShieldAlert
+    ShieldAlert,
+    AlertCircleIcon
 } from '@lucide/vue';
 import { ref, watch, computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -71,7 +77,8 @@ import {
     update as userUpdate, 
     destroy as userDestroy,
     toggleActive as userToggleActive,
-    importMethod as userImport
+    importMethod as userImport,
+    importTemplate as userImportTemplate
 } from '@/routes/users';
 import type { User } from '@/types';
 
@@ -92,6 +99,7 @@ const props = defineProps<{
         total: number;
     };
     majors: string[];
+    classes: { id: number; name: string }[];
     filters: {
         search?: string;
         role?: string;
@@ -121,6 +129,7 @@ const crudForm = useForm({
     phone: '',
     address: '',
     password: '',
+    student_class_id: 'none',
 });
 
 // Import State using useHttp
@@ -213,6 +222,7 @@ const openAddModal = () => {
     crudForm.id = null;
     crudForm.role = 'student';
     crudForm.gender = 'L';
+    crudForm.student_class_id = 'none';
     showAddEditModal.value = true;
 };
 
@@ -227,6 +237,7 @@ const openEditModal = (user: any) => {
     crudForm.phone = user.phone || '';
     crudForm.address = user.address || '';
     crudForm.password = ''; // Keep password blank unless changing
+    crudForm.student_class_id = user.student_class_id ? user.student_class_id.toString() : 'none';
     showAddEditModal.value = true;
 };
 
@@ -409,6 +420,7 @@ const handlePageChange = (newPage: number) => {
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Nama</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Email</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">NIM</TableHead>
+                            <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Kelas</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Peran</TableHead>
                             <TableHead class="h-10 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider">Status</TableHead>
                             <TableHead class="h-10 px-4 text-right align-middle font-medium text-xs uppercase tracking-wider">Aksi</TableHead>
@@ -424,6 +436,9 @@ const handlePageChange = (newPage: number) => {
                             <TableCell class="p-4 align-middle font-medium text-foreground">{{ user.name }}</TableCell>
                             <TableCell class="p-4 align-middle text-muted-foreground">{{ user.email }}</TableCell>
                             <TableCell class="p-4 align-middle text-muted-foreground">{{ user.nim || '-' }}</TableCell>
+                            <TableCell class="p-4 align-middle text-muted-foreground">
+                                {{ user.student_class ? user.student_class.name : '-' }}
+                            </TableCell>
                             <TableCell class="p-4 align-middle">
                                 <Badge :variant="getRoleBadgeVariant(user.role)">
                                     {{ getRoleLabel(user.role) }}
@@ -553,6 +568,23 @@ const handlePageChange = (newPage: number) => {
                             <Input id="form-nim" v-model="crudForm.nim" placeholder="Nomor Induk Mahasiswa" required />
                             <InputError :message="crudForm.errors.nim" />
                         </div>
+                        <div class="space-y-1.5">
+                            <Label>Kelas</Label>
+                            <Select v-model="crudForm.student_class_id">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih Kelas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="none">Tanpa Kelas</SelectItem>
+                                        <SelectItem v-for="c in classes" :key="c.id" :value="c.id.toString()">
+                                            {{ c.name }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="crudForm.errors.student_class_id" />
+                        </div>
                     </template>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -630,11 +662,25 @@ const handlePageChange = (newPage: number) => {
                         </h4>
                         <ul class="list-disc pl-4 space-y-1 leading-relaxed">
                             <li>Impor massal hanya diperuntukkan untuk pengguna dengan peran <strong>Mahasiswa</strong>.</li>
-                            <li>Data minimum yang wajib diisi pada baris kolom adalah: <strong>name</strong>, <strong>nim</strong>, dan <strong>major</strong>.</li>
+                            <li>Data minimum yang wajib diisi pada baris kolom adalah: <strong>name</strong>, <strong>nim</strong>, dan <strong>kelas</strong>.</li>
                             <li>NIM mahasiswa akan secara otomatis digunakan sebagai password default mereka.</li>
                             <li>Ukuran file maksimal yang didukung adalah <strong>10MB</strong>.</li>
                         </ul>
+                        <div class="pt-2 border-t border-emerald-500/20 mt-2">
+                            <a :href="userImportTemplate.url()" class="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200 font-bold underline transition-colors">
+                                <FileDown class="h-4 w-4" />
+                                Unduh Template Impor (.xlsx)
+                            </a>
+                        </div>
                     </div>
+
+                    <Alert variant="destructive">
+                        <AlertCircleIcon />
+                            <AlertTitle>XLSX File Parser Bug</AlertTitle>
+                        <AlertDescription>
+                            <p>Meskipun XLSX didukung, import menggunakan file XLSX cenderung error. Sebaiknya gunakan CSV sebagai gantinya.</p>
+                        </AlertDescription>
+                    </Alert>
 
                     <div class="space-y-2">
                         <Label for="import-file-input">Pilih File XLSX / CSV</Label>

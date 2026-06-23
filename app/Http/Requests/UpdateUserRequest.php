@@ -18,6 +18,18 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->input('student_class_id') === 'none') {
+            $this->merge([
+                'student_class_id' => null,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -35,6 +47,7 @@ class UpdateUserRequest extends FormRequest
             'gender' => ['nullable', Rule::in(['L', 'P'])],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
+            'student_class_id' => ['nullable', 'exists:student_classes,id'],
         ];
 
         if ($role === 'student') {

@@ -20,6 +20,10 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('password_changed_at')->nullable();
             $table->integer('semester')->nullable();
+            $table->foreignId('student_class_id')
+                ->nullable()
+                ->constrained('student_classes')
+                ->nullOnDelete();
         });
     }
 

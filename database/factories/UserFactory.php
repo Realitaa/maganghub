@@ -37,6 +37,7 @@ class UserFactory extends Factory
             'address' => fake()->address(),
             'gender' => fake()->randomElement(['L', 'P']),
             'semester' => fake()->numberBetween(1, 8),
+            'student_class_id' => null,
         ];
     }
 
@@ -52,6 +53,7 @@ class UserFactory extends Factory
                 $user->address = null;
                 $user->gender = null;
                 $user->semester = null;
+                $user->student_class_id = null;
             }
         });
     }

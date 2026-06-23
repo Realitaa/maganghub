@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StudentClass;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -336,7 +337,7 @@ describe('administrator', function () {
     it('can bulk import students from a CSV file using useHttp', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
-        $csvContent = "name,nim,email\nCharlie Student,10121020,charlie@student.maganghub.id\nDiana Student,10121021,\n";
+        $csvContent = "name,nim,email,kelas\nCharlie Student,10121020,charlie@student.maganghub.id,PSIK25A\nDiana Student,10121021,,PSIK25B\n";
         $file = UploadedFile::fake()->createWithContent('students.csv', $csvContent);
 
         $response = $this
@@ -356,12 +357,14 @@ describe('administrator', function () {
         expect($charlie->name)->toBe('Charlie Student');
         expect($charlie->email)->toBe('charlie@student.maganghub.id');
         expect(Hash::check('10121020', $charlie->password))->toBeTrue();
+        expect($charlie->studentClass->name)->toBe('PSIK25A');
 
         $diana = User::where('nim', '10121021')->first();
         expect($diana)->not->toBeNull();
         expect($diana->name)->toBe('Diana Student');
         expect($diana->email)->toBeNull();
         expect(Hash::check('10121021', $diana->password))->toBeTrue();
+        expect($diana->studentClass->name)->toBe('PSIK25B');
     });
 
     it('can bulk import students from an XLSX file using useHttp', function () {
@@ -372,8 +375,8 @@ describe('administrator', function () {
             ->once()
             ->andReturn([
                 [
-                    ['name', 'nim', 'email'],
-                    ['Emily Student', '10121030', 'emily@student.maganghub.id'],
+                    ['name', 'nim', 'email', 'kelas'],
+                    ['Emily Student', '10121030', 'emily@student.maganghub.id', 'PSIK25C'],
                 ],
             ]);
 
@@ -396,13 +399,14 @@ describe('administrator', function () {
         expect($emily->name)->toBe('Emily Student');
         expect($emily->email)->toBe('emily@student.maganghub.id');
         expect(Hash::check('10121030', $emily->password))->toBeTrue();
+        expect($emily->studentClass->name)->toBe('PSIK25C');
     });
 
     it('can fail to import if required headers name or nim are missing', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
         // Invalid headers: missing 'nim'
-        $csvContent = "name,email\nJohn Doe,john@example.com\n";
+        $csvContent = "name,email,kelas\nJohn Doe,john@example.com,PSIK25A\n";
         $file = UploadedFile::fake()->createWithContent('invalid.csv', $csvContent);
 
         $response = $this
@@ -546,6 +550,101 @@ describe('operator', function () {
         $response->assertRedirect();
 
         expect($student->refresh()->is_active)->toBeFalse();
+    });
+
+});
+
+describe('academic class and import template', function () {
+
+    it('can create a student with an academic class', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $studentClass = StudentClass::factory()->create(['name' => 'PSIK25A']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('users.store'), [
+                'name' => 'John Class Student',
+                'email' => 'john.class@example.com',
+                'role' => 'student',
+                'nim' => '12345678',
+                'gender' => 'L',
+                'student_class_id' => $studentClass->id,
+            ]);
+
+        $response->assertRedirect();
+
+        $user = User::where('email', 'john.class@example.com')->first();
+        expect($user)->not->toBeNull();
+        expect($user->student_class_id)->toBe($studentClass->id);
+        expect($user->studentClass->name)->toBe('PSIK25A');
+    });
+
+    it('can update student academic class', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $classA = StudentClass::factory()->create(['name' => 'PSIK25A']);
+        $classB = StudentClass::factory()->create(['name' => 'PSIK25B']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'student_class_id' => $classA->id,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->patch(route('users.update', $student->id), [
+                'name' => $student->name,
+                'email' => $student->email,
+                'role' => 'student',
+                'nim' => $student->nim,
+                'student_class_id' => $classB->id,
+            ]);
+
+        $response->assertRedirect();
+        expect($student->refresh()->student_class_id)->toBe($classB->id);
+    });
+
+    it('nullifies academic class when student is updated to non-student role', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $studentClass = StudentClass::factory()->create(['name' => 'PSIK25A']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'student_class_id' => $studentClass->id,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->patch(route('users.update', $student->id), [
+                'name' => $student->name,
+                'email' => $student->email,
+                'role' => 'operator',
+                'student_class_id' => $studentClass->id,
+            ]);
+
+        $response->assertRedirect();
+        $student->refresh();
+        expect($student->role)->toBe('operator');
+        expect($student->student_class_id)->toBeNull();
+    });
+
+    it('can fail to import if required header kelas is missing', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $csvContent = "name,nim,email\nCharlie Student,10121020,charlie@student.maganghub.id\n";
+        $file = UploadedFile::fake()->createWithContent('invalid.csv', $csvContent);
+
+        $response = $this->actingAs($admin)
+            ->postJson(route('users.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('file');
+    });
+
+    it('can download import template file', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+
+        $response = $this->actingAs($admin)
+            ->get(route('users.import-template'));
+
+        $response->assertSuccessful();
+        $response->assertHeader('content-disposition', 'attachment; filename=template_import_mahasiswa.xlsx');
     });
 
 });
