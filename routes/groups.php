@@ -10,6 +10,7 @@ Route::get('join/{code}', [InternshipGroupController::class, 'invite'])->name('g
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups', [InternshipGroupController::class, 'store'])->name('groups.store');
     Route::post('groups/join', [InternshipGroupController::class, 'join'])->name('groups.join');
+    Route::get('groups/by-code/{code}', [InternshipGroupController::class, 'showByCode'])->name('groups.by-code');
     Route::post('groups/leave', [InternshipGroupController::class, 'leave'])->name('groups.leave');
     Route::post('groups/{group}/banner', [InternshipGroupController::class, 'updateBanner'])->name('groups.banner.update');
     Route::delete('groups/{group}', [InternshipGroupController::class, 'destroy'])->name('groups.destroy');

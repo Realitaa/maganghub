@@ -3,6 +3,7 @@
 use App\Models\GroupJoinRequest;
 use App\Models\GroupMembership;
 use App\Models\InternshipGroup;
+use App\Models\InternshipSubmission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -626,4 +627,82 @@ describe('group membership lifecycle', function () {
         // 7. menjadi anggota dari kelompok itu lagi
         expect(GroupMembership::where('group_id', $group->id)->where('user_id', $student->id)->exists())->toBeTrue();
     });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// 9. Fetching Group by Code (Join Confirmation Dialog Info)
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('fetching group by code', function () {
+
+    it('redirects guest to login', function () {
+        $this->get(route('groups.by-code', 'ABCDEF1234'))
+            ->assertRedirect(route('login'));
+    });
+
+    it('returns 404 for non-existent group code', function () {
+        $student = User::factory()->create(['role' => 'student']);
+
+        $this->actingAs($student)
+            ->get(route('groups.by-code', 'NONEXISTENT'))
+            ->assertNotFound()
+            ->assertJson(['message' => 'Kelompok tidak ditemukan.']);
+    });
+
+    it('returns group details for a valid code without active submission', function () {
+        $student = User::factory()->create(['role' => 'student']);
+        $leader = User::factory()->create(['role' => 'student', 'name' => 'John Doe', 'nim' => '12345678', 'email' => 'john@unimed.ac.id']);
+        $group = InternshipGroup::factory()->create([
+            'leader_id' => $leader->id,
+            'code' => 'TESTCODE12',
+        ]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+
+        $this->actingAs($student)
+            ->get(route('groups.by-code', 'TESTCODE12'))
+            ->assertOk()
+            ->assertJson([
+                'code' => 'TESTCODE12',
+                'leader' => [
+                    'name' => 'John Doe',
+                    'nim' => '12345678',
+                    'email' => 'john@unimed.ac.id',
+                ],
+                'banner_url' => $group->bannerUrl(),
+                'members_count' => 1,
+                'company_name' => null,
+            ]);
+    });
+
+    it('returns group details including active submission company name', function () {
+        $student = User::factory()->create(['role' => 'student']);
+        $leader = User::factory()->create(['role' => 'student', 'name' => 'Jane Doe', 'nim' => '87654321', 'email' => 'jane@unimed.ac.id']);
+        $group = InternshipGroup::factory()->create([
+            'leader_id' => $leader->id,
+            'code' => 'TESTCODE34',
+        ]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+
+        InternshipSubmission::factory()->create([
+            'group_id' => $group->id,
+            'company_name' => 'Google Indonesia',
+            'status' => 'submitted',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('groups.by-code', 'TESTCODE34'))
+            ->assertOk()
+            ->assertJson([
+                'code' => 'TESTCODE34',
+                'leader' => [
+                    'name' => 'Jane Doe',
+                    'nim' => '87654321',
+                    'email' => 'jane@unimed.ac.id',
+                ],
+                'banner_url' => $group->bannerUrl(),
+                'members_count' => 1,
+                'company_name' => 'Google Indonesia',
+            ]);
+    });
+
 });

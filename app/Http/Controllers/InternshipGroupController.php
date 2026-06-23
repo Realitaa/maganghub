@@ -7,6 +7,7 @@ use App\Models\InternshipGroup;
 use App\Models\User;
 use App\Services\InternshipGroupService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -206,6 +207,34 @@ class InternshipGroupController extends Controller
             'type' => 'success',
             'message' => 'Banner kelompok berhasil diperbarui.',
         ])->back();
+    }
+
+    /**
+     * Get details of a group by its code.
+     */
+    public function showByCode(string $code): JsonResponse
+    {
+        $group = InternshipGroup::with([
+            'leader',
+            'memberships.user',
+            'activeSubmission',
+        ])->where('code', $code)->first();
+
+        if (! $group) {
+            return response()->json(['message' => 'Kelompok tidak ditemukan.'], 404);
+        }
+
+        return response()->json([
+            'code' => $group->code,
+            'leader' => [
+                'name' => $group->leader->name,
+                'nim' => $group->leader->nim,
+                'email' => $group->leader->email,
+            ],
+            'banner_url' => $group->bannerUrl(),
+            'members_count' => $group->memberships->count(),
+            'company_name' => $group->activeSubmission?->company_name,
+        ]);
     }
 
     /**
