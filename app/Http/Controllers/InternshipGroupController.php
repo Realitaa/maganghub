@@ -244,15 +244,18 @@ class InternshipGroupController extends Controller
      */
     public function invite(string $code): View|RedirectResponse
     {
-        $group = InternshipGroup::with('leader')->where('code', $code)->first();
+        $group = InternshipGroup::with(['leader', 'activeSubmission'])->where('code', $code)->first();
 
         if (! $group) {
             return redirect()->route('home');
         }
 
+        $groupName = $group->activeSubmission?->company_name ?: $group->leader->name;
+
         return view('invite', [
             'groupCode' => $group->code,
             'leaderName' => $group->leader->name,
+            'groupName' => $groupName,
             'ogImageUrl' => $group->ogImageUrl(),
             'appName' => config('app.name', 'MagangHub'),
             'appUrl' => config('app.url'),

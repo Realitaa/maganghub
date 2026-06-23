@@ -486,7 +486,30 @@ onMounted(() => {
                 inviteGroupError.value = 'Gagal memuat detail kelompok. Silakan periksa kembali kode undangan Anda.';
                 isFetchingInviteGroup.value = false;
             },
+            onHttpException: () => {
+                inviteGroupError.value = 'Gagal memuat detail kelompok. Silakan periksa kembali kode undangan Anda.';
+                isFetchingInviteGroup.value = false;
+
+                return true;
+            },
+            onNetworkError: () => {
+                inviteGroupError.value = 'Koneksi jaringan terputus. Silakan coba lagi.';
+                isFetchingInviteGroup.value = false;
+
+                return true;
+            },
         });
+    }
+});
+
+watch(showJoinConfirmDialog, (isOpen) => {
+    if (!isOpen) {
+        const url = new URL(window.location.href);
+        
+        if (url.searchParams.has('code')) {
+            url.searchParams.delete('code');
+            window.history.replaceState({}, '', url.pathname + url.search);
+        }
     }
 });
 </script>
