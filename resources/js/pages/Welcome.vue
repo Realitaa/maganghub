@@ -344,8 +344,8 @@ const faqs = [
                     <!-- Right: Mockup Dashboard -->
                     <div class="relative w-full flex justify-center lg:justify-end pt-3">
                         <div class="relative w-full max-w-[590px]">
-                            <!-- Shadow di bawah saja ratakan (emerald shadow) -->
-                            <div class="absolute bottom-[-14px] left-[5%] right-[5%] h-4 bg-gradient-to-r from-emerald-500/20 via-emerald-500/40 to-emerald-500/20 blur-md rounded-full pointer-events-none"></div>
+                            <!-- Shadow di bawah saja ratakan (emerald shadow tebal) -->
+                            <div class="absolute bottom-[-20px] left-[4%] right-[4%] h-6 bg-linear-to-r from-emerald-500/40 via-emerald-500/75 to-emerald-500/40 blur-lg rounded-full pointer-events-none"></div>
 
                             <div class="overflow-hidden rounded-xl border-2 border-emerald-500/30 bg-card shadow-xl dark:border-emerald-500/50">
                                 <!-- Image Content -->

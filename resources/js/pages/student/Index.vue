@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router, usePage, Link } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
+import { parseDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import {
     Users,
     Plus,
@@ -41,12 +42,9 @@ import { watch } from 'vue';
 import GroupBannerCropDialog from '@/components/GroupBannerCropDialog.vue';
 import GroupShareDialog from '@/components/GroupShareDialog.vue';
 import GroupStatusDialog from '@/components/GroupStatusDialog.vue';
-import { parseDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import {
     Card,
     CardContent,
@@ -64,7 +62,9 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import {
     store as groupStore,
