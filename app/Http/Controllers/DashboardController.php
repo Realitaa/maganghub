@@ -21,6 +21,7 @@ class DashboardController extends Controller
                 'group.leader',
                 'group.memberships.user',
                 'group.activeSubmission',
+                'group.timelines' => fn ($query) => $query->latest('created_at'),
             ])->first();
 
             $group = null;

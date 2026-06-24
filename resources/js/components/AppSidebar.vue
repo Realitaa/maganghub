@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import NavNotifications from '@/components/NavNotifications.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -94,6 +95,7 @@ const mainNavItems = computed<NavItem[]>(() => {
         </SidebarContent>
 
         <SidebarFooter>
+            <NavNotifications v-if="userRole === 'student'" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

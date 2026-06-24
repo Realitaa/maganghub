@@ -10,6 +10,8 @@ use Illuminate\Validation\ValidationException;
 
 class InternshipSubmissionService
 {
+    public function __construct(protected GroupTimelineService $timelineService) {}
+
     /**
      * Save the internship submission data as a draft.
      *
@@ -153,6 +155,9 @@ class InternshipSubmissionService
         $group->update([
             'status' => 'submitted',
         ]);
+
+        // Record timeline
+        $this->timelineService->submissionCreated($group);
 
         // Create snapshot membership records
         // Clean up any existing submission memberships for this submission to avoid duplicate key issues if re-submitting

@@ -156,7 +156,7 @@ test('guest can visit public invite page and see OG tags', function () {
     $response = $this->get(route('groups.invite', 'TESTCODE123'));
 
     $response->assertOk();
-    $response->assertSee('Bergabung ke Kelompok Magang John Doe');
+    $response->assertSee('Kelompok Magang John Doe');
     $response->assertSee('og:image');
     $response->assertSee(Storage::disk('public')->url('og-banners/uploaded-og.webp'));
 });

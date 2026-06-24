@@ -100,4 +100,14 @@ class InternshipGroup extends Model
     {
         return $this->hasOne(InternshipSubmission::class, 'group_id')->latestOfMany();
     }
+
+    /**
+     * Get the timelines of this group.
+     *
+     * @return HasMany<GroupTimeline, $this>
+     */
+    public function timelines(): HasMany
+    {
+        return $this->hasMany(GroupTimeline::class, 'group_id');
+    }
 }

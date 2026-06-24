@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 
 class InternshipReviewService
 {
+    public function __construct(protected GroupTimelineService $timelineService) {}
+
     /**
      * Reject the internship submission with notes.
      *
@@ -44,6 +46,9 @@ class InternshipReviewService
                 'status' => 'forming',
             ]);
 
+            // Record timeline
+            $this->timelineService->submissionRejected($lockedSubmission->group, $notes);
+
             return $lockedSubmission;
         });
     }
@@ -76,6 +81,9 @@ class InternshipReviewService
             $lockedSubmission->group->update([
                 'status' => 'letter_published',
             ]);
+
+            // Record timeline
+            $this->timelineService->submissionApproved($lockedSubmission->group);
 
             // Generate document if not already generated
             if (! $lockedSubmission->letter_path) {
@@ -124,6 +132,9 @@ class InternshipReviewService
             $lockedSubmission->group->update([
                 'status' => 'applying',
             ]);
+
+            // Record timeline
+            $this->timelineService->applicationLetterPrinted($lockedSubmission->group);
 
             return $lockedSubmission;
         });
@@ -232,6 +243,10 @@ class InternshipReviewService
                 throw ValidationException::withMessages([
                     'error' => 'Keputusan tidak valid.',
                 ]);
+            }
+
+            if ($decision === 'all_accepted' || $decision === 'partially_accepted') {
+                $this->timelineService->administrationCompleted($group);
             }
 
             return $lockedSubmission;

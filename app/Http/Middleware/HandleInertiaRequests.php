@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                     'password_changed' => $request->user()->hasChangedPassword(),
                     'profile_completed' => $request->user()->isProfileComplete(),
                 ] : null,
+                'notifications' => $request->user() ? $request->user()->notifications()->latest()->get() : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

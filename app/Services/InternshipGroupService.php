@@ -6,6 +6,8 @@ use App\Models\GroupJoinRequest;
 use App\Models\GroupMembership;
 use App\Models\InternshipGroup;
 use App\Models\User;
+use App\Notifications\JoinRequestAcceptedNotification;
+use App\Notifications\JoinRequestRejectedNotification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -173,6 +175,10 @@ class InternshipGroupService
 
         $request->update(['status' => 'approved']);
 
+        // Send notification
+        $groupName = $group->activeSubmission?->company_name ?: $group->leader->name;
+        $student->notify(new JoinRequestAcceptedNotification($group->id, $groupName, $leader->name));
+
         // Cancel all other pending requests from this student
         GroupJoinRequest::where('user_id', $student->id)
             ->where('id', '!=', $request->id)
@@ -210,6 +216,11 @@ class InternshipGroupService
         }
 
         $request->update(['status' => 'rejected']);
+
+        // Send notification
+        $student = $request->user;
+        $groupName = $group->activeSubmission?->company_name ?: $group->leader->name;
+        $student->notify(new JoinRequestRejectedNotification($group->id, $groupName));
 
         return $request;
     }

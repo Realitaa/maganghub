@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InternshipSubmission;
 use App\Models\User;
 use App\Services\DocumentGeneratorService;
+use App\Services\GroupTimelineService;
 use App\Services\InternshipSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,10 @@ class InternshipSubmissionController extends Controller
     /**
      * Create a new controller instance.
      */
-    public function __construct(public InternshipSubmissionService $submissionService) {}
+    public function __construct(
+        public InternshipSubmissionService $submissionService,
+        public GroupTimelineService $timelineService
+    ) {}
 
     /**
      * Save the internship submission as a draft.
@@ -126,6 +130,8 @@ class InternshipSubmissionController extends Controller
         $submission->update([
             'company_response_path' => $path,
         ]);
+
+        $this->timelineService->companyReplyUploaded($submission->group);
 
         return Inertia::flash('toast', [
             'type' => 'success',
