@@ -117,11 +117,18 @@ interface Submission {
     company_address: string;
     company_contact: string;
     division: string;
+    field_of_interest: string;
     start_date: string;
     end_date: string;
     supporting_document: string | null;
     company_response_path?: string | null;
     status: string;
+}
+
+interface Timeline {
+    id: number;
+    title: string;
+    created_at: string;
 }
 
 interface Group {
@@ -134,6 +141,7 @@ interface Group {
     memberships: Array<{ user: Member }>;
     join_requests: JoinRequest[];
     active_submission?: Submission | null;
+    timelines?: Timeline[];
 }
 
 interface PendingJoinRequest {
@@ -1399,7 +1407,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                                                     {{
                                                         submissionForm.start_date
                                                             ? dateFormatter.format(
-                                                                  startDateValue.toDate(
+                                                                  startDateValue!.toDate(
                                                                       getLocalTimeZone(),
                                                                   ),
                                                               )
@@ -1458,7 +1466,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                                                     {{
                                                         submissionForm.end_date
                                                             ? dateFormatter.format(
-                                                                  endDateValue.toDate(
+                                                                  endDateValue!.toDate(
                                                                       getLocalTimeZone(),
                                                                   ),
                                                               )

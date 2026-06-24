@@ -126,8 +126,8 @@ watch(selectedStatus, () => {
 // Format date helper
 function formatDate(dateStr?: string) {
     if (!dateStr) {
-return '-';
-}
+        return '-';
+    }
 
     return new Date(dateStr).toLocaleDateString('id-ID', {
         day: 'numeric',

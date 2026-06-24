@@ -5,13 +5,11 @@ import {
     Calendar,
     MapPin,
     Phone,
-    User,
     Users,
     FileText,
     CheckCircle2,
     XCircle,
     Clock,
-    AlertCircle,
     ArrowRight,
     Search,
     Printer,
@@ -180,8 +178,8 @@ const filteredReceived = computed(() => {
 
 const acceptedMembersForDropdown = computed(() => {
     if (!selectedSubmission.value) {
-return [];
-}
+        return [];
+    }
 
     return selectedSubmission.value.submission_memberships
         .filter((m) => {
@@ -205,7 +203,10 @@ function handleDownloadLetter(subId: number) {
 
 function handleDownloadIndividualLetter(subId: number, userId: number) {
     window.open(
-        downloadLetter.url({ submission: subId, user_id: userId }),
+        downloadLetter.url(
+            { submission: subId },
+            { query: { user_id: userId } },
+        ),
         '_blank',
     );
 }
@@ -262,8 +263,8 @@ function selectDecision(
 
 function submitDecision(type: 'all_accepted' | 'all_rejected') {
     if (!selectedSubmission.value) {
-return;
-}
+        return;
+    }
 
     localProcessing.value = true;
     submissionError.value = null;
@@ -292,8 +293,8 @@ return;
 
 function submitPartialDecision() {
     if (!selectedSubmission.value) {
-return;
-}
+        return;
+    }
 
     submissionError.value = null;
 
@@ -374,8 +375,8 @@ function handleBackToDecision() {
 // Formatting dates helper
 function formatDate(dateStr?: string) {
     if (!dateStr) {
-return '-';
-}
+        return '-';
+    }
 
     return new Date(dateStr).toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -486,7 +487,7 @@ return '-';
                                 </td>
                                 <td class="p-4 text-right">
                                     <Button
-                                        size="xs"
+                                        size="sm"
                                         variant="outline"
                                         class="h-8 cursor-pointer gap-1.5 font-medium"
                                         @click="openDetail(sub)"
@@ -587,7 +588,7 @@ return '-';
                                 </td>
                                 <td class="p-4 text-right">
                                     <Button
-                                        size="xs"
+                                        size="sm"
                                         variant="outline"
                                         class="h-8 cursor-pointer gap-1.5 font-medium"
                                         @click="openDetail(sub)"
@@ -699,7 +700,7 @@ return '-';
                                 </td>
                                 <td class="p-4 text-right">
                                     <Button
-                                        size="xs"
+                                        size="sm"
                                         variant="default"
                                         class="h-8 cursor-pointer bg-green-600 font-medium text-white hover:bg-green-700"
                                         @click="openDecision(sub)"
@@ -875,7 +876,7 @@ return '-';
                                             Ketua Kelompok
                                         </Badge>
                                         <Button
-                                            size="xs"
+                                            size="sm"
                                             variant="outline"
                                             class="h-7 cursor-pointer gap-1 border-primary/20 font-medium text-primary hover:bg-primary/5"
                                             @click="
@@ -1130,7 +1131,6 @@ return '-';
                                             >
                                                 {{ membership.user.name }}
                                                 <Badge
-                                                    v-slot:default
                                                     v-if="
                                                         membership.user.id ===
                                                         selectedSubmission.group
@@ -1178,7 +1178,8 @@ return '-';
                                                             membership.user
                                                                 .id ===
                                                             selectedSubmission
-                                                                .group.leader_id
+                                                                ?.group
+                                                                ?.leader_id
                                                         ) {
                                                             newLeaderId = null;
                                                         }

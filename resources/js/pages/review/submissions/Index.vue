@@ -6,16 +6,13 @@ import {
     Calendar,
     MapPin,
     Phone,
-    User,
     Users,
-    FileText,
     CheckCircle2,
     XCircle,
     Clock,
-    AlertCircle,
     ArrowRight,
 } from '@lucide/vue';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -99,7 +96,7 @@ interface SubmissionDetail {
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
-const props = defineProps<{
+defineProps<{
     submissions: SubmissionListItem[];
 }>();
 

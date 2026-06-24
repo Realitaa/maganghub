@@ -97,7 +97,7 @@ export function useBannerUpload() {
             // Apply crop → banner blob + OG blob in parallel
             const [bannerBlob, ogBlob] = await Promise.all([
                 applyCrop(sourceBlob, cropCoords),
-                generateOgFromMaster(sourceBlob, cropCoords),
+                generateOgFromMaster(sourceBlob),
             ]);
 
             const formData = new FormData();
@@ -153,10 +153,7 @@ export function useBannerUpload() {
      * 1200×630 center-cropped image ≤300KB for WhatsApp.
      * Runs in the Worker so it doesn't block the main thread.
      */
-    function generateOgFromMaster(
-        blob: Blob,
-        _cropCoords: CropCoordinates,
-    ): Promise<Blob> {
+    function generateOgFromMaster(blob: Blob): Promise<Blob> {
         return new Promise((resolve, reject) => {
             blob.arrayBuffer().then((buffer) => {
                 const worker = new CompressWorker();

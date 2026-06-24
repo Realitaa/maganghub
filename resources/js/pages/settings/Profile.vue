@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
-import { CircleQuestionMark } from '@lucide/vue';
 import { computed } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/Heading.vue';
@@ -10,12 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-    TooltipProvider,
-} from '@/components/ui/tooltip';
 import { edit } from '@/routes/profile';
 
 defineOptions({

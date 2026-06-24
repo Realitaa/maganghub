@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { Cropper  } from 'vue-advanced-cropper';
-import type {CropperResult} from 'vue-advanced-cropper';
-import 'vue-advanced-cropper/dist/style.css';
 import { ImageIcon, Upload, X } from '@lucide/vue';
+import { ref, watch } from 'vue';
+import { Cropper } from 'vue-advanced-cropper';
+import type { CropperResult } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -14,11 +14,8 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import {
-    useBannerUpload
-    
-} from '@/composables/useBannerUpload';
-import type {CropCoordinates} from '@/composables/useBannerUpload';
+import { useBannerUpload } from '@/composables/useBannerUpload';
+import type { CropCoordinates } from '@/composables/useBannerUpload';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 

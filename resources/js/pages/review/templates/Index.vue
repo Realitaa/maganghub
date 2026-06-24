@@ -9,7 +9,6 @@ import {
     HardDrive,
 } from '@lucide/vue';
 import { ref } from 'vue';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -45,7 +44,7 @@ interface TemplateStatus {
     updatedAt: string | null;
 }
 
-const props = defineProps<{
+defineProps<{
     template: TemplateStatus;
 }>();
 
