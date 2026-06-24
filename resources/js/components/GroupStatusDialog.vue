@@ -81,26 +81,33 @@ const isRejected = computed(() => props.group.status === 'rejected');
 // ─── Human-readable status info ───────────────────────────────────────────────
 
 const statusInfo = computed(() => {
-    const company = props.group.active_submission?.company_name ?? 'perusahaan tujuan';
+    const company =
+        props.group.active_submission?.company_name ?? 'perusahaan tujuan';
 
-    const map: Record<string, { icon: object; label: string; color: string; description: string }> = {
+    const map: Record<
+        string,
+        { icon: object; label: string; color: string; description: string }
+    > = {
         forming: {
             icon: Users,
             label: 'Membentuk Kelompok',
             color: 'text-blue-500',
-            description: 'Kelompok sedang dalam tahap pembentukan. Ketua kelompok dapat mengisi data pengajuan magang dan mengundang anggota.',
+            description:
+                'Kelompok sedang dalam tahap pembentukan. Ketua kelompok dapat mengisi data pengajuan magang dan mengundang anggota.',
         },
         submitted: {
             icon: FileText,
             label: 'Pengajuan Dikirim',
             color: 'text-yellow-500',
-            description: 'Pengajuan telah dikirim ke program studi dan sedang menunggu verifikasi oleh admin/operator.',
+            description:
+                'Pengajuan telah dikirim ke program studi dan sedang menunggu verifikasi oleh admin/operator.',
         },
         under_review: {
             icon: Clock,
             label: 'Sedang Ditinjau',
             color: 'text-orange-500',
-            description: 'Tim program studi sedang meninjau pengajuan kelompok Anda.',
+            description:
+                'Tim program studi sedang meninjau pengajuan kelompok Anda.',
         },
         letter_published: {
             icon: FileCheck,
@@ -142,7 +149,8 @@ const statusInfo = computed(() => {
             icon: Trophy,
             label: 'Magang Selesai',
             color: 'text-primary',
-            description: 'Masa magang kelompok ini telah selesai. Terima kasih telah menggunakan MagangHub.',
+            description:
+                'Masa magang kelompok ini telah selesai. Terima kasih telah menggunakan MagangHub.',
         },
     };
 
@@ -161,16 +169,26 @@ const statusInfo = computed(() => {
             </DialogHeader>
 
             <!-- Current Status Badge -->
-            <div class="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-4">
+            <div
+                class="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-4"
+            >
                 <div
                     class="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
                     :class="`bg-${statusInfo.color.replace('text-', '')}/10`"
                 >
-                    <component :is="statusInfo.icon" class="h-5 w-5" :class="statusInfo.color" />
+                    <component
+                        :is="statusInfo.icon"
+                        class="h-5 w-5"
+                        :class="statusInfo.color"
+                    />
                 </div>
                 <div>
-                    <p class="font-semibold" :class="statusInfo.color">{{ statusInfo.label }}</p>
-                    <p class="mt-0.5 text-sm text-muted-foreground leading-relaxed">
+                    <p class="font-semibold" :class="statusInfo.color">
+                        {{ statusInfo.label }}
+                    </p>
+                    <p
+                        class="mt-0.5 text-sm leading-relaxed text-muted-foreground"
+                    >
                         {{ statusInfo.description }}
                     </p>
                 </div>
@@ -178,7 +196,9 @@ const statusInfo = computed(() => {
 
             <!-- Progress Timeline -->
             <div class="space-y-1">
-                <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <p
+                    class="mb-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                >
                     Progres Kelompok
                 </p>
                 <div class="relative space-y-0">
@@ -196,26 +216,41 @@ const statusInfo = computed(() => {
                                         ? 'border-primary bg-primary text-primary-foreground'
                                         : index === currentStepIndex
                                           ? isRejected
-                                            ? 'border-destructive bg-destructive text-destructive-foreground'
-                                            : 'border-primary bg-primary/10 text-primary'
+                                              ? 'border-destructive bg-destructive text-destructive-foreground'
+                                              : 'border-primary bg-primary/10 text-primary'
                                           : 'border-border bg-muted/40 text-muted-foreground/50',
                                 ]"
                             >
-                                <CheckCircle2 v-if="index < currentStepIndex" class="h-3.5 w-3.5" />
-                                <XCircle v-else-if="index === currentStepIndex && isRejected" class="h-3.5 w-3.5" />
-                                <Circle v-else-if="index === currentStepIndex" class="h-3 w-3 fill-current" />
+                                <CheckCircle2
+                                    v-if="index < currentStepIndex"
+                                    class="h-3.5 w-3.5"
+                                />
+                                <XCircle
+                                    v-else-if="
+                                        index === currentStepIndex && isRejected
+                                    "
+                                    class="h-3.5 w-3.5"
+                                />
+                                <Circle
+                                    v-else-if="index === currentStepIndex"
+                                    class="h-3 w-3 fill-current"
+                                />
                                 <Circle v-else class="h-3 w-3" />
                             </div>
                             <!-- Line between steps -->
                             <div
                                 v-if="index < progressSteps.length - 1"
                                 class="mt-0.5 h-6 w-0.5 rounded-full"
-                                :class="index < currentStepIndex ? 'bg-primary' : 'bg-border'"
+                                :class="
+                                    index < currentStepIndex
+                                        ? 'bg-primary'
+                                        : 'bg-border'
+                                "
                             />
                         </div>
 
                         <!-- Step label -->
-                        <div class="pb-1 pt-0.5">
+                        <div class="pt-0.5 pb-1">
                             <p
                                 class="text-sm leading-7"
                                 :class="[
@@ -223,8 +258,8 @@ const statusInfo = computed(() => {
                                         ? 'font-medium text-foreground'
                                         : index === currentStepIndex
                                           ? isRejected
-                                            ? 'font-semibold text-destructive'
-                                            : 'font-semibold text-primary'
+                                              ? 'font-semibold text-destructive'
+                                              : 'font-semibold text-primary'
                                           : 'text-muted-foreground/60',
                                 ]"
                             >

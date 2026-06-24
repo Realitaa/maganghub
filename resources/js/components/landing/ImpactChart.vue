@@ -40,24 +40,27 @@ onMounted(() => {
     observer = new MutationObserver(checkTheme);
     observer.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['class']
+        attributeFilter: ['class'],
     });
 
     if (containerRef.value && typeof IntersectionObserver !== 'undefined') {
-        intersectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    isInView.value = true;
+        intersectionObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        isInView.value = true;
 
-                    if (intersectionObserver) {
-                        intersectionObserver.disconnect();
-                        intersectionObserver = null;
+                        if (intersectionObserver) {
+                            intersectionObserver.disconnect();
+                            intersectionObserver = null;
+                        }
                     }
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
+                });
+            },
+            {
+                threshold: 0.1,
+            },
+        );
         intersectionObserver.observe(containerRef.value);
     } else {
         isInView.value = true;
@@ -78,35 +81,59 @@ onUnmounted(() => {
 const chartDetails = computed(() => {
     // Company levels list with predefined emerald hues
     const companies: CompanyLevel[] = [
-        { name: 'Perusahaan Global', y: props.statistics.global, color: '#047857'},
-        { name: 'Perusahaan Multinasional', y: props.statistics.multinational, color: '#059669'},
-        { name: 'Perusahaan Internasional', y: props.statistics.international, color: '#10b981'},
-        { name: 'Perusahaan Nasional', y: props.statistics.national, color: '#34d399'},
-        { name: 'Perusahaan Regional', y: props.statistics.regional, color: '#6ee7b7'},
-        { name: 'Perusahaan Lokal', y: props.statistics.local, color: '#a7f3d0'}
+        {
+            name: 'Perusahaan Global',
+            y: props.statistics.global,
+            color: '#047857',
+        },
+        {
+            name: 'Perusahaan Multinasional',
+            y: props.statistics.multinational,
+            color: '#059669',
+        },
+        {
+            name: 'Perusahaan Internasional',
+            y: props.statistics.international,
+            color: '#10b981',
+        },
+        {
+            name: 'Perusahaan Nasional',
+            y: props.statistics.national,
+            color: '#34d399',
+        },
+        {
+            name: 'Perusahaan Regional',
+            y: props.statistics.regional,
+            color: '#6ee7b7',
+        },
+        {
+            name: 'Perusahaan Lokal',
+            y: props.statistics.local,
+            color: '#a7f3d0',
+        },
     ];
-    
+
     // Sort company levels in descending order of value to identify the biggest one
     companies.sort((a, b) => b.y - a.y);
-    
+
     // Slice ONLY the biggest company level
     companies.forEach((company, index) => {
         company.sliced = index === 0;
     });
-    
+
     const totalCompanySum = companies.reduce((sum, item) => sum + item.y, 0);
     const totalSum = totalCompanySum + props.statistics.havenot;
-    
+
     // The biggest company level value
     const biggestCompanyValue = companies[0]?.y || 0;
-    
+
     // To make the biggest company level face top-left (-45 degrees):
     // startAngle of the first slice should align its midpoint at -45 deg.
     // midpoint = startAngle + (p * 360) / 2 = -45
     // startAngle = -45 - 180 * p
     const p = totalSum > 0 ? biggestCompanyValue / totalSum : 0;
-    const startAngle = -45 - (180 * p);
-    
+    const startAngle = -45 - 180 * p;
+
     // Combine data: biggest company level is first (index 0), then other company levels, then havenot
     const data = [
         ...companies,
@@ -117,28 +144,28 @@ const chartDetails = computed(() => {
             sliced: false, // never slice havenot
             showInLegend: false, // don't show in legend
             dataLabels: {
-                enabled: false // don't show percentage labels for havenot
+                enabled: false, // don't show percentage labels for havenot
             },
             states: {
                 hover: {
                     enabled: false, // disable hover states completely
-                    halo: null
-                }
+                    halo: null,
+                },
             },
-            cursor: 'default' // no hover pointer reaction
-        }
+            cursor: 'default', // no hover pointer reaction
+        },
     ];
-    
+
     return {
         data,
-        startAngle
+        startAngle,
     };
 });
 
 // Highcharts options configuration
 const chartOptions = computed(() => {
     const details = chartDetails.value;
-    
+
     return {
         chart: {
             type: 'pie',
@@ -150,29 +177,39 @@ const chartOptions = computed(() => {
             options3d: {
                 enabled: true,
                 alpha: -10,
-                beta: -10
-            }
+                beta: -10,
+            },
         },
         title: {
-            text: '' // Title is handled by outer card header
+            text: '', // Title is handled by outer card header
         },
         credits: {
-            enabled: false
+            enabled: false,
         },
         tooltip: {
-            formatter: function(this: any) {
+            formatter: function (this: any) {
                 // Completely skip tooltip for havenot
                 if (this.point.name === 'Belum Magang') {
                     return false;
                 }
 
-                return '<span style="color:' + this.point.color + '">\u25CF</span> <b>' + this.point.name + '</b>: <b>' + this.point.y + '</b> (' + this.point.percentage.toFixed(1) + '%)';
-            }
+                return (
+                    '<span style="color:' +
+                    this.point.color +
+                    '">\u25CF</span> <b>' +
+                    this.point.name +
+                    '</b>: <b>' +
+                    this.point.y +
+                    '</b> (' +
+                    this.point.percentage.toFixed(1) +
+                    '%)'
+                );
+            },
         },
         accessibility: {
             point: {
-                valueSuffix: '%'
-            }
+                valueSuffix: '%',
+            },
         },
         plotOptions: {
             pie: {
@@ -187,21 +224,21 @@ const chartOptions = computed(() => {
                         enabled: true,
                         brightness: 0.01, // high contrast brightness highlight
                         halo: {
-                            size: 0 // remove fuzzy blurry shadow halo
-                        }
+                            size: 0, // remove fuzzy blurry shadow halo
+                        },
                     },
                     inactive: {
-                        opacity: 0.15 // keep other slices readable
-                    }
+                        opacity: 0.15, // keep other slices readable
+                    },
                 },
                 dataLabels: {
                     enabled: true,
                     format: '{point.percentage:.1f}%',
                     distance: 15,
                     connectorWidth: 1,
-                    connectorColor: isDark.value ? '#3e3e3a' : '#e3e3e0'
-                }
-            }
+                    connectorColor: isDark.value ? '#3e3e3a' : '#e3e3e0',
+                },
+            },
         },
         legend: {
             enabled: true,
@@ -209,19 +246,21 @@ const chartOptions = computed(() => {
             align: 'center',
             verticalAlign: 'bottom',
             itemMarginTop: 5,
-            itemMarginBottom: 5
+            itemMarginBottom: 5,
         },
-        series: [{
-            name: 'Kategori Magang',
-            colorByPoint: true,
-            data: details.data
-        }]
+        series: [
+            {
+                name: 'Kategori Magang',
+                colorByPoint: true,
+                data: details.data,
+            },
+        ],
     };
 });
 </script>
 
 <template>
-    <div ref="containerRef" class="w-full min-h-[400px]">
+    <div ref="containerRef" class="min-h-[400px] w-full">
         <HighchartsChart v-if="isInView" :options="chartOptions" />
     </div>
 </template>

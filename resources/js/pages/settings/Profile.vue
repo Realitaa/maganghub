@@ -10,7 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+    TooltipProvider,
+} from '@/components/ui/tooltip';
 import { edit } from '@/routes/profile';
 
 defineOptions({
@@ -89,19 +94,29 @@ const user = computed(() => page.props.auth.user);
                     <InputError class="mt-2" :message="errors.nim" />
                 </div>
 
-
-
                 <!-- Gender (Radio Group) -->
                 <div class="grid gap-2">
                     <Label>Jenis Kelamin</Label>
-                    <RadioGroup name="gender" :default-value="user.gender || 'L'" class="flex gap-4 mt-1">
+                    <RadioGroup
+                        name="gender"
+                        :default-value="user.gender || 'L'"
+                        class="mt-1 flex gap-4"
+                    >
                         <div class="flex items-center space-x-2">
                             <RadioGroupItem id="gender-l" value="L" />
-                            <Label for="gender-l" class="font-normal cursor-pointer">Laki-laki</Label>
+                            <Label
+                                for="gender-l"
+                                class="cursor-pointer font-normal"
+                                >Laki-laki</Label
+                            >
                         </div>
                         <div class="flex items-center space-x-2">
                             <RadioGroupItem id="gender-p" value="P" />
-                            <Label for="gender-p" class="font-normal cursor-pointer">Perempuan</Label>
+                            <Label
+                                for="gender-p"
+                                class="cursor-pointer font-normal"
+                                >Perempuan</Label
+                            >
                         </div>
                     </RadioGroup>
                     <InputError class="mt-2" :message="errors.gender" />
@@ -145,14 +160,14 @@ const user = computed(() => page.props.auth.user);
                         max="14"
                         class="mt-1 block w-full"
                         name="semester"
-                        :default-value="user.semester ? String(user.semester) : ''"
+                        :default-value="
+                            user.semester ? String(user.semester) : ''
+                        "
                         required
                         placeholder="Semester"
                     />
                     <InputError class="mt-2" :message="errors.semester" />
                 </div>
-
-
             </template>
 
             <div class="flex items-center gap-4">

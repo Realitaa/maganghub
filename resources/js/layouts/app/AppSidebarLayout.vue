@@ -30,26 +30,57 @@ const requirements = computed(() => (page.props.auth as any)?.requirements);
         <AppSidebar />
         <AppContent variant="sidebar" class="overflow-x-hidden">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
-            
-            <div v-if="user && user.role === 'student' && requirements && (!requirements.password_changed || !requirements.profile_completed)" class="px-6 pt-2 space-y-3">
-                <Alert v-if="!requirements.password_changed" variant="destructive" id="alert-password">
+
+            <div
+                v-if="
+                    user &&
+                    user.role === 'student' &&
+                    requirements &&
+                    (!requirements.password_changed ||
+                        !requirements.profile_completed)
+                "
+                class="space-y-3 px-6 pt-2"
+            >
+                <Alert
+                    v-if="!requirements.password_changed"
+                    variant="destructive"
+                    id="alert-password"
+                >
                     <AlertTriangle class="h-4 w-4" />
                     <div>
                         <AlertTitle>Ganti Password Default</AlertTitle>
                         <AlertDescription>
-                            Anda masih menggunakan password default. Silakan 
-                            <Link :href="editSecurity()" class="font-semibold underline">ganti password Anda</Link> 
+                            Anda masih menggunakan password default. Silakan
+                            <Link
+                                :href="editSecurity()"
+                                class="font-semibold underline"
+                                >ganti password Anda</Link
+                            >
                             terlebih dahulu.
                         </AlertDescription>
                     </div>
                 </Alert>
-                <Alert v-if="!requirements.profile_completed" class="border-yellow-200 dark:border-yellow-900 bg-yellow-50/50 dark:bg-yellow-950/20" id="alert-profile">
-                    <AlertCircle class="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                <Alert
+                    v-if="!requirements.profile_completed"
+                    class="border-yellow-200 bg-yellow-50/50 dark:border-yellow-900 dark:bg-yellow-950/20"
+                    id="alert-profile"
+                >
+                    <AlertCircle
+                        class="h-4 w-4 text-yellow-600 dark:text-yellow-400"
+                    />
                     <div>
-                        <AlertTitle class="text-yellow-800 dark:text-yellow-200">Biodata Mahasiswa Belum Lengkap</AlertTitle>
-                        <AlertDescription class="text-yellow-700 dark:text-yellow-300">
-                            Biodata Anda belum lengkap. Silakan 
-                            <Link :href="editProfile()" class="font-semibold underline">lengkapi biodata Anda</Link> 
+                        <AlertTitle class="text-yellow-800 dark:text-yellow-200"
+                            >Biodata Mahasiswa Belum Lengkap</AlertTitle
+                        >
+                        <AlertDescription
+                            class="text-yellow-700 dark:text-yellow-300"
+                        >
+                            Biodata Anda belum lengkap. Silakan
+                            <Link
+                                :href="editProfile()"
+                                class="font-semibold underline"
+                                >lengkapi biodata Anda</Link
+                            >
                             terlebih dahulu.
                         </AlertDescription>
                     </div>

@@ -63,6 +63,14 @@
         "lint:check": [
             "pint --parallel --test"
         ],
+        "format": [
+            "pint --parallel",
+            "npm run format",
+            "npm run lint"
+        ],
+        "deploy": [
+            "bash scripts/deploy.sh"
+        ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "npm run lint:check",

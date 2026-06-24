@@ -39,7 +39,9 @@ self.onmessage = async (event: MessageEvent<InMessage>) => {
             self.postMessage({ mode: 'og', blob });
         }
     } catch (err) {
-        self.postMessage({ error: err instanceof Error ? err.message : String(err) });
+        self.postMessage({
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };
 
@@ -87,7 +89,10 @@ async function generateOgImage(bitmap: ImageBitmap): Promise<Blob> {
 
     // Target ≤300KB for WhatsApp. Start at q=0.75; if still too large, step down.
     for (const quality of [0.75, 0.65, 0.55, 0.45]) {
-        const blob = await canvas.convertToBlob({ type: 'image/webp', quality });
+        const blob = await canvas.convertToBlob({
+            type: 'image/webp',
+            quality,
+        });
 
         if (blob.size <= 300 * 1024) {
             return blob;

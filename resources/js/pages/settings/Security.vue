@@ -78,7 +78,9 @@ defineOptions({
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Konfirmasi Kata Sandi Baru</Label>
+                <Label for="password_confirmation"
+                    >Konfirmasi Kata Sandi Baru</Label
+                >
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"

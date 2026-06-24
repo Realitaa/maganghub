@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Cropper, type CropperResult } from 'vue-advanced-cropper';
+import { Cropper  } from 'vue-advanced-cropper';
+import type {CropperResult} from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { ImageIcon, Upload, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,11 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { useBannerUpload, type CropCoordinates } from '@/composables/useBannerUpload';
+import {
+    useBannerUpload
+    
+} from '@/composables/useBannerUpload';
+import type {CropCoordinates} from '@/composables/useBannerUpload';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -55,6 +60,7 @@ function triggerFileSelect() {
 function onFileChange(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
+
     if (!file) {
         return;
     }
@@ -101,10 +107,12 @@ async function handleSave() {
 
 function handleClose() {
     step.value = 'select';
+
     if (previewUrl.value) {
         URL.revokeObjectURL(previewUrl.value);
         previewUrl.value = null;
     }
+
     reset();
 }
 </script>
@@ -114,7 +122,11 @@ function handleClose() {
         <DialogContent class="sm:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>
-                    {{ step === 'select' ? 'Pilih Gambar Banner' : 'Atur Tampilan Banner' }}
+                    {{
+                        step === 'select'
+                            ? 'Pilih Gambar Banner'
+                            : 'Atur Tampilan Banner'
+                    }}
                 </DialogTitle>
                 <DialogDescription>
                     {{
@@ -126,17 +138,24 @@ function handleClose() {
             </DialogHeader>
 
             <!-- Step 1: File Select -->
-            <div v-if="step === 'select'" class="flex flex-col items-center justify-center">
+            <div
+                v-if="step === 'select'"
+                class="flex flex-col items-center justify-center"
+            >
                 <button
                     type="button"
                     class="group flex h-48 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border bg-muted/20 transition-colors hover:border-primary/50 hover:bg-primary/5"
                     @click="triggerFileSelect"
                 >
-                    <div class="rounded-full bg-primary/10 p-4 text-primary transition-transform group-hover:scale-110">
+                    <div
+                        class="rounded-full bg-primary/10 p-4 text-primary transition-transform group-hover:scale-110"
+                    >
                         <ImageIcon class="h-8 w-8" />
                     </div>
                     <div class="text-center">
-                        <p class="text-sm font-semibold">Klik untuk memilih gambar</p>
+                        <p class="text-sm font-semibold">
+                            Klik untuk memilih gambar
+                        </p>
                         <p class="mt-0.5 text-xs text-muted-foreground">
                             PNG, JPG, atau WebP — maks. 10 MB
                         </p>
@@ -152,7 +171,10 @@ function handleClose() {
             </div>
 
             <!-- Step 2: Cropper -->
-            <div v-else-if="step === 'crop' && previewUrl" class="overflow-hidden rounded-xl">
+            <div
+                v-else-if="step === 'crop' && previewUrl"
+                class="overflow-hidden rounded-xl"
+            >
                 <Cropper
                     ref="cropperRef"
                     :src="previewUrl"
@@ -186,7 +208,11 @@ function handleClose() {
                     <X class="h-4 w-4" />
                     Pilih Ulang
                 </Button>
-                <Button variant="outline" @click="$emit('update:open', false)" :disabled="isUploading">
+                <Button
+                    variant="outline"
+                    @click="$emit('update:open', false)"
+                    :disabled="isUploading"
+                >
                     Batal
                 </Button>
                 <Button
@@ -195,7 +221,10 @@ function handleClose() {
                     @click="handleSave"
                     :disabled="isUploading"
                 >
-                    <Spinner v-if="isUploading" class="mr-2 h-4 w-4 animate-spin" />
+                    <Spinner
+                        v-if="isUploading"
+                        class="mr-2 h-4 w-4 animate-spin"
+                    />
                     <Upload v-else class="mr-2 h-4 w-4" />
                     {{ isUploading ? 'Menyimpan...' : 'Simpan Banner' }}
                 </Button>

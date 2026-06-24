@@ -41,7 +41,13 @@ export function useBannerUpload() {
             file.arrayBuffer().then((buffer) => {
                 const worker = new CompressWorker();
 
-                worker.onmessage = (event: MessageEvent<{ mode?: string; blob?: Blob; error?: string }>) => {
+                worker.onmessage = (
+                    event: MessageEvent<{
+                        mode?: string;
+                        blob?: Blob;
+                        error?: string;
+                    }>,
+                ) => {
                     worker.terminate();
 
                     if (event.data.blob && event.data.mode === 'banner') {
@@ -81,7 +87,7 @@ export function useBannerUpload() {
 
         try {
             // Wait for banner compression if still running
-            const base = await compressionPromise ?? null;
+            const base = (await compressionPromise) ?? null;
             const sourceBlob = base ?? masterBlob;
 
             if (!sourceBlob) {
@@ -117,7 +123,10 @@ export function useBannerUpload() {
     /**
      * Apply the user's crop to the master blob to produce the final banner.
      */
-    async function applyCrop(blob: Blob, coords: CropCoordinates): Promise<Blob> {
+    async function applyCrop(
+        blob: Blob,
+        coords: CropCoordinates,
+    ): Promise<Blob> {
         const bitmap = await createImageBitmap(blob);
 
         const scaleX = bitmap.width / coords.naturalWidth;
@@ -144,18 +153,31 @@ export function useBannerUpload() {
      * 1200×630 center-cropped image ≤300KB for WhatsApp.
      * Runs in the Worker so it doesn't block the main thread.
      */
-    function generateOgFromMaster(blob: Blob, _cropCoords: CropCoordinates): Promise<Blob> {
+    function generateOgFromMaster(
+        blob: Blob,
+        _cropCoords: CropCoordinates,
+    ): Promise<Blob> {
         return new Promise((resolve, reject) => {
             blob.arrayBuffer().then((buffer) => {
                 const worker = new CompressWorker();
 
-                worker.onmessage = (event: MessageEvent<{ mode?: string; blob?: Blob; error?: string }>) => {
+                worker.onmessage = (
+                    event: MessageEvent<{
+                        mode?: string;
+                        blob?: Blob;
+                        error?: string;
+                    }>,
+                ) => {
                     worker.terminate();
 
                     if (event.data.blob) {
                         resolve(event.data.blob);
                     } else {
-                        reject(new Error(event.data.error ?? 'OG generation failed'));
+                        reject(
+                            new Error(
+                                event.data.error ?? 'OG generation failed',
+                            ),
+                        );
                     }
                 };
 
@@ -169,7 +191,11 @@ export function useBannerUpload() {
         });
     }
 
-    function blobFromCanvas(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+    function blobFromCanvas(
+        canvas: HTMLCanvasElement,
+        type: string,
+        quality: number,
+    ): Promise<Blob> {
         return new Promise((resolve, reject) => {
             canvas.toBlob(
                 (b) => {
