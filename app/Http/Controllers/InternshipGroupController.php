@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Groups\JoinGroupRequest;
+use App\Http\Requests\Groups\UpdateGroupBannerRequest;
 use App\Models\GroupJoinRequest;
 use App\Models\InternshipGroup;
-use App\Models\User;
 use App\Services\InternshipGroupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -44,10 +46,8 @@ class InternshipGroupController extends Controller
     /**
      * Send a join request to an internship group.
      */
-    public function join(Request $request): RedirectResponse
+    public function join(JoinGroupRequest $request): RedirectResponse
     {
-        $request->validate(['code' => ['required', 'string']]);
-
         try {
             $this->groupService->requestToJoin(auth()->user(), $request->input('code'));
 
@@ -148,6 +148,13 @@ class InternshipGroupController extends Controller
      */
     public function destroy(InternshipGroup $group): RedirectResponse
     {
+        if (Gate::denies('delete', $group)) {
+            return Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Hanya ketua kelompok yang dapat membubarkan kelompok.',
+            ])->back();
+        }
+
         try {
             $this->groupService->disbandGroup(auth()->user(), $group);
 
@@ -167,19 +174,9 @@ class InternshipGroupController extends Controller
      * Update the banner image for the internship group.
      * Also accepts an optional og_image for WhatsApp/social OG preview.
      */
-    public function updateBanner(Request $request, InternshipGroup $group): RedirectResponse
+    public function updateBanner(UpdateGroupBannerRequest $request, InternshipGroup $group): RedirectResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        if ($group->leader_id !== $user->id) {
-            abort(403, 'Hanya ketua kelompok yang dapat mengubah banner.');
-        }
-
-        $request->validate([
-            'image' => ['required', 'file', 'mimes:webp,png,jpg,jpeg', 'max:3072'],
-            'og_image' => ['nullable', 'file', 'mimes:webp,png,jpg,jpeg', 'max:512'],
-        ]);
+        Gate::authorize('updateBanner', $group);
 
         $oldBannerPath = $group->banner_path;
         $oldOgPath = $group->og_image_path;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm, useHttp, router, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     Plus,
     Upload,
@@ -9,27 +9,12 @@ import {
     UserCheck,
     UserX,
     MoreVertical,
-    FileDown,
-    AlertTriangle,
-    ShieldAlert,
-    AlertCircleIcon,
 } from '@lucide/vue';
 import { ref, watch, computed } from 'vue';
-import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -57,7 +42,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
     TableBody,
@@ -66,15 +50,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+import UserCreateEditDialog from '@/components/users/UserCreateEditDialog.vue';
+import UserDeleteDialog from '@/components/users/UserDeleteDialog.vue';
+import UserImportDialog from '@/components/users/UserImportDialog.vue';
 import {
     index as userIndex,
-    store as userStore,
-    update as userUpdate,
-    destroy as userDestroy,
     toggleActive as userToggleActive,
-    importMethod as userImport,
-    importTemplate as userImportTemplate,
 } from '@/routes/users';
 import type { User } from '@/types';
 
@@ -112,29 +93,8 @@ const selectedMajor = ref(props.filters.major || 'all');
 const showAddEditModal = ref(false);
 const showImportModal = ref(false);
 const showDeleteConfirmModal = ref(false);
-const userToDelete = ref<any>(null);
-
-// Forms
-const crudForm = useForm({
-    id: null as number | null,
-    name: '',
-    email: '',
-    role: 'student',
-    nim: '',
-    gender: 'L' as 'L' | 'P',
-    phone: '',
-    address: '',
-    password: '',
-    student_class_id: 'none',
-});
-
-// Import State using useHttp
-const importHttp = useHttp({
-    file: null as File | null,
-});
-
-const importError = ref<string | null>(null);
-const importSuccess = ref<string | null>(null);
+const userEditing = ref<User | null>(null);
+const userToDelete = ref<User | null>(null);
 
 // Page user and permission helpers
 const page = usePage();
@@ -217,48 +177,13 @@ watch(selectedRole, () => {
 
 // Form Actions
 const openAddModal = () => {
-    crudForm.reset();
-    crudForm.clearErrors();
-    crudForm.id = null;
-    crudForm.role = 'student';
-    crudForm.gender = 'L';
-    crudForm.student_class_id = 'none';
+    userEditing.value = null;
     showAddEditModal.value = true;
 };
 
-const openEditModal = (user: any) => {
-    crudForm.clearErrors();
-    crudForm.id = user.id;
-    crudForm.name = user.name;
-    crudForm.email = user.email;
-    crudForm.role = user.role;
-    crudForm.nim = user.nim || '';
-    crudForm.gender = user.gender || 'L';
-    crudForm.phone = user.phone || '';
-    crudForm.address = user.address || '';
-    crudForm.password = ''; // Keep password blank unless changing
-    crudForm.student_class_id = user.student_class_id
-        ? user.student_class_id.toString()
-        : 'none';
+const openEditModal = (user: User) => {
+    userEditing.value = user;
     showAddEditModal.value = true;
-};
-
-const submitCrudForm = () => {
-    if (crudForm.id) {
-        crudForm.patch(userUpdate.url(crudForm.id), {
-            onSuccess: () => {
-                showAddEditModal.value = false;
-                crudForm.reset();
-            },
-        });
-    } else {
-        crudForm.post(userStore.url(), {
-            onSuccess: () => {
-                showAddEditModal.value = false;
-                crudForm.reset();
-            },
-        });
-    }
 };
 
 const toggleUserStatus = (user: any) => {
@@ -271,67 +196,9 @@ const toggleUserStatus = (user: any) => {
     );
 };
 
-const confirmDelete = (user: any) => {
+const confirmDelete = (user: User) => {
     userToDelete.value = user;
     showDeleteConfirmModal.value = true;
-};
-
-const deleteUser = () => {
-    if (userToDelete.value) {
-        router.delete(userDestroy.url(userToDelete.value.id), {
-            onSuccess: () => {
-                showDeleteConfirmModal.value = false;
-                userToDelete.value = null;
-            },
-        });
-    }
-};
-
-// Import Handlers using useHttp
-const handleFileChange = (e: Event) => {
-    importError.value = null;
-    importSuccess.value = null;
-    const target = e.target as HTMLInputElement;
-
-    if (target.files && target.files.length > 0) {
-        importHttp.file = target.files[0];
-    }
-};
-
-const submitImport = () => {
-    if (!importHttp.file) {
-        importError.value = 'Silakan pilih file terlebih dahulu.';
-
-        return;
-    }
-
-    importError.value = null;
-    importSuccess.value = null;
-
-    importHttp.post(userImport.url(), {
-        onSuccess: (response: any) => {
-            importSuccess.value = response.message || 'Data berhasil diimpor!';
-            importHttp.reset();
-            // Reset the file input manually if needed
-            const fileInput = document.getElementById(
-                'import-file-input',
-            ) as HTMLInputElement;
-
-            if (fileInput) {
-                fileInput.value = '';
-            }
-
-            router.reload({ only: ['users', 'majors'] });
-        },
-        onError: (errors: any) => {
-            if (errors.file) {
-                importError.value = errors.file;
-            } else {
-                importError.value =
-                    'Gagal mengimpor data. Pastikan format file Anda sesuai.';
-            }
-        },
-    });
 };
 
 // Helper translations
@@ -646,376 +513,23 @@ const handlePageChange = (newPage: number) => {
             </CardContent>
         </Card>
 
-        <!-- ADD / EDIT USER DIALOG -->
-        <Dialog v-model:open="showAddEditModal">
-            <DialogContent class="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>{{
-                        crudForm.id ? 'Edit Pengguna' : 'Tambah Pengguna Baru'
-                    }}</DialogTitle>
-                    <DialogDescription>
-                        Isi form di bawah ini untuk
-                        {{
-                            crudForm.id
-                                ? 'memperbarui data pengguna'
-                                : 'menambahkan pengguna baru ke sistem'
-                        }}.
-                    </DialogDescription>
-                </DialogHeader>
+        <!-- EXTRACTED DIALOGS -->
+        <UserCreateEditDialog
+            v-model:open="showAddEditModal"
+            :user="userEditing"
+            :classes="classes"
+            @success="router.reload({ only: ['users'] })"
+        />
 
-                <form @submit.prevent="submitCrudForm" class="space-y-4 py-2">
-                    <div class="space-y-1.5">
-                        <Label for="form-name">Nama Lengkap</Label>
-                        <Input
-                            id="form-name"
-                            v-model="crudForm.name"
-                            placeholder="Nama Lengkap"
-                            required
-                        />
-                        <InputError :message="crudForm.errors.name" />
-                    </div>
+        <UserImportDialog
+            v-model:open="showImportModal"
+            @success="router.reload({ only: ['users', 'majors'] })"
+        />
 
-                    <div class="space-y-1.5">
-                        <Label for="form-email">Email</Label>
-                        <Input
-                            id="form-email"
-                            type="email"
-                            v-model="crudForm.email"
-                            placeholder="nama@domain.com"
-                            required
-                        />
-                        <InputError :message="crudForm.errors.email" />
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <Label>Peran Pengguna</Label>
-                        <Select v-model="crudForm.role">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Pilih Peran" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="student"
-                                        >Mahasiswa</SelectItem
-                                    >
-                                    <SelectItem value="operator"
-                                        >Operator</SelectItem
-                                    >
-                                    <SelectItem value="administrator"
-                                        >Administrator</SelectItem
-                                    >
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                        <InputError :message="crudForm.errors.role" />
-                    </div>
-
-                    <!-- Dynamic fields for student -->
-                    <template v-if="crudForm.role === 'student'">
-                        <div class="space-y-1.5">
-                            <Label for="form-nim">NIM</Label>
-                            <Input
-                                id="form-nim"
-                                v-model="crudForm.nim"
-                                placeholder="Nomor Induk Mahasiswa"
-                                required
-                            />
-                            <InputError :message="crudForm.errors.nim" />
-                        </div>
-                        <div class="space-y-1.5">
-                            <Label>Kelas</Label>
-                            <Select v-model="crudForm.student_class_id">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Kelas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem value="none"
-                                            >Tanpa Kelas</SelectItem
-                                        >
-                                        <SelectItem
-                                            v-for="c in classes"
-                                            :key="c.id"
-                                            :value="c.id.toString()"
-                                        >
-                                            {{ c.name }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <InputError
-                                :message="crudForm.errors.student_class_id"
-                            />
-                        </div>
-                    </template>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1.5">
-                            <Label>Jenis Kelamin</Label>
-                            <Select v-model="crudForm.gender">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem value="L"
-                                            >Laki-laki</SelectItem
-                                        >
-                                        <SelectItem value="P"
-                                            >Perempuan</SelectItem
-                                        >
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="crudForm.errors.gender" />
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <Label for="form-phone">No. Telepon</Label>
-                            <Input
-                                id="form-phone"
-                                v-model="crudForm.phone"
-                                placeholder="08xxxxxxxx"
-                            />
-                            <InputError :message="crudForm.errors.phone" />
-                        </div>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <Label for="form-address">Alamat</Label>
-                        <Textarea
-                            id="form-address"
-                            v-model="crudForm.address"
-                            placeholder="Alamat lengkap..."
-                        />
-                        <InputError :message="crudForm.errors.address" />
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <Label for="form-password">
-                            Kata Sandi
-                            <span
-                                v-if="crudForm.role === 'student'"
-                                class="text-xs font-normal text-muted-foreground"
-                            >
-                                (Kosongkan untuk menggunakan NIM)
-                            </span>
-                        </Label>
-                        <PasswordInput
-                            id="form-password"
-                            v-model="crudForm.password"
-                            placeholder="Kata Sandi"
-                            :required="
-                                crudForm.role !== 'student' && !crudForm.id
-                            "
-                        />
-                        <InputError :message="crudForm.errors.password" />
-                    </div>
-
-                    <DialogFooter class="pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            @click="showAddEditModal = false"
-                            >Batal</Button
-                        >
-                        <Button type="submit" :disabled="crudForm.processing">
-                            <Spinner
-                                v-if="crudForm.processing"
-                                class="mr-2 h-4 w-4 animate-spin"
-                            />
-                            Simpan
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-
-        <!-- IMPORT USER DIALOG -->
-        <Dialog v-model:open="showImportModal">
-            <DialogContent class="sm:max-w-[450px]">
-                <DialogHeader>
-                    <DialogTitle>Impor Data Mahasiswa</DialogTitle>
-                    <DialogDescription>
-                        Impor data pengguna massal menggunakan file Excel
-                        (.xlsx) atau CSV (.csv).
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div class="space-y-4 py-3">
-                    <div
-                        class="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs text-emerald-800 dark:text-emerald-300"
-                    >
-                        <h4 class="flex items-center gap-2 font-bold">
-                            <FileDown
-                                class="h-4 w-4 text-emerald-600 dark:text-emerald-400"
-                            />
-                            Informasi & Ketentuan Impor:
-                        </h4>
-                        <ul class="list-disc space-y-1 pl-4 leading-relaxed">
-                            <li>
-                                Impor massal hanya diperuntukkan untuk pengguna
-                                dengan peran <strong>Mahasiswa</strong>.
-                            </li>
-                            <li>
-                                Data minimum yang wajib diisi pada baris kolom
-                                adalah: <strong>name</strong>,
-                                <strong>nim</strong>, dan
-                                <strong>kelas</strong>.
-                            </li>
-                            <li>
-                                NIM mahasiswa akan secara otomatis digunakan
-                                sebagai password default mereka.
-                            </li>
-                            <li>
-                                Ukuran file maksimal yang didukung adalah
-                                <strong>10MB</strong>.
-                            </li>
-                        </ul>
-                        <div class="mt-2 border-t border-emerald-500/20 pt-2">
-                            <a
-                                :href="userImportTemplate.url()"
-                                class="inline-flex items-center gap-1.5 font-bold text-emerald-700 underline transition-colors hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200"
-                            >
-                                <FileDown class="h-4 w-4" />
-                                Unduh Template Impor (.xlsx)
-                            </a>
-                        </div>
-                    </div>
-
-                    <Alert variant="destructive">
-                        <AlertCircleIcon />
-                        <AlertTitle>XLSX File Parser Bug</AlertTitle>
-                        <AlertDescription>
-                            <p>
-                                Meskipun XLSX didukung, import menggunakan file
-                                XLSX cenderung error. Sebaiknya gunakan CSV
-                                sebagai gantinya.
-                            </p>
-                        </AlertDescription>
-                    </Alert>
-
-                    <div class="space-y-2">
-                        <Label for="import-file-input"
-                            >Pilih File XLSX / CSV</Label
-                        >
-                        <Input
-                            id="import-file-input"
-                            type="file"
-                            accept=".xlsx,.csv"
-                            @change="handleFileChange"
-                            class="cursor-pointer"
-                        />
-                    </div>
-
-                    <!-- Process indicator / Error / Success message -->
-                    <div
-                        v-if="importHttp.processing"
-                        class="flex items-center gap-3 rounded bg-muted/30 p-2 text-sm text-muted-foreground"
-                    >
-                        <Spinner class="h-4 w-4 animate-spin" />
-                        <span>Sedang mengimpor data, mohon tunggu...</span>
-                    </div>
-
-                    <div
-                        v-if="importHttp.progress"
-                        class="h-2 w-full overflow-hidden rounded bg-muted"
-                    >
-                        <div
-                            class="h-full bg-primary transition-all duration-300"
-                            :style="`width: ${importHttp.progress.percentage}%`"
-                        />
-                    </div>
-
-                    <div
-                        v-if="importError"
-                        class="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs font-semibold text-destructive"
-                    >
-                        <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{{ importError }}</span>
-                    </div>
-
-                    <div
-                        v-if="importSuccess"
-                        class="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
-                    >
-                        <UserCheck class="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{{ importSuccess }}</span>
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        @click="showImportModal = false"
-                        :disabled="importHttp.processing"
-                        >Tutup</Button
-                    >
-                    <Button
-                        @click="submitImport"
-                        :disabled="importHttp.processing || !importHttp.file"
-                    >
-                        <Spinner
-                            v-if="importHttp.processing"
-                            class="mr-2 h-4 w-4 animate-spin"
-                        />
-                        Mulai Impor
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-
-        <!-- DELETE CONFIRM DIALOG -->
-        <Dialog v-model:open="showDeleteConfirmModal">
-            <DialogContent class="sm:max-w-[400px]">
-                <DialogHeader>
-                    <DialogTitle
-                        class="flex items-center gap-2 text-destructive"
-                    >
-                        <ShieldAlert class="h-5 w-5" />
-                        Konfirmasi Hapus Pengguna
-                    </DialogTitle>
-                    <DialogDescription>
-                        Apakah Anda yakin ingin menghapus pengguna ini? Tindakan
-                        ini tidak dapat dibatalkan dan akan menghapus seluruh
-                        data terkait.
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div v-if="userToDelete" class="py-2 text-sm">
-                    <div class="grid grid-cols-3 py-1 text-muted-foreground">
-                        <span class="font-semibold">Nama:</span
-                        ><span class="col-span-2 text-foreground">{{
-                            userToDelete.name
-                        }}</span>
-                    </div>
-                    <div class="grid grid-cols-3 py-1 text-muted-foreground">
-                        <span class="font-semibold">Email:</span
-                        ><span class="col-span-2 text-foreground">{{
-                            userToDelete.email
-                        }}</span>
-                    </div>
-                    <div class="grid grid-cols-3 py-1 text-muted-foreground">
-                        <span class="font-semibold">NIM:</span
-                        ><span class="col-span-2 text-foreground">{{
-                            userToDelete.nim || '-'
-                        }}</span>
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        @click="showDeleteConfirmModal = false"
-                        >Batal</Button
-                    >
-                    <Button variant="destructive" @click="deleteUser"
-                        >Hapus</Button
-                    >
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <UserDeleteDialog
+            v-model:open="showDeleteConfirmModal"
+            :user="userToDelete"
+            @success="router.reload({ only: ['users'] })"
+        />
     </div>
 </template>

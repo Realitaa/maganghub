@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Submissions\UploadResponseLetterRequest;
 use App\Models\InternshipSubmission;
 use App\Models\User;
 use App\Services\DocumentGeneratorService;
@@ -108,18 +109,9 @@ class InternshipSubmissionController extends Controller
     /**
      * Upload the company response letter.
      */
-    public function uploadResponse(Request $request, InternshipSubmission $submission): RedirectResponse
+    public function uploadResponse(UploadResponseLetterRequest $request, InternshipSubmission $submission): RedirectResponse
     {
         Gate::authorize('uploadResponse', $submission);
-
-        $request->validate([
-            'file' => 'required|file|mimes:pdf,docx,png,jpg,jpeg|max:2048',
-        ], [
-            'file.required' => 'Surat balasan wajib diunggah.',
-            'file.file' => 'Berkas yang diunggah harus berupa file.',
-            'file.mimes' => 'Format file surat balasan harus berupa PDF, DOCX, PNG, JPG, atau JPEG.',
-            'file.max' => 'Ukuran file surat balasan tidak boleh lebih dari 2 MB.',
-        ]);
 
         if ($submission->company_response_path) {
             Storage::delete($submission->company_response_path);

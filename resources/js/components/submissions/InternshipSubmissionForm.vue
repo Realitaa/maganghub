@@ -1,0 +1,474 @@
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3';
+import {
+    parseDate,
+    DateFormatter,
+    getLocalTimeZone,
+} from '@internationalized/date';
+import {
+    AlertCircle,
+    Building2,
+    FileText,
+    Phone,
+    Calendar,
+    MapPin,
+    Save,
+    Send,
+} from '@lucide/vue';
+import { ref, computed, watch } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
+import {
+    store as submissionStore,
+    submit as submissionSubmit,
+} from '@/routes/groups/submissions';
+
+import type { Group } from '@/types';
+
+const props = defineProps<{
+    group: Group;
+    isLeader: boolean;
+    isSubmissionEditable: boolean;
+    groupStatusLabel: string;
+    statusDescription: string;
+}>();
+
+const showSubmitConfirm = ref(false);
+const isProcessing = ref(false);
+
+const submissionForm = useForm({
+    company_name: props.group?.active_submission?.company_name ?? '',
+    company_address: props.group?.active_submission?.company_address ?? '',
+    company_contact: props.group?.active_submission?.company_contact ?? '',
+    division: props.group?.active_submission?.division ?? '',
+    field_of_interest: props.group?.active_submission?.field_of_interest ?? '',
+    start_date: props.group?.active_submission?.start_date
+        ? props.group.active_submission.start_date.substring(0, 10)
+        : '',
+    end_date: props.group?.active_submission?.end_date
+        ? props.group.active_submission.end_date.substring(0, 10)
+        : '',
+});
+
+watch(
+    () => props.group?.active_submission,
+    (newSub) => {
+        submissionForm.company_name = newSub?.company_name ?? '';
+        submissionForm.company_address = newSub?.company_address ?? '';
+        submissionForm.company_contact = newSub?.company_contact ?? '';
+        submissionForm.division = newSub?.division ?? '';
+        submissionForm.field_of_interest = newSub?.field_of_interest ?? '';
+        submissionForm.start_date = newSub?.start_date
+            ? newSub.start_date.substring(0, 10)
+            : '';
+        submissionForm.end_date = newSub?.end_date
+            ? newSub.end_date.substring(0, 10)
+            : '';
+    },
+    { deep: true },
+);
+
+const dateFormatter = new DateFormatter('id-ID', {
+    dateStyle: 'medium',
+});
+
+const startDateValue = computed({
+    get: () => {
+        return submissionForm.start_date
+            ? parseDate(submissionForm.start_date)
+            : undefined;
+    },
+    set: (val) => {
+        submissionForm.start_date = val ? val.toString() : '';
+    },
+});
+
+const endDateValue = computed({
+    get: () => {
+        return submissionForm.end_date
+            ? parseDate(submissionForm.end_date)
+            : undefined;
+    },
+    set: (val) => {
+        submissionForm.end_date = val ? val.toString() : '';
+    },
+});
+
+function saveSubmissionDraft() {
+    isProcessing.value = true;
+    submissionForm.post(submissionStore.url(), {
+        preserveScroll: true,
+        onFinish: () => {
+            isProcessing.value = false;
+        },
+    });
+}
+
+function submitSubmissionProposal() {
+    isProcessing.value = true;
+    submissionForm.post(submissionSubmit.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showSubmitConfirm.value = false;
+        },
+        onFinish: () => {
+            isProcessing.value = false;
+        },
+    });
+}
+</script>
+
+<template>
+    <div class="space-y-6">
+        <!-- Status Banner -->
+        <div
+            v-if="
+                group.status !== 'forming' &&
+                group.status !== 'company_rejected'
+            "
+            class="flex gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground"
+        >
+            <AlertCircle class="h-5 w-5 shrink-0 text-primary" />
+            <div>
+                <h4 class="mb-1 font-semibold">
+                    Status Pengajuan Magang: {{ groupStatusLabel }}
+                </h4>
+                <p class="text-xs text-muted-foreground">
+                    {{ statusDescription }}
+                </p>
+            </div>
+        </div>
+        <div
+            v-else
+            class="flex gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 text-sm text-foreground"
+        >
+            <AlertCircle
+                class="h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-500"
+            />
+            <div>
+                <h4 class="mb-1 font-semibold" v-if="isLeader">
+                    Persiapan Pengajuan Magang
+                </h4>
+                <h4 class="mb-1 font-semibold" v-else>
+                    Menunggu Pengajuan Ketua Kelompok
+                </h4>
+                <p class="text-xs text-muted-foreground" v-if="isLeader">
+                    Isi data instansi/perusahaan tujuan magang di bawah ini.
+                    Setelah diajukan, data dan keanggotaan akan
+                    <strong>dikunci</strong>.
+                </p>
+                <p class="text-xs text-muted-foreground" v-else>
+                    Draf data pengajuan sedang diisi oleh ketua kelompok ({{
+                        group.leader.name
+                    }}).
+                </p>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form @submit.prevent class="space-y-6">
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="space-y-1.5">
+                    <Label
+                        for="company_name"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <Building2 class="h-3.5 w-3.5" />
+                        Nama Perusahaan / Instansi
+                    </Label>
+                    <Input
+                        id="company_name"
+                        v-model="submissionForm.company_name"
+                        placeholder="Contoh: PT Teknologi Nusantara"
+                        :disabled="!isSubmissionEditable"
+                    />
+                    <span
+                        v-if="submissionForm.errors.company_name"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.company_name }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="field_of_interest"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <FileText class="h-3.5 w-3.5" />
+                        Bidang yang Diminati
+                    </Label>
+                    <Input
+                        id="field_of_interest"
+                        v-model="submissionForm.field_of_interest"
+                        placeholder="Contoh: Web Developer, UI/UX"
+                        :disabled="!isSubmissionEditable"
+                    />
+                    <span
+                        v-if="submissionForm.errors.field_of_interest"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.field_of_interest }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="division"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <Building2 class="h-3.5 w-3.5" />
+                        Divisi Pekerjaan (Opsional)
+                    </Label>
+                    <Input
+                        id="division"
+                        v-model="submissionForm.division"
+                        placeholder="Contoh: Frontend, Backend"
+                        :disabled="!isSubmissionEditable"
+                    />
+                    <span
+                        v-if="submissionForm.errors.division"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.division }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="space-y-1.5">
+                    <Label
+                        for="company_contact"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <Phone class="h-3.5 w-3.5" />
+                        Kontak Instansi (No. Telp / Email)
+                    </Label>
+                    <Input
+                        id="company_contact"
+                        v-model="submissionForm.company_contact"
+                        placeholder="Contoh: hr@company.com / 021-xxxxxx"
+                        :disabled="!isSubmissionEditable"
+                    />
+                    <span
+                        v-if="submissionForm.errors.company_contact"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.company_contact }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="start_date"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <Calendar class="h-3.5 w-3.5" />
+                        Tanggal Mulai
+                    </Label>
+                    <Popover>
+                        <PopoverTrigger as-child>
+                            <Button
+                                id="start_date"
+                                variant="outline"
+                                role="combobox"
+                                :class="
+                                    cn(
+                                        'h-10 w-full justify-start text-left font-normal',
+                                        !submissionForm.start_date &&
+                                            'text-muted-foreground',
+                                    )
+                                "
+                                :disabled="!isSubmissionEditable"
+                            >
+                                <Calendar
+                                    class="mr-2 h-4 w-4 text-muted-foreground"
+                                />
+                                <span>
+                                    {{
+                                        submissionForm.start_date
+                                            ? dateFormatter.format(
+                                                  startDateValue!.toDate(
+                                                      getLocalTimeZone(),
+                                                  ),
+                                              )
+                                            : 'Pilih tanggal...'
+                                    }}
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent class="w-auto p-0" align="start">
+                            <CalendarComponent
+                                v-model="startDateValue"
+                                initial-focus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <span
+                        v-if="submissionForm.errors.start_date"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.start_date }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="end_date"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <Calendar class="h-3.5 w-3.5" />
+                        Tanggal Selesai
+                    </Label>
+                    <Popover>
+                        <PopoverTrigger as-child>
+                            <Button
+                                id="end_date"
+                                variant="outline"
+                                role="combobox"
+                                :class="
+                                    cn(
+                                        'h-10 w-full justify-start text-left font-normal',
+                                        !submissionForm.end_date &&
+                                            'text-muted-foreground',
+                                    )
+                                "
+                                :disabled="!isSubmissionEditable"
+                            >
+                                <Calendar
+                                    class="mr-2 h-4 w-4 text-muted-foreground"
+                                />
+                                <span>
+                                    {{
+                                        submissionForm.end_date
+                                            ? dateFormatter.format(
+                                                  endDateValue!.toDate(
+                                                      getLocalTimeZone(),
+                                                  ),
+                                              )
+                                            : 'Pilih tanggal...'
+                                    }}
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent class="w-auto p-0" align="start">
+                            <CalendarComponent
+                                v-model="endDateValue"
+                                initial-focus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <span
+                        v-if="submissionForm.errors.end_date"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.end_date }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <Label
+                    for="company_address"
+                    class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                >
+                    <MapPin class="h-3.5 w-3.5" />
+                    Alamat Lengkap Perusahaan
+                </Label>
+                <textarea
+                    id="company_address"
+                    v-model="submissionForm.company_address"
+                    placeholder="Contoh: Jl. Jenderal Sudirman No. 12, Jakarta Selatan"
+                    rows="3"
+                    class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!isSubmissionEditable"
+                ></textarea>
+                <span
+                    v-if="submissionForm.errors.company_address"
+                    class="text-xs text-destructive"
+                >
+                    {{ submissionForm.errors.company_address }}
+                </span>
+            </div>
+
+            <div
+                v-if="isSubmissionEditable"
+                class="flex justify-end gap-3 border-t border-border pt-4"
+            >
+                <Button
+                    type="button"
+                    variant="outline"
+                    @click="saveSubmissionDraft"
+                    :disabled="isProcessing"
+                    id="btn-save-draft"
+                >
+                    <Spinner
+                        v-if="isProcessing"
+                        class="mr-2 h-4 w-4 animate-spin"
+                    />
+                    <Save v-else class="mr-2 h-4 w-4" />
+                    Simpan Draf
+                </Button>
+                <Button
+                    type="button"
+                    @click="showSubmitConfirm = true"
+                    :disabled="isProcessing"
+                    id="btn-submit-proposal"
+                >
+                    <Send class="mr-2 h-4 w-4" />
+                    Ajukan Magang
+                </Button>
+            </div>
+        </form>
+
+        <!-- Submit Proposal Confirm Dialog -->
+        <Dialog v-model:open="showSubmitConfirm">
+            <DialogContent class="sm:max-w-[400px]">
+                <DialogHeader>
+                    <DialogTitle>Ajukan Permohonan Magang</DialogTitle>
+                    <DialogDescription>
+                        Apakah Anda yakin ingin mengajukan permohonan magang?
+                        <span class="mt-2 block font-semibold text-destructive">
+                            Tindakan ini akan mengirimkan data pengajuan ke
+                            program studi dan mengunci komposisi anggota
+                            kelompok serta data perusahaan.
+                        </span>
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showSubmitConfirm = false"
+                        >Batal</Button
+                    >
+                    <Button
+                        id="btn-confirm-submit-proposal"
+                        @click="submitSubmissionProposal"
+                        :disabled="isProcessing"
+                    >
+                        <Spinner
+                            v-if="isProcessing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
+                        Ya, Ajukan
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    </div>
+</template>

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Templates\StoreTemplateRequest;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -16,9 +18,7 @@ class InternshipTemplateController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
-        if (! in_array($request->user()->role, ['operator', 'administrator'])) {
-            abort(403, 'Unauthorized.');
-        }
+        Gate::authorize('manage-templates');
 
         $path = 'templates/letter_template.docx';
         $exists = Storage::exists($path);
@@ -33,28 +33,11 @@ class InternshipTemplateController extends Controller
     /**
      * Store/update the uploaded template file.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTemplateRequest $request): RedirectResponse
     {
-        if (! in_array($request->user()->role, ['operator', 'administrator'])) {
-            abort(403, 'Unauthorized.');
-        }
-
-        $request->validate([
-            'file' => 'required|file|max:5120',
-        ], [
-            'file.required' => 'File template wajib diunggah.',
-            'file.file' => 'Berkas harus berupa file.',
-            'file.max' => 'Ukuran file template tidak boleh lebih dari 5 MB.',
-        ]);
+        Gate::authorize('manage-templates');
 
         $file = $request->file('file');
-        $extension = strtolower($file->getClientOriginalExtension());
-
-        if ($extension !== 'docx') {
-            return redirect()->back()->withErrors([
-                'file' => 'Format file template harus berupa berkas Word (.docx).',
-            ]);
-        }
 
         $dir = 'templates';
         if (! Storage::exists($dir)) {

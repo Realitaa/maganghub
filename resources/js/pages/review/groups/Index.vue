@@ -40,36 +40,7 @@ defineOptions({
     },
 });
 
-// Define Types
-interface Member {
-    id: number;
-    name: string;
-    nim: string;
-}
-
-interface Membership {
-    id: number;
-    user: Member;
-}
-
-interface ActiveSubmission {
-    id: number;
-    company_name: string;
-    start_date: string;
-    end_date: string;
-}
-
-interface Group {
-    id: number;
-    code: string;
-    status: string;
-    leader_id: number;
-    computed_status: 'segera_magang' | 'melaksanakan_magang' | 'selesai_magang';
-    leader: Member | null;
-    memberships: Membership[];
-    active_submission?: ActiveSubmission | null;
-    activeSubmission?: ActiveSubmission | null;
-}
+import type { Group } from '@/types';
 
 // Props
 const props = defineProps<{
@@ -341,7 +312,7 @@ function getStatusClass(status?: string) {
                                 >
                                     <div class="flex items-center gap-1.5">
                                         <Building2
-                                            class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground"
+                                            class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
                                         <span>{{
                                             group.active_submission
@@ -357,7 +328,7 @@ function getStatusClass(status?: string) {
                                         class="flex items-center gap-1.5 text-xs"
                                     >
                                         <Calendar
-                                            class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground"
+                                            class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
                                         <span>
                                             {{

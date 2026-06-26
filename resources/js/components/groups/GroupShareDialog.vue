@@ -11,17 +11,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Group {
-    id: number;
-    code: string;
-    status: string;
-    leader: { name: string };
-    banner_url?: string | null;
-    og_image_url?: string | null;
-    invite_url?: string | null;
-}
+import type { Group } from '@/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -120,7 +110,7 @@ const { copy: copyLink, copied: linkCopied } = useClipboard({
                     </div>
                     <!-- Gradient overlay like WhatsApp does -->
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
+                        class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"
                     />
                 </div>
 

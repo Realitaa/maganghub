@@ -8,6 +8,7 @@ export type User = {
     updated_at: string;
     nim: string;
     phone: string;
+    address?: string | null;
     role: string;
     gender: 'L' | 'P';
     is_active: boolean;
@@ -24,6 +25,17 @@ export type Auth = {
         password_changed: boolean;
         profile_completed: boolean;
     } | null;
+};
+
+export type MemberDetail = {
+    id: number;
+    name: string;
+    email: string;
+    nim?: string;
+    phone?: string;
+    address?: string;
+    gender?: string;
+    semester?: number;
 };
 
 /* @chisel-passkeys */

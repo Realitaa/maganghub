@@ -23,6 +23,7 @@ import {
     index as templateIndex,
     store as templateStore,
 } from '@/routes/review/templates';
+import type { TemplateStatus } from '@/types';
 
 // Define layout breadcrumbs
 defineOptions({
@@ -37,12 +38,6 @@ defineOptions({
 });
 
 // ─── Props ────────────────────────────────────────────────────────────────────
-
-interface TemplateStatus {
-    exists: boolean;
-    size: string | null;
-    updatedAt: string | null;
-}
 
 defineProps<{
     template: TemplateStatus;
@@ -115,7 +110,7 @@ function handleFileChange(event: Event) {
                         class="flex items-start gap-3 rounded-xl border border-green-200/60 bg-green-50/10 p-4 dark:border-green-900/60 dark:bg-green-950/10"
                     >
                         <CheckCircle2
-                            class="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400"
+                            class="mt-0.5 h-5 w-5 shrink-0 text-green-600 dark:text-green-400"
                         />
                         <div>
                             <h4
@@ -138,7 +133,7 @@ function handleFileChange(event: Event) {
                         class="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4"
                     >
                         <AlertCircle
-                            class="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive"
+                            class="mt-0.5 h-5 w-5 shrink-0 text-destructive"
                         />
                         <div>
                             <h4 class="text-sm font-semibold text-destructive">

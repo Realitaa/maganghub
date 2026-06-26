@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Submissions\CompanyDecisionRequest;
+use App\Http\Requests\Submissions\RejectSubmissionRequest;
 use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Services\InternshipReviewService;
@@ -95,17 +97,11 @@ class InternshipReviewController extends Controller
     /**
      * Reject the specified submission with notes.
      */
-    public function reject(Request $request, InternshipSubmission $submission): RedirectResponse
+    public function reject(RejectSubmissionRequest $request, InternshipSubmission $submission): RedirectResponse
     {
         Gate::authorize('reject', $submission);
 
         try {
-            $request->validate([
-                'notes' => ['required', 'string'],
-            ], [
-                'notes.required' => 'Catatan penolakan wajib diisi.',
-            ]);
-
             $this->reviewService->rejectSubmission($submission, $request->input('notes'));
 
             return Inertia::flash('toast', [
@@ -173,15 +169,9 @@ class InternshipReviewController extends Controller
     /**
      * Process the company placement outcome decision.
      */
-    public function companyDecision(Request $request, InternshipSubmission $submission): RedirectResponse
+    public function companyDecision(CompanyDecisionRequest $request, InternshipSubmission $submission): RedirectResponse
     {
         Gate::authorize('approve', $submission);
-
-        $request->validate([
-            'decision' => ['required', 'string', 'in:all_accepted,all_rejected,partially_accepted'],
-            'member_decisions' => ['nullable', 'array'],
-            'new_leader_id' => ['nullable', 'integer', 'exists:users,id'],
-        ]);
 
         try {
             $this->reviewService->processCompanyDecision(

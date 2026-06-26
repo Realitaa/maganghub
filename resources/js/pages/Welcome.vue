@@ -794,7 +794,7 @@ const faqs = [
 
         <!-- Statistics Section -->
         <section
-            class="relative overflow-hidden border-y border-emerald-500/25 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 py-16 text-white md:py-20 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
+            class="relative overflow-hidden border-y border-emerald-500/25 bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 py-16 text-white md:py-20 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
         >
             <!-- Decorative vector patterns inside statistics section for texture -->
             <div
@@ -889,7 +889,7 @@ const faqs = [
         <!-- CTA Jumbotron -->
         <section class="mx-6 my-12 max-w-7xl lg:mx-auto">
             <div
-                class="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 px-8 py-16 text-center text-primary-foreground shadow-xl dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
+                class="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 px-8 py-16 text-center text-primary-foreground shadow-xl dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
             >
                 <!-- Soft yellow radial glow accents (Unimed identity) -->
                 <div

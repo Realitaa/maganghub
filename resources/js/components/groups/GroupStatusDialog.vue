@@ -18,20 +18,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Submission {
-    company_name: string;
-    status: string;
-}
-
-interface Group {
-    id: number;
-    code: string;
-    status: string;
-    leader: { name: string };
-    active_submission?: Submission | null;
-}
+import type { Group } from '@/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -173,7 +160,7 @@ const statusInfo = computed(() => {
                 class="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-4"
             >
                 <div
-                    class="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
+                    class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
                     :class="`bg-${statusInfo.color.replace('text-', '')}/10`"
                 >
                     <component
@@ -210,7 +197,7 @@ const statusInfo = computed(() => {
                         <!-- Connector line -->
                         <div class="flex flex-col items-center">
                             <div
-                                class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
+                                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all"
                                 :class="[
                                     index < currentStepIndex
                                         ? 'border-primary bg-primary text-primary-foreground'
