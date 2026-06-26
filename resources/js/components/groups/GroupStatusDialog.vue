@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
     CheckCircle2,
-    Circle,
     Clock,
     FileCheck,
     FileText,
@@ -17,6 +16,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import WorkflowStepper from '@/components/WorkflowStepper.vue';
 
 import type { Group } from '@/types';
 
@@ -30,40 +30,6 @@ const props = defineProps<{
 defineEmits<{
     (e: 'update:open', value: boolean): void;
 }>();
-
-// ─── Progress Steps ───────────────────────────────────────────────────────────
-
-/**
- * Maps internal status values to ordered progress steps with human labels.
- * Internal states (submitted, applying, accepted) are hidden from the user.
- */
-const progressSteps = [
-    { key: 'forming', label: 'Membentuk Kelompok', icon: Users },
-    { key: 'pengajuan', label: 'Pengajuan Dikirim', icon: FileText },
-    { key: 'letter_published', label: 'Surat Terbit', icon: FileCheck },
-    { key: 'applying', label: 'Menunggu Balasan', icon: Clock },
-    { key: 'internship_started', label: 'Magang Dimulai', icon: Trophy },
-    { key: 'completed', label: 'Selesai', icon: CheckCircle2 },
-];
-
-const statusToStepIndex: Record<string, number> = {
-    forming: 0,
-    submitted: 1,
-    under_review: 1,
-    letter_published: 2,
-    applying: 3,
-    accepted: 3,
-    partially_accepted: 3,
-    rejected: 3,
-    internship_started: 4,
-    completed: 5,
-};
-
-const currentStepIndex = computed(() => {
-    return statusToStepIndex[props.group.status] ?? 0;
-});
-
-const isRejected = computed(() => props.group.status === 'rejected');
 
 // ─── Human-readable status info ───────────────────────────────────────────────
 
@@ -147,7 +113,7 @@ const statusInfo = computed(() => {
 
 <template>
     <Dialog :open="open" @update:open="$emit('update:open', $event)">
-        <DialogContent class="sm:max-w-lg">
+        <DialogContent class="sm:max-w-lg lg:max-w-5xl">
             <DialogHeader>
                 <DialogTitle>Status Kelompok</DialogTitle>
                 <DialogDescription>
@@ -188,73 +154,7 @@ const statusInfo = computed(() => {
                 >
                     Progres Kelompok
                 </p>
-                <div class="relative space-y-0">
-                    <div
-                        v-for="(step, index) in progressSteps"
-                        :key="step.key"
-                        class="flex items-start gap-3"
-                    >
-                        <!-- Connector line -->
-                        <div class="flex flex-col items-center">
-                            <div
-                                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all"
-                                :class="[
-                                    index < currentStepIndex
-                                        ? 'border-primary bg-primary text-primary-foreground'
-                                        : index === currentStepIndex
-                                          ? isRejected
-                                              ? 'border-destructive bg-destructive text-destructive-foreground'
-                                              : 'border-primary bg-primary/10 text-primary'
-                                          : 'border-border bg-muted/40 text-muted-foreground/50',
-                                ]"
-                            >
-                                <CheckCircle2
-                                    v-if="index < currentStepIndex"
-                                    class="h-3.5 w-3.5"
-                                />
-                                <XCircle
-                                    v-else-if="
-                                        index === currentStepIndex && isRejected
-                                    "
-                                    class="h-3.5 w-3.5"
-                                />
-                                <Circle
-                                    v-else-if="index === currentStepIndex"
-                                    class="h-3 w-3 fill-current"
-                                />
-                                <Circle v-else class="h-3 w-3" />
-                            </div>
-                            <!-- Line between steps -->
-                            <div
-                                v-if="index < progressSteps.length - 1"
-                                class="mt-0.5 h-6 w-0.5 rounded-full"
-                                :class="
-                                    index < currentStepIndex
-                                        ? 'bg-primary'
-                                        : 'bg-border'
-                                "
-                            />
-                        </div>
-
-                        <!-- Step label -->
-                        <div class="pt-0.5 pb-1">
-                            <p
-                                class="text-sm leading-7"
-                                :class="[
-                                    index < currentStepIndex
-                                        ? 'font-medium text-foreground'
-                                        : index === currentStepIndex
-                                          ? isRejected
-                                              ? 'font-semibold text-destructive'
-                                              : 'font-semibold text-primary'
-                                          : 'text-muted-foreground/60',
-                                ]"
-                            >
-                                {{ step.label }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <WorkflowStepper mode="dialog" :status="group.status" />
             </div>
         </DialogContent>
     </Dialog>

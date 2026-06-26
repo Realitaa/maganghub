@@ -7,11 +7,6 @@ import {
     ShieldCheck,
     Activity,
     NotebookPen,
-    UserPlus,
-    FilePlus,
-    Mail,
-    CheckCircle,
-    Briefcase,
     Menu,
     X,
     Check,
@@ -42,15 +37,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-    Stepper,
-    StepperTrigger,
-    StepperItem,
-    StepperIndicator,
-    StepperTitle,
-    StepperDescription,
-    StepperSeparator,
-} from '@/components/ui/stepper';
+import WorkflowStepper from '@/components/WorkflowStepper.vue';
 import { dashboard, home, login } from '@/routes';
 
 // state
@@ -168,51 +155,6 @@ const features = [
         description:
             'Catat laporan aktivitas harian, unggah bukti penugasan magang, dan dapatkan umpan balik dosen.',
         icon: NotebookPen,
-    },
-];
-
-const workflowSteps = [
-    {
-        step: 1,
-        title: 'Buat Kelompok',
-        description:
-            'Bentuk kelompok magang bersama rekan mahasiswa dari program studi yang sama.',
-        icon: UserPlus,
-    },
-    {
-        step: 2,
-        title: 'Ajukan Magang',
-        description:
-            'Masukkan data lengkap perusahaan tujuan dan berkas proposal magang.',
-        icon: FilePlus,
-    },
-    {
-        step: 3,
-        title: 'Review Admin',
-        description:
-            'Persetujuan akademik dan verifikasi berkas oleh koordinator magang program studi.',
-        icon: ShieldCheck,
-    },
-    {
-        step: 4,
-        title: 'Kirim Perusahaan',
-        description:
-            'Penerbitan surat permohonan magang resmi dan pengiriman ke pihak instansi tujuan.',
-        icon: Mail,
-    },
-    {
-        step: 5,
-        title: 'Terima Respons',
-        description:
-            'Instansi memberikan balasan penerimaan dan mahasiswa mengunggah bukti tersebut di portal.',
-        icon: CheckCircle,
-    },
-    {
-        step: 6,
-        title: 'Mulai Magang',
-        description:
-            'Kegiatan magang resmi dimulai. Laporkan perkembangan harian Anda melalui modul logbook digital.',
-        icon: Briefcase,
     },
 ];
 
@@ -700,95 +642,7 @@ const faqs = [
                 </div>
 
                 <!-- Timeline Steps -->
-                <!-- Desktop: Horizontal Layout -->
-                <Stepper
-                    :model-value="hoveredStep"
-                    class="relative hidden w-full items-start justify-between lg:flex"
-                >
-                    <template v-for="item in workflowSteps" :key="item.step">
-                        <StepperItem
-                            :step="item.step"
-                            @mouseenter="hoveredStep = item.step"
-                            class="group relative z-10 flex flex-1 flex-col items-center text-center"
-                        >
-                            <StepperTrigger
-                                class="flex cursor-default flex-col items-center gap-0 p-0 hover:bg-transparent"
-                            >
-                                <StepperIndicator
-                                    class="flex h-16 w-16 items-center justify-center rounded-full border-4 border-background bg-muted text-muted-foreground transition-all duration-300 group-data-[state=active]:border-primary/25 group-data-[state=active]:bg-primary group-data-[state=active]:text-primary-foreground"
-                                >
-                                    <component
-                                        :is="item.icon"
-                                        class="h-6 w-6"
-                                    />
-                                </StepperIndicator>
-                            </StepperTrigger>
-
-                            <StepperSeparator
-                                v-if="item.step !== workflowSteps.length"
-                                class="absolute top-8 right-[calc(-50%+2rem)] left-[calc(50%+2rem)] z-0 h-[2px] bg-border transition-colors duration-300 group-data-[state=completed]:bg-primary"
-                            />
-
-                            <span
-                                class="mt-3 text-xs font-bold tracking-wider text-primary uppercase"
-                                >Langkah {{ item.step }}</span
-                            >
-                            <StepperTitle
-                                class="mt-2 text-sm font-bold text-foreground"
-                                >{{ item.title }}</StepperTitle
-                            >
-                            <StepperDescription
-                                class="mt-1 px-2 text-xs text-muted-foreground"
-                                >{{ item.description }}</StepperDescription
-                            >
-                        </StepperItem>
-                    </template>
-                </Stepper>
-
-                <!-- Mobile: Vertical Layout -->
-                <Stepper
-                    :model-value="hoveredStep"
-                    orientation="vertical"
-                    class="relative flex flex-col space-y-8 before:absolute before:top-2 before:bottom-2 before:left-[27px] before:w-[2px] before:bg-border lg:hidden"
-                >
-                    <StepperItem
-                        v-for="item in workflowSteps"
-                        :key="item.step"
-                        :step="item.step"
-                        @mouseenter="hoveredStep = item.step"
-                        class="group flex w-full items-start gap-4"
-                    >
-                        <StepperTrigger
-                            class="flex cursor-default items-center justify-center p-0 hover:bg-transparent"
-                        >
-                            <StepperIndicator
-                                class="z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 border-background bg-muted text-muted-foreground transition-all duration-300 group-data-[state=active]:border-primary/25 group-data-[state=active]:bg-primary group-data-[state=active]:text-primary-foreground"
-                            >
-                                <component
-                                    :is="item.icon"
-                                    class="h-5.5 w-5.5"
-                                />
-                            </StepperIndicator>
-                        </StepperTrigger>
-
-                        <div
-                            class="flex-1 rounded-xl border border-border/80 bg-background p-4.5 dark:bg-zinc-950"
-                        >
-                            <span
-                                class="text-xs font-bold tracking-wider text-primary uppercase"
-                                >Langkah {{ item.step }}</span
-                            >
-                            <StepperTitle
-                                class="mt-0.5 text-sm font-bold text-foreground"
-                                >{{ item.title }}</StepperTitle
-                            >
-                            <StepperDescription
-                                class="mt-1 text-xs text-muted-foreground"
-                                >{{ item.description }}</StepperDescription
-                            >
-                        </div>
-                    </StepperItem>
-                </Stepper>
+                <WorkflowStepper mode="landing" v-model="hoveredStep" />
             </div>
         </section>
 

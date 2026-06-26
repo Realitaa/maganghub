@@ -16,6 +16,7 @@ import {
     Send,
 } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import {
@@ -138,49 +139,38 @@ function submitSubmissionProposal() {
 <template>
     <div class="space-y-6">
         <!-- Status Banner -->
-        <div
+        <Alert
             v-if="
                 group.status !== 'forming' &&
                 group.status !== 'company_rejected'
             "
-            class="flex gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground"
+            variant="primary"
         >
-            <AlertCircle class="h-5 w-5 shrink-0 text-primary" />
-            <div>
-                <h4 class="mb-1 font-semibold">
-                    Status Pengajuan Magang: {{ groupStatusLabel }}
-                </h4>
-                <p class="text-xs text-muted-foreground">
-                    {{ statusDescription }}
-                </p>
-            </div>
-        </div>
-        <div
-            v-else
-            class="flex gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4 text-sm text-foreground"
-        >
-            <AlertCircle
-                class="h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-500"
-            />
-            <div>
-                <h4 class="mb-1 font-semibold" v-if="isLeader">
-                    Persiapan Pengajuan Magang
-                </h4>
-                <h4 class="mb-1 font-semibold" v-else>
-                    Menunggu Pengajuan Ketua Kelompok
-                </h4>
-                <p class="text-xs text-muted-foreground" v-if="isLeader">
-                    Isi data instansi/perusahaan tujuan magang di bawah ini.
-                    Setelah diajukan, data dan keanggotaan akan
-                    <strong>dikunci</strong>.
-                </p>
-                <p class="text-xs text-muted-foreground" v-else>
-                    Draf data pengajuan sedang diisi oleh ketua kelompok ({{
-                        group.leader.name
-                    }}).
-                </p>
-            </div>
-        </div>
+            <AlertCircle />
+            <AlertTitle>
+                Status Pengajuan Magang: {{ groupStatusLabel }}
+            </AlertTitle>
+            <AlertDescription>
+                {{ statusDescription }}
+            </AlertDescription>
+        </Alert>
+        <Alert v-else variant="warning">
+            <AlertCircle />
+            <AlertTitle v-if="isLeader">
+                Persiapan Pengajuan Magang
+            </AlertTitle>
+            <AlertTitle v-else> Menunggu Pengajuan Ketua Kelompok </AlertTitle>
+            <AlertDescription v-if="isLeader">
+                Isi data instansi/perusahaan tujuan magang di bawah ini. Setelah
+                diajukan, data dan keanggotaan akan
+                <strong>dikunci</strong>.
+            </AlertDescription>
+            <AlertDescription v-else>
+                Draf data pengajuan sedang diisi oleh ketua kelompok ({{
+                    group.leader.name
+                }}).
+            </AlertDescription>
+        </Alert>
 
         <!-- Form -->
         <form @submit.prevent class="space-y-6">
