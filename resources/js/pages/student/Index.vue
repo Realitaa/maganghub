@@ -26,6 +26,7 @@ import GroupStatusDialog from '@/components/groups/GroupStatusDialog.vue';
 import NoGroupState from '@/components/groups/NoGroupState.vue';
 import CompanyResponseTab from '@/components/submissions/CompanyResponseTab.vue';
 import InternshipSubmissionForm from '@/components/submissions/InternshipSubmissionForm.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { home } from '@/routes';
 
@@ -368,26 +369,25 @@ watch(showJoinConfirmDialog, (isOpen) => {
                         >
                             <TabsTrigger
                                 value="members"
-                                class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                             >
                                 Anggota
-                                <span
-                                    class="ml-1.5 inline-flex items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] leading-none font-semibold"
-                                >
+                                <Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs">
                                     {{ group.memberships.length }}
-                                </span>
+                                </Badge>
                             </TabsTrigger>
                             <TabsTrigger
+                                v-if="isLeader"
                                 value="requests"
-                                class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                class="relative items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                             >
                                 Permintaan
-                                <span
+                                <Badge
                                     v-if="group.join_requests.length > 0"
-                                    class="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] leading-none font-semibold text-primary-foreground"
+                                    class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
                                 >
                                     {{ group.join_requests.length }}
-                                </span>
+                                </Badge>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="submissions"
@@ -397,9 +397,15 @@ watch(showJoinConfirmDialog, (isOpen) => {
                             </TabsTrigger>
                             <TabsTrigger
                                 value="history"
-                                class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                             >
                                 Riwayat
+                                <Badge
+                                    v-if="group.timelines?.length"
+                                    class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                >
+                                    {{ group.timelines?.length }}
+                                </Badge>
                             </TabsTrigger>
                             <TabsTrigger
                                 v-if="showResponseTab"
@@ -420,7 +426,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                     </TabsContent>
 
                     <!-- ─ Requests Tab ─ -->
-                    <TabsContent value="requests" class="mt-0 space-y-4">
+                    <TabsContent v-if="isLeader" value="requests" class="mt-0 space-y-4">
                         <GroupJoinRequestsTab
                             :group="group"
                             :is-leader="isLeader"
