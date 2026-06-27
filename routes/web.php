@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('welcome');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('home', [DashboardController::class, 'index'])->name('home');
+    Route::redirect('dashboard', 'home')->name('dashboard');
+    Route::get('home', [HomeController::class, 'index'])->name('home');
 });
 
 Route::inertia('deactivated', 'auth/Deactivated')->name('deactivated');

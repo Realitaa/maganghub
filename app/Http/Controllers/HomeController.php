@@ -6,7 +6,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class DashboardController extends Controller
+class HomeController extends Controller
 {
     /**
      * Display the dashboard for the authenticated user.

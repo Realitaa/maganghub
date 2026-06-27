@@ -42,12 +42,12 @@ class UpdateUserRequest extends FormRequest
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
             'role' => ['required', 'string', Rule::in(['administrator', 'operator', 'student'])],
             'gender' => ['nullable', Rule::in(['L', 'P'])],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
-            'student_class_id' => ['nullable', 'exists:student_classes,id'],
+            'student_class_id' => ['nullable'],
         ];
 
         if ($role === 'student') {

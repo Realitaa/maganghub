@@ -203,18 +203,6 @@ class InternshipGroupService
             ]);
         }
 
-        if ($group->status !== 'forming') {
-            throw ValidationException::withMessages([
-                'error' => 'Kelompok ini sudah tidak menerima anggota baru.',
-            ]);
-        }
-
-        if ($request->status !== 'pending') {
-            throw ValidationException::withMessages([
-                'error' => 'Permintaan ini sudah tidak dapat diproses.',
-            ]);
-        }
-
         $request->update(['status' => 'rejected']);
 
         // Send notification

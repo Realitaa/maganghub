@@ -123,7 +123,6 @@ function formatDate(dateStr?: string) {
                                 <th class="p-4">Perusahaan Tujuan</th>
                                 <th class="p-4 text-center">Anggota</th>
                                 <th class="p-4">Tanggal Diajukan</th>
-                                <th class="p-4">Status</th>
                                 <th class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -149,14 +148,6 @@ function formatDate(dateStr?: string) {
                                 </td>
                                 <td class="p-4 text-muted-foreground">
                                     {{ formatDate(sub.submitted_at) }}
-                                </td>
-                                <td class="p-4">
-                                    <Badge
-                                        variant="default"
-                                        class="bg-primary hover:bg-primary/95"
-                                    >
-                                        Diajukan
-                                    </Badge>
                                 </td>
                                 <td class="p-4 text-right">
                                     <Button

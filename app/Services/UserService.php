@@ -13,6 +13,26 @@ use Maatwebsite\Excel\Facades\Excel;
 class UserService
 {
     /**
+     * Resolve or create student class by ID or Name.
+     */
+    protected function resolveStudentClassId(mixed $classInput): ?int
+    {
+        if (empty($classInput) || $classInput === 'none') {
+            return null;
+        }
+
+        if (is_numeric($classInput)) {
+            $exists = StudentClass::where('id', $classInput)->exists();
+            if ($exists) {
+                return (int) $classInput;
+            }
+        }
+
+        $studentClass = StudentClass::firstOrCreate(['name' => $classInput]);
+        return $studentClass->id;
+    }
+
+    /**
      * Create a new user.
      *
      * @param  array<string, mixed>  $data
@@ -26,6 +46,10 @@ class UserService
             $data['password'] = Hash::make($data['nim']);
         } else {
             $data['password'] = Hash::make($data['password']);
+        }
+
+        if ($role === 'student' && isset($data['student_class_id'])) {
+            $data['student_class_id'] = $this->resolveStudentClassId($data['student_class_id']);
         }
 
         return User::create($data);
@@ -43,6 +67,8 @@ class UserService
         if ($role !== 'student') {
             $data['nim'] = null;
             $data['student_class_id'] = null;
+        } elseif (isset($data['student_class_id'])) {
+            $data['student_class_id'] = $this->resolveStudentClassId($data['student_class_id']);
         }
 
         if (! empty($data['password'])) {

@@ -252,6 +252,7 @@ function cancelJoinRequest(requestId: number) {
                                     placeholder="Contoh: ABCDE12345"
                                     class="font-mono tracking-widest uppercase"
                                     maxlength="10"
+                                    autocomplete="off"
                                     @keydown.enter="sendJoinRequest"
                                 />
                             </div>

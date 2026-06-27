@@ -87,7 +87,7 @@ watch(
 );
 
 const dateFormatter = new DateFormatter('id-ID', {
-    dateStyle: 'medium',
+    dateStyle: 'long',
 });
 
 const startDateValue = computed({
@@ -273,7 +273,7 @@ function submitSubmissionProposal() {
                         <Calendar class="h-3.5 w-3.5" />
                         Tanggal Mulai
                     </Label>
-                    <Popover>
+                    <Popover v-slot="{ close }">
                         <PopoverTrigger as-child>
                             <Button
                                 id="start_date"
@@ -306,8 +306,10 @@ function submitSubmissionProposal() {
                         </PopoverTrigger>
                         <PopoverContent class="w-auto p-0" align="start">
                             <CalendarComponent
+                                locale="id-ID"
                                 v-model="startDateValue"
                                 initial-focus
+                                @update:model-value="close"
                             />
                         </PopoverContent>
                     </Popover>
@@ -327,7 +329,7 @@ function submitSubmissionProposal() {
                         <Calendar class="h-3.5 w-3.5" />
                         Tanggal Selesai
                     </Label>
-                    <Popover>
+                    <Popover v-slot="{ close }">
                         <PopoverTrigger as-child>
                             <Button
                                 id="end_date"
@@ -360,8 +362,10 @@ function submitSubmissionProposal() {
                         </PopoverTrigger>
                         <PopoverContent class="w-auto p-0" align="start">
                             <CalendarComponent
+                                locale="id-ID"
                                 v-model="endDateValue"
                                 initial-focus
+                                @update:model-value="close"
                             />
                         </PopoverContent>
                     </Popover>

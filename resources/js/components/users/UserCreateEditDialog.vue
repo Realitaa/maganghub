@@ -1,8 +1,20 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { watch } from 'vue';
+import { ChevronDown } from '@lucide/vue';
+import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import {
+    Autocomplete,
+    AutocompleteAnchor,
+    AutocompleteContent,
+    AutocompleteEmpty,
+    AutocompleteGroup,
+    AutocompleteItem,
+    AutocompleteInput,
+    AutocompleteTrigger,
+    AutocompleteViewport,
+} from '@/components/ui/autocomplete';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -81,6 +93,28 @@ watch(
     { immediate: true },
 );
 
+const classSearchText = ref('');
+const isClassOpen = ref(false);
+
+watch(
+    () => form.student_class_id,
+    (val) => {
+        if (val === 'none') {
+            classSearchText.value = '';
+        } else {
+            const found = props.classes.find((c) => c.id.toString() === val);
+            classSearchText.value = found ? found.name : '';
+        }
+    },
+    { immediate: true },
+);
+
+watch(classSearchText, (newVal) => {
+    if (!newVal) {
+        form.student_class_id = 'none';
+    }
+});
+
 function submitForm() {
     if (form.id) {
         form.patch(userUpdate.url(form.id), {
@@ -121,7 +155,7 @@ function submitForm() {
 
             <form @submit.prevent="submitForm" class="space-y-4 py-2">
                 <div class="space-y-1.5">
-                    <Label for="form-name">Nama Lengkap</Label>
+                    <Label for="form-name" required>Nama Lengkap</Label>
                     <Input
                         id="form-name"
                         v-model="form.name"
@@ -138,15 +172,14 @@ function submitForm() {
                         type="email"
                         v-model="form.email"
                         placeholder="nama@domain.com"
-                        required
                     />
                     <InputError :message="form.errors.email" />
                 </div>
 
                 <div class="space-y-1.5">
-                    <Label>Peran Pengguna</Label>
+                    <Label required>Peran Pengguna</Label>
                     <Select v-model="form.role">
-                        <SelectTrigger>
+                        <SelectTrigger class="w-full">
                             <SelectValue placeholder="Pilih Peran" />
                         </SelectTrigger>
                         <SelectContent>
@@ -167,9 +200,9 @@ function submitForm() {
                 </div>
 
                 <!-- Dynamic fields for student -->
-                <template v-if="form.role === 'student'">
+                <div class="grid grid-cols-2 gap-3" v-if="form.role === 'student'">
                     <div class="space-y-1.5">
-                        <Label for="form-nim">NIM</Label>
+                        <Label for="form-nim" required>NIM</Label>
                         <Input
                             id="form-nim"
                             v-model="form.nim"
@@ -180,34 +213,47 @@ function submitForm() {
                     </div>
                     <div class="space-y-1.5">
                         <Label>Kelas</Label>
-                        <Select v-model="form.student_class_id">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Pilih Kelas" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="none"
-                                        >Tanpa Kelas</SelectItem
-                                    >
-                                    <SelectItem
-                                        v-for="c in classes"
-                                        :key="c.id"
-                                        :value="c.id.toString()"
-                                    >
-                                        {{ c.name }}
-                                    </SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                        <Autocomplete
+                            v-model="classSearchText"
+                            v-model:open="isClassOpen"
+                            :open-on-focus="true"
+                            :open-on-click="true"
+                        >
+                            <AutocompleteAnchor class="w-full">
+                                <AutocompleteInput
+                                    placeholder="Isi atau pilih kelas..."
+                                    class="pr-10"
+                                />
+                                <AutocompleteTrigger>
+                                    <ChevronDown class="h-4 w-4 text-muted-foreground" />
+                                </AutocompleteTrigger>
+                            </AutocompleteAnchor>
+
+                            <AutocompleteContent>
+                                <AutocompleteViewport>
+                                    <AutocompleteEmpty>Tidak ada Kelas.</AutocompleteEmpty>
+                                    <AutocompleteGroup>
+                                        <AutocompleteItem
+                                            v-for="c in classes"
+                                            :key="c.id"
+                                            :value="c.name"
+                                            @select="form.student_class_id = c.id.toString()"
+                                        >
+                                            {{ c.name }}
+                                        </AutocompleteItem>
+                                    </AutocompleteGroup>
+                                </AutocompleteViewport>
+                            </AutocompleteContent>
+                        </Autocomplete>
                         <InputError :message="form.errors.student_class_id" />
                     </div>
-                </template>
+                </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <Label>Jenis Kelamin</Label>
                         <Select v-model="form.gender">
-                            <SelectTrigger>
+                            <SelectTrigger class="w-full">
                                 <SelectValue placeholder="Pilih" />
                             </SelectTrigger>
                             <SelectContent>
