@@ -41,7 +41,7 @@ watch(
 
             http.get(groupByCode.url(code), {
                 onSuccess: (response: any) => {
-                    inviteGroup.value = response.group;
+                    inviteGroup.value = response;
                     isFetchingInviteGroup.value = false;
                 },
                 onError: (errors: any) => {
@@ -49,6 +49,20 @@ watch(
                         errors.error ||
                         'Gagal mengambil data kelompok. Kode undangan mungkin salah atau kelompok sudah dibubarkan.';
                     isFetchingInviteGroup.value = false;
+                },
+                onHttpException: () => {
+                    inviteGroupError.value =
+                        'Gagal memuat detail kelompok. Silakan periksa kembali kode undangan Anda.';
+                    isFetchingInviteGroup.value = false;
+
+                    return true;
+                },
+                onNetworkError: () => {
+                    inviteGroupError.value =
+                        'Koneksi jaringan terputus. Silakan coba lagi.';
+                    isFetchingInviteGroup.value = false;
+
+                    return true;
                 },
             });
         }
