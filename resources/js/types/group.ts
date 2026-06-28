@@ -41,6 +41,10 @@ export type Submission = {
 export type Timeline = {
     id: number;
     title: string;
+    type: string;
+    metadata?: {
+        reason?: string;
+    } | null;
     created_at: string;
 };
 
