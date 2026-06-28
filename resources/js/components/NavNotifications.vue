@@ -33,9 +33,9 @@ const { isMobile, state } = useSidebar();
                         class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                     >
                         <div
-                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg text-primary"
                         >
-                            <Bell class="h-4 w-4" />
+                            <Bell class="h-4 w-4" :class="state === 'collapsed' ? 'ml-2' : ''" />
                         </div>
                         <div
                             class="grid flex-1 text-left text-sm leading-tight"

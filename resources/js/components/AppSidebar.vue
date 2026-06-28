@@ -11,6 +11,7 @@ import {
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavNotifications from '@/components/NavNotifications.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -22,9 +23,9 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import { home } from '@/routes';
+import { dashboard, home, welcome } from '@/routes';
 import { index as groupsIndex } from '@/routes/review/groups';
 import { index as readyIndex } from '@/routes/review/ready';
 import { index as submissionsIndex } from '@/routes/review/submissions';
@@ -34,6 +35,7 @@ import type { NavItem } from '@/types';
 
 const page = usePage();
 const userRole = computed(() => page.props.auth?.user?.role);
+const { state } = useSidebar();
 
 const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [];
@@ -92,8 +94,9 @@ const mainNavItems = computed<NavItem[]>(() => {
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
-                            <AppLogo />
+                        <AppLogo v-if="state === 'expanded'" />
+                        <Link v-else :href="welcome()" class="h-7 w-7">
+                            <AppLogoIcon />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
