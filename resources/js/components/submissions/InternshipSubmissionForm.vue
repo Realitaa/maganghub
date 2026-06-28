@@ -16,6 +16,7 @@ import {
     Send,
 } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
+import GoogleMapLink from '@/components/GoogleMapLink.vue';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -40,7 +41,6 @@ import {
     store as submissionStore,
     submit as submissionSubmit,
 } from '@/routes/groups/submissions';
-
 import type { Group } from '@/types';
 
 const props = defineProps<{
@@ -401,6 +401,18 @@ function submitSubmissionProposal() {
                     {{ submissionForm.errors.company_address }}
                 </span>
             </div>
+
+                <GoogleMapLink 
+                    v-if="submissionForm.company_name"
+                    :query="submissionForm.company_name" 
+                    :text="`Lihat ${submissionForm.company_name} di Google Maps`"
+                    class="mb-2"
+                />
+                <GoogleMapLink 
+                    v-if="submissionForm.company_address"
+                    :query="submissionForm.company_address" 
+                    :text="`Lihat ${submissionForm.company_address} di Google Maps`"
+                />
 
             <div
                 v-if="isSubmissionEditable"

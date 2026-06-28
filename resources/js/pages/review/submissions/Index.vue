@@ -2,7 +2,7 @@
 import { Head, router } from '@inertiajs/vue3';
 import { CheckCircle2, Clock, ArrowRight } from '@lucide/vue';
 import { ref } from 'vue';
-import SubmissionReviewDialog from '@/components/submissions/SubmissionReviewDialog.vue';
+import SubmissionDetailDialog from '@/components/submissions/SubmissionDetailDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -157,10 +157,11 @@ function openDetail(id: number) {
             </CardContent>
         </Card>
 
-        <!-- Submission Review Dialog -->
-        <SubmissionReviewDialog
+        <!-- Submission Detail/Review Dialog -->
+        <SubmissionDetailDialog
             v-model:open="showDetailModal"
             :submission-id="selectedSubmissionId"
+            mode="review"
             @success="router.reload({ only: ['submissions'] })"
         />
     </div>
