@@ -39,7 +39,7 @@ test('inertia middleware shares requirements data correctly', function () {
     ]);
 
     $this->actingAs($student)
-        ->get(route('dashboard'))
+        ->get(route('home'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('auth.requirements.password_changed', false)
             ->where('auth.requirements.profile_completed', false)

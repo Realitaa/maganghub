@@ -287,7 +287,7 @@ describe('Student Dashboard', function () {
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -304,7 +304,7 @@ describe('Student Dashboard', function () {
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -322,7 +322,7 @@ describe('Student Dashboard', function () {
 
         // Check leader view
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -332,7 +332,7 @@ describe('Student Dashboard', function () {
 
         // Check member view
         $this->actingAs($member)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')

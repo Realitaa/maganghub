@@ -53,14 +53,14 @@ function makeGroupWithPendingRequest(): array
 describe('dashboard', function () {
 
     it('redirects guest to login', function () {
-        $this->get(route('dashboard'))->assertRedirect(route('login'));
+        $this->get(route('home'))->assertRedirect(route('login'));
     });
 
     it('renders student/Index with null group when student has no group', function () {
         $student = User::factory()->create(['role' => 'student']);
 
         $this->actingAs($student)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -73,7 +73,7 @@ describe('dashboard', function () {
         ['student' => $student] = makeGroupWithPendingRequest();
 
         $this->actingAs($student)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -86,7 +86,7 @@ describe('dashboard', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupWithMember();
 
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
@@ -102,7 +102,7 @@ describe('dashboard', function () {
 
         // Leader sees requests
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 1)
@@ -110,7 +110,7 @@ describe('dashboard', function () {
 
         // Member does NOT see requests
         $this->actingAs($member)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 0)
@@ -161,7 +161,7 @@ describe('dashboard', function () {
         GroupMembership::factory()->create(['group_id' => $otherGroup->id, 'user_id' => $staleStudent->id]);
 
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 1)

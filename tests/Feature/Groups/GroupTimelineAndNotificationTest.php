@@ -15,6 +15,25 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    Storage::fake();
+    Storage::fake('public');
+    setupGroupTimelineFakeTemplate();
+});
+
+function setupGroupTimelineFakeTemplate(): void
+{
+    $tempFile = tempnam(sys_get_temp_dir(), 'test_docx_');
+    $zip = new ZipArchive;
+    $zip->open($tempFile, ZipArchive::CREATE);
+    $zip->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{name}} {{nim}} {{semester}} {{phone}} {{email}} {{number}} {{today}} {{company_name}} {{start_date}} {{end_date}} {{calculateDuration}} {{field_of_interest}} {{division ? Division : field_of_interest}}</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>');
+    $zip->close();
+    $dummyDocxContent = file_get_contents($tempFile);
+    unlink($tempFile);
+
+    Storage::put('templates/letter_template.docx', $dummyDocxContent);
+}
+
 test('accepting a join request sends JoinRequestAcceptedNotification', function () {
     Notification::fake();
 
@@ -186,8 +205,6 @@ test('marking as applying records APPLICATION_LETTER_PRINTED in group timeline',
 });
 
 test('uploading reply records COMPANY_REPLY_UPLOADED in group timeline', function () {
-    Storage::fake('public');
-
     $leader = User::factory()->create(['role' => 'student']);
     $student = User::factory()->create(['role' => 'student']);
 

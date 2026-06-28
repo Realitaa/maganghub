@@ -44,7 +44,7 @@ describe('internship submission', function () {
         ]);
 
         $this->actingAs($leader)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')

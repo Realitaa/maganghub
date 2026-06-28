@@ -164,14 +164,14 @@ test('logged in users that get deactivated are logged out and redirected to deac
 
     $this->actingAs($user);
 
-    $response = $this->get(route('dashboard'));
+    $response = $this->get(route('home'));
     $response->assertOk();
 
     // Now deactivate the user in database
     $user->update(['is_active' => false]);
 
     // Send a new request to a protected route
-    $response = $this->get(route('dashboard'));
+    $response = $this->get(route('home'));
     $response->assertRedirect(route('deactivated'));
     $this->assertGuest();
 });
