@@ -13,8 +13,10 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 
 const page = usePage();
+const { formatTimeAgo } = useIdTimeFormat();
 const notifications = computed(
     () => (page.props.auth as any)?.notifications || [],
 );
@@ -79,14 +81,7 @@ const { isMobile, state } = useSidebar();
                                 <div
                                     class="mt-1 text-[10px] text-muted-foreground/60"
                                 >
-                                    {{
-                                        new Date(
-                                            notif.created_at,
-                                        ).toLocaleString('id-ID', {
-                                            dateStyle: 'medium',
-                                            timeStyle: 'short',
-                                        })
-                                    }}
+                                    {{ formatTimeAgo(notif.created_at) }}
                                 </div>
                             </div>
                         </div>

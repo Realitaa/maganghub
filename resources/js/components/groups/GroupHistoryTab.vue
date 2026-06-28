@@ -15,20 +15,14 @@ import {
     StepperTrigger,
     StepperIndicator
 } from '@/components/ui/stepper';
-
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import type { Group } from '@/types';
 
 defineProps<{
     group: Group;
 }>();
 
-// Helper to format date-time
-const formatDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('id-ID', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    });
-};
+const { formatFAT } = useIdTimeFormat();
 
 // Helper to parse title and reason
 const parseTimelineTitle = (title: string, metadata: any) => {
@@ -160,7 +154,7 @@ const getTimelineMeta = (type: string) => {
                 >
                     <div class="flex items-center justify-between gap-4">
                         <span class="text-xs text-muted-foreground font-medium">
-                            {{ formatDateTime(timeline.created_at) }}
+                            {{ formatFAT(timeline.created_at) }}
                         </span>
                     </div>
 

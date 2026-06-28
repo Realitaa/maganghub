@@ -23,6 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import {
     show as showSubmission,
     approve as approveSubmission,
@@ -39,6 +40,8 @@ const emit = defineEmits<{
     (e: 'update:open', val: boolean): void;
     (e: 'success'): void;
 }>();
+
+const { formatDate } = useIdTimeFormat();
 
 const submissionDetail = ref<SubmissionDetail | null>(null);
 const processing = ref(false);
@@ -64,18 +67,6 @@ watch([() => props.open, () => props.submissionId], ([open, id]) => {
         });
     }
 });
-
-function formatDate(dateStr?: string) {
-    if (!dateStr) {
-        return '-';
-    }
-
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
-}
 
 function confirmApprove() {
     showApproveModal.value = true;
@@ -389,8 +380,7 @@ function submitReject() {
                             class="mt-2 block font-semibold text-foreground"
                         >
                             Status kelompok akan dikunci dan berkas pengantar
-                            magang akan ditandai siap dikirim
-                            (LETTER_PUBLISHED).
+                            magang akan ditandai siap dikirim.
                         </strong>
                     </DialogDescription>
                 </DialogHeader>

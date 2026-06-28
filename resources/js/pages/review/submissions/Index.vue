@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import { index as submissionsIndex } from '@/routes/review/submissions';
 
 // Define layout breadcrumbs
@@ -38,25 +39,13 @@ defineProps<{
 
 const showDetailModal = ref(false);
 const selectedSubmissionId = ref<number | null>(null);
+const { formatFAT } = useIdTimeFormat();
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
 
 function openDetail(id: number) {
     selectedSubmissionId.value = id;
     showDetailModal.value = true;
-}
-
-// Formatting dates helper
-function formatDate(dateStr?: string) {
-    if (!dateStr) {
-        return '-';
-    }
-
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
 }
 </script>
 
@@ -92,8 +81,8 @@ function formatDate(dateStr?: string) {
                     >Daftar Pengajuan Masuk</CardTitle
                 >
                 <CardDescription>
-                    Pengajuan dengan status "Diajukan" (submitted) yang
-                    memerlukan persetujuan dokumen.
+                    Pengajuan dengan status "Diajukan" yang memerlukan
+                    persetujuan.
                 </CardDescription>
             </CardHeader>
             <CardContent class="p-0">
@@ -122,7 +111,7 @@ function formatDate(dateStr?: string) {
                                 <th class="p-4">Ketua Kelompok</th>
                                 <th class="p-4">Perusahaan Tujuan</th>
                                 <th class="p-4 text-center">Anggota</th>
-                                <th class="p-4">Tanggal Diajukan</th>
+                                <th class="p-4">Waktu Pengajuan</th>
                                 <th class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -147,7 +136,7 @@ function formatDate(dateStr?: string) {
                                     </Badge>
                                 </td>
                                 <td class="p-4 text-muted-foreground">
-                                    {{ formatDate(sub.submitted_at) }}
+                                    {{ formatFAT(sub.submitted_at) }}
                                 </td>
                                 <td class="p-4 text-right">
                                     <Button

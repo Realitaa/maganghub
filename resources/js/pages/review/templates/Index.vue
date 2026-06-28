@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import {
     index as templateIndex,
     store as templateStore,
@@ -36,6 +37,8 @@ defineOptions({
         ],
     },
 });
+
+const { formatDateTime } = useIdTimeFormat();
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -178,7 +181,7 @@ function handleFileChange(event: Event) {
                             <p class="font-medium text-foreground">
                                 {{
                                     template.exists && template.updatedAt
-                                        ? template.updatedAt
+                                        ? formatDateTime(template.updatedAt)
                                         : 'Tidak tersedia'
                                 }}
                             </p>
@@ -208,7 +211,7 @@ function handleFileChange(event: Event) {
                         <p
                             class="mt-1 max-w-[150px] text-[10px] text-muted-foreground"
                         >
-                            Gunakan ekstensi berkas .docx maksimal 5 MB.
+                            Gunakan ekstensi berkas .docx maksimal 2 MB.
                         </p>
                     </div>
 

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import { downloadLetter } from '@/routes/groups/submissions';
 import { markApplying } from '@/routes/review/submissions';
 import type { Submission } from '@/types';
@@ -36,17 +37,7 @@ const emit = defineEmits<{
 
 const processing = ref(false);
 
-function formatDate(dateStr?: string) {
-    if (!dateStr) {
-        return '-';
-    }
-
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
-}
+const { formatDate } = useIdTimeFormat();
 
 function handleDownloadLetter(subId: number) {
     window.open(downloadLetter.url({ submission: subId }), '_blank');

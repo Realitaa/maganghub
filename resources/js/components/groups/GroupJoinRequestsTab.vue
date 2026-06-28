@@ -2,6 +2,7 @@
 import { router } from '@inertiajs/vue3';
 import { Clock, UserCheck, UserX } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import {
     approve as approveRequest,
     reject as rejectRequest,
@@ -13,6 +14,8 @@ defineProps<{
     group: Group;
     isLeader: boolean;
 }>();
+
+const { formatTimeAgo } = useIdTimeFormat();
 
 function approveJoinRequest(requestId: number) {
     router.post(approveRequest.url(requestId));
@@ -49,10 +52,10 @@ function rejectJoinRequest(requestId: number) {
                     </div>
                     <div>
                         <p class="text-sm font-medium">
-                            {{ req.user.name }}
+                            {{ req.user.name }} ({{ req.user.nim ?? req.user.email }})
                         </p>
                         <p class="text-xs text-muted-foreground">
-                            {{ req.user.nim ?? req.user.email }}
+                            {{ formatTimeAgo(req.created_at) }}
                         </p>
                     </div>
                 </div>

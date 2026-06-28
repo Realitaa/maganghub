@@ -154,7 +154,7 @@ function handleClose() {
                             Klik untuk memilih gambar
                         </p>
                         <p class="mt-0.5 text-xs text-muted-foreground">
-                            PNG, JPG, atau WebP — maks. 10 MB
+                            PNG, JPG, atau WebP — maks. 2 MB
                         </p>
                     </div>
                 </button>

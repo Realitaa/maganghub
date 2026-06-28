@@ -22,6 +22,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import { index as readyIndex } from '@/routes/review/ready';
 import type { Submission } from '@/types';
 
@@ -36,6 +37,8 @@ defineOptions({
         ],
     },
 });
+
+const { formatDate } = useIdTimeFormat();
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -116,19 +119,6 @@ function openDetail(sub: Submission) {
 function openDecision(sub: Submission) {
     selectedSubmission.value = sub;
     showDecisionModal.value = true;
-}
-
-// Formatting dates helper
-function formatDate(dateStr?: string) {
-    if (!dateStr) {
-        return '-';
-    }
-
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
 }
 </script>
 

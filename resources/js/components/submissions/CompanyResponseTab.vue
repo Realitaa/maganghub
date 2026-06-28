@@ -65,17 +65,17 @@ function handleResponseUpload(event: Event) {
                 <p
                     class="mt-0.5 text-xs text-green-700/80 dark:text-green-300/80"
                 >
-                    Unggah surat balasan resmi setelah disetujui perusahaan.
+                    Anda dapat mengambil surat pengantar magang dari kaprodi.
                 </p>
             </div>
         </div>
 
         <p class="text-sm leading-relaxed text-muted-foreground">
-            Surat permohonan untuk kelompok Anda telah diterbitkan. Antar ke
+            Setelah mendapatkan surat pengantar magang dari kaprodi, antar ke
             <strong>{{
                 group.active_submission?.company_name ?? 'perusahaan tujuan'
             }}</strong>
-            dan upload surat balasannya di sini.
+            dan upload surat balasannya (Letter of Acceptance -- LoA) di sini.
         </p>
 
         <!-- Success if already uploaded -->
@@ -122,6 +122,12 @@ function handleResponseUpload(event: Event) {
             class="text-xs font-medium text-destructive"
         >
             {{ responseUploadForm.errors.file }}
+        </p>
+
+        <p class="mt-2 text-xs text-muted-foreground">
+            Pastikan format file adalah PDF, DOCX, PNG, JPG, atau JPEG dan ukuran
+            tidak melebihi 2MB. Setelah surat balasan berhasil diunggah, anggota
+            kelompok akan dikonfirmasi mengenai status kelanjutan magangnya.
         </p>
     </div>
 </template>
