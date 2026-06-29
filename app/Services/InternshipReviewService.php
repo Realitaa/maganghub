@@ -159,7 +159,7 @@ class InternshipReviewService
                 ->lockForUpdate()
                 ->first();
 
-            if (! $lockedSubmission || $lockedSubmission->status !== 'applying') {
+            if (! $lockedSubmission || ! in_array($lockedSubmission->status, ['applying', 'loa_review'])) {
                 throw ValidationException::withMessages([
                     'error' => 'Kelompok ini tidak sedang dalam status menunggu balasan perusahaan.',
                 ]);

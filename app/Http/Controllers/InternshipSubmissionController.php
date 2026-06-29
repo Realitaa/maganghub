@@ -145,6 +145,11 @@ class InternshipSubmissionController extends Controller
 
         $submission->update([
             'company_response_path' => $path,
+            'status' => 'loa_review',
+        ]);
+
+        $submission->group->update([
+            'status' => 'loa_review',
         ]);
 
         $this->timelineService->companyReplyUploaded($submission->group);

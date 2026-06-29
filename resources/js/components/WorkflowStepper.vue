@@ -14,9 +14,11 @@ import {
     XCircle,
     Trophy,
     Check,
+    FileSearchCorner,
 } from '@lucide/vue';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Stepper,
     StepperTrigger,
@@ -39,7 +41,7 @@ const emit = defineEmits<{
 
 // Breakpoints and orientation
 const breakpoints = useBreakpoints(breakpointsTailwind);
-const lgAndLarger = breakpoints.greaterOrEqual('lg');
+const lgAndLarger = breakpoints.greaterOrEqual('xl');
 const orientation = computed(() =>
     lgAndLarger.value ? 'horizontal' : 'vertical',
 );
@@ -60,11 +62,12 @@ const statusToStepIndex: Record<string, number> = {
     submitted: 1,
     letter_published: 2,
     applying: 3,
-    accepted: 3,
-    partially_accepted: 3,
-    rejected: 3,
-    internship_started: 4,
-    completed: 5,
+    loa_review: 4,
+    accepted: 5,
+    partially_accepted: 5,
+    rejected: 5,
+    internship_started: 6,
+    completed: 7,
 };
 
 const currentStepIndex = computed(() => {
@@ -100,6 +103,11 @@ const statusColors: Record<
         text: 'text-green-500',
     },
     applying: {
+        border: 'border-yellow-500',
+        bg: 'bg-yellow-500/10',
+        text: 'text-yellow-500',
+    },
+    loa_review: {
         border: 'border-yellow-500',
         bg: 'bg-yellow-500/10',
         text: 'text-yellow-500',
@@ -178,18 +186,18 @@ const landingSteps = [
 ];
 
 const getDialogSteps = (status: string) => {
-    let step4Label = 'Menunggu Balasan';
-    let step4Icon: any = Clock;
+    let step6Label = 'Keputusan Perusahaan';
+    let step6Icon: any = CheckCircle2;
 
     if (status === 'accepted') {
-        step4Label = 'Diterima Perusahaan';
-        step4Icon = CheckCircle2;
+        step6Label = 'Diterima Perusahaan';
+        step6Icon = CheckCircle2;
     } else if (status === 'partially_accepted') {
-        step4Label = 'Diterima Sebagian';
-        step4Icon = CheckCircle2;
+        step6Label = 'Diterima Sebagian';
+        step6Icon = CheckCircle2;
     } else if (status === 'rejected') {
-        step4Label = 'Ditolak Perusahaan';
-        step4Icon = XCircle;
+        step6Label = 'Ditolak Perusahaan';
+        step6Icon = XCircle;
     }
 
     return [
@@ -216,21 +224,35 @@ const getDialogSteps = (status: string) => {
         },
         {
             step: 4,
-            title: step4Label,
+            title: 'Menunggu Balasan',
             description:
-                status === 'rejected'
-                    ? 'Permohonan magang tidak dapat diterima. Silakan diskusikan dengan pembimbing untuk langkah selanjutnya.'
-                    : 'Silakan antar surat pengantar ke perusahaan tujuan dan tunggu surat balasan (LoA).',
-            icon: step4Icon,
+                'Silakan antar surat pengantar ke perusahaan tujuan dan tunggu surat balasan (LoA).',
+            icon: Clock,
         },
         {
             step: 5,
+            title: 'Menunggu Review LoA',
+            description:
+                'Surat balasan dari perusahaan (LoA) sedang diperiksa oleh administrator/operator.',
+            icon: FileSearchCorner,
+        },
+        {
+            step: 6,
+            title: step6Label,
+            description:
+                status === 'rejected'
+                    ? 'Permohonan magang tidak dapat diterima. Silakan diskusikan dengan pembimbing untuk langkah selanjutnya.'
+                    : 'Hasil keputusan penempatan magang dari perusahaan.',
+            icon: step6Icon,
+        },
+        {
+            step: 7,
             title: 'Magang Dimulai',
             description: 'Selamat melaksanakan magang di perusahaan tujuan!',
             icon: Trophy,
         },
         {
-            step: 6,
+            step: 8,
             title: 'Selesai',
             description:
                 'Masa magang kelompok ini telah selesai. Terima kasih telah menggunakan MagangHub.',
@@ -261,7 +283,10 @@ function centerActiveStep() {
 
     nextTick(() => {
         setTimeout(() => {
-            const container = containerRef.value;
+            const scrollAreaEl = containerRef.value as any;
+            const container = scrollAreaEl?.$el?.querySelector('[data-slot="scroll-area-viewport"]')
+                || scrollAreaEl?.querySelector('[data-slot="scroll-area-viewport"]')
+                || scrollAreaEl;
             const activeIdx = currentStepIndex.value;
             const activeEl = itemRefs.value[activeIdx];
 
@@ -488,7 +513,7 @@ function getStepIcon(item: any, index: number) {
             return FileCheck;
         }
 
-        if (status === 'applying') {
+        if (status === 'applying' || status === 'loa_review') {
             return Clock;
         }
 
@@ -504,13 +529,73 @@ function getStepIcon(item: any, index: number) {
 </script>
 
 <template>
-    <div
+    <ScrollArea
+        v-if="mode === 'dialog' && orientation === 'vertical'"
         ref="containerRef"
-        :class="[
-            mode === 'dialog' && orientation === 'vertical'
-                ? 'max-h-[350px] scrollbar-thin overflow-y-auto pr-2'
-                : '',
-        ]"
+        class="h-[300px] pr-3"
+    >
+        <Stepper
+            :model-value="activeStep"
+            :orientation="orientation"
+            class="relative w-full p-1 flex flex-col space-y-8 before:absolute before:top-2 before:bottom-2 before:left-[27px] before:w-[2px] before:bg-border"
+        >
+            <StepperItem
+                v-for="(item, index) in steps"
+                :key="item.step"
+                :step="item.step"
+                :ref="(el) => setItemRef(el, index)"
+                @mouseenter="handleMouseEnter(item.step)"
+                class="group relative z-10 transition-all duration-300 flex w-full items-start gap-4"
+            >
+                <StepperTrigger
+                    class="flex cursor-default items-center justify-center p-0 hover:bg-transparent"
+                >
+                    <StepperIndicator
+                        :class="[
+                            'z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-all duration-300',
+                            getIndicatorClass(index),
+                        ]"
+                    >
+                        <component
+                            :is="getStepIcon(item, index)"
+                            :class="[
+                                'h-5.5 w-5.5 transition-colors',
+                                getIconClass(index),
+                            ]"
+                        />
+                    </StepperIndicator>
+                </StepperTrigger>
+
+                <div
+                    class="flex-1 rounded-xl border p-4.5 transition-all duration-300"
+                    :class="getCardClass(index)"
+                >
+                    <span
+                        class="text-xs font-bold tracking-wider uppercase transition-colors"
+                        :class="getTextColorClass(index, 'span')"
+                    >
+                        Langkah {{ item.step }}
+                    </span>
+                    <StepperTitle
+                        class="mt-0.5 text-sm font-bold transition-colors"
+                        :class="getTextColorClass(index, 'title')"
+                    >
+                        {{ item.title }}
+                    </StepperTitle>
+                    <StepperDescription
+                        class="mt-1 text-xs transition-colors"
+                        :class="getTextColorClass(index, 'desc')"
+                    >
+                        {{ item.description }}
+                    </StepperDescription>
+                </div>
+            </StepperItem>
+        </Stepper>
+    </ScrollArea>
+
+    <div
+        v-else
+        ref="containerRef"
     >
         <Stepper
             :model-value="activeStep"

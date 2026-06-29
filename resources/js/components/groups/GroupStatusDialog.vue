@@ -67,6 +67,12 @@ const statusInfo = computed(() => {
             color: 'text-yellow-500',
             description: `${company} sedang meninjau permohonan magang. Setelah menerima surat balasan, upload di tab Surat Balasan.`,
         },
+        loa_review: {
+            icon: Clock,
+            label: 'Review Surat Balasan',
+            color: 'text-yellow-500',
+            description: 'Surat balasan dari perusahaan sedang diperiksa oleh operator/administrator.',
+        },
         accepted: {
             icon: CheckCircle2,
             label: 'Diterima Perusahaan',
@@ -106,7 +112,7 @@ const statusInfo = computed(() => {
 
 <template>
     <Dialog :open="open" @update:open="$emit('update:open', $event)">
-        <DialogContent class="sm:max-w-lg lg:max-w-5xl">
+        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-2xl xl:max-w-7xl">
             <DialogHeader>
                 <DialogTitle>Status Kelompok</DialogTitle>
                 <DialogDescription>

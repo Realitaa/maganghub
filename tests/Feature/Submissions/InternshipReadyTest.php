@@ -109,8 +109,8 @@ describe('ready to print / siap magang workflow', function () {
         $sub2->group->update(['status' => 'applying']);
 
         ['submission' => $sub3] = makeReadySubmission();
-        $sub3->update(['status' => 'applying', 'company_response_path' => 'responses/file.pdf']);
-        $sub3->group->update(['status' => 'applying']);
+        $sub3->update(['status' => 'loa_review', 'company_response_path' => 'responses/file.pdf']);
+        $sub3->group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
             ->get(route('review.ready.index'))
@@ -119,7 +119,8 @@ describe('ready to print / siap magang workflow', function () {
                 ->component('review/Ready')
                 ->has('readyToPrint', 1)
                 ->where('readyToPrint.0.id', $sub1->id)
-                ->has('waitingResponse', 2)
+                ->has('waitingResponse', 1)
+                ->where('waitingResponse.0.id', $sub2->id)
                 ->has('receivedResponse', 1)
                 ->where('receivedResponse.0.id', $sub3->id)
             );
@@ -161,8 +162,8 @@ describe('ready to print / siap magang workflow', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
-        $submission->update(['status' => 'applying']);
-        $group->update(['status' => 'applying']);
+        $submission->update(['status' => 'loa_review']);
+        $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
             ->post(route('review.submissions.company-decision', $submission->id), [
@@ -187,8 +188,8 @@ describe('ready to print / siap magang workflow', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
-        $submission->update(['status' => 'applying']);
-        $group->update(['status' => 'applying']);
+        $submission->update(['status' => 'loa_review']);
+        $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
             ->post(route('review.submissions.company-decision', $submission->id), [
@@ -213,8 +214,8 @@ describe('ready to print / siap magang workflow', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
-        $submission->update(['status' => 'applying']);
-        $group->update(['status' => 'applying']);
+        $submission->update(['status' => 'loa_review']);
+        $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
             ->post(route('review.submissions.company-decision', $submission->id), [
@@ -247,8 +248,8 @@ describe('ready to print / siap magang workflow', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
-        $submission->update(['status' => 'applying']);
-        $group->update(['status' => 'applying']);
+        $submission->update(['status' => 'loa_review']);
+        $group->update(['status' => 'loa_review']);
 
         // Attempt without specifying new leader - should fail validation
         $this->actingAs($operator)

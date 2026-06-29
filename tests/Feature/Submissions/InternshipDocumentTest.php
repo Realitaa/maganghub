@@ -399,6 +399,8 @@ describe('Upload Company Response', function () {
             ]);
 
         expect($submission->fresh()->company_response_path)->not->toBeNull();
+        expect($submission->fresh()->status)->toBe('loa_review');
+        expect($submission->fresh()->group->status)->toBe('loa_review');
         Storage::assertExists($submission->fresh()->company_response_path);
     });
 

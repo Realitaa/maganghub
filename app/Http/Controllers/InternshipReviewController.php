@@ -135,7 +135,7 @@ class InternshipReviewController extends Controller
 
         $readyToPrint = $allSubmissions->filter(fn ($sub) => $sub->status === 'letter_published')->values();
         $waitingResponse = $allSubmissions->filter(fn ($sub) => $sub->status === 'applying')->values();
-        $receivedResponse = $allSubmissions->filter(fn ($sub) => $sub->status === 'applying' && ! empty($sub->company_response_path))->values();
+        $receivedResponse = $allSubmissions->filter(fn ($sub) => $sub->status === 'loa_review')->values();
 
         return Inertia::render('review/Ready', [
             'readyToPrint' => $readyToPrint,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { FileText, CheckCircle2, Upload, AlertCircle } from '@lucide/vue';
+import { FileText, CheckCircle2, Upload, AlertCircle, Clock } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -81,9 +81,29 @@ function handleResponseUpload(event: Event) {
             </div>
         </template>
 
-        <!-- Status: Applying (Menunggu Balasan) -->
-        <template v-else-if="group.status === 'applying'">
+        <!-- Status: Applying or LoA Review -->
+        <template v-else-if="group.status === 'applying' || group.status === 'loa_review'">
             <div
+                v-if="group.status === 'loa_review'"
+                class="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/20"
+            >
+                <div
+                    class="rounded-full bg-blue-100 p-2 text-blue-700 dark:bg-blue-900 dark:text-blue-350"
+                >
+                    <Clock class="h-5 w-5" />
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                        Surat Balasan Sedang Ditinjau
+                    </p>
+                    <p class="text-xs text-blue-700 dark:text-blue-300">
+                        Surat balasan dari perusahaan (LoA) telah berhasil diunggah dan sedang diperiksa oleh operator/administrator. Harap menunggu hasil penempatan.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                v-else
                 class="flex items-start gap-3 rounded-xl border border-yellow-200 bg-yellow-50/30 p-4 dark:border-yellow-900/50 dark:bg-yellow-950/10"
             >
                 <div

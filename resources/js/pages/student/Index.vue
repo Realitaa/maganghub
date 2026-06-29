@@ -11,6 +11,7 @@ import {
     FileCheck,
     Trash2,
     ArrowLeftToLine,
+    FileSearchCorner,
 } from '@lucide/vue';
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui';
 import { ref, onMounted, computed, watch } from 'vue';
@@ -87,6 +88,7 @@ const groupStatusLabel = computed(() => {
         submitted: 'Menunggu Verifikasi',
         letter_published: 'Surat Terbit',
         applying: 'Menunggu Balasan',
+        loa_review: 'Menunggu Review LoA',
         accepted: 'Diterima',
         partially_accepted: 'Diterima Sebagian',
         rejected: 'Ditolak Perusahaan',
@@ -103,6 +105,7 @@ const statusIcon = computed(() => {
         submitted: Clock,
         letter_published: FileCheck,
         applying: Clock,
+        loa_review: FileSearchCorner,
         accepted: CheckCircle2,
         partially_accepted: CheckCircle2,
         rejected: XCircle,
@@ -119,6 +122,7 @@ const statusIconColor = computed(() => {
         submitted: 'text-yellow-500',
         letter_published: 'text-green-500',
         applying: 'text-yellow-500',
+        loa_review: 'text-yellow-500',
         accepted: 'text-green-500',
         partially_accepted: 'text-yellow-500',
         rejected: 'text-destructive',
@@ -137,6 +141,7 @@ const statusDescription = computed(() => {
         submitted: 'Pengajuan menunggu verifikasi admin.',
         letter_published: `Surat terbit, antar ke ${company}.`,
         applying: `${company} sedang meninjau permohonan.`,
+        loa_review: 'LoA sedang dalam tahap review.',
         accepted: `Diterima di ${company}.`,
         partially_accepted: 'Diterima sebagian oleh perusahaan.',
         rejected: 'Permohonan ditolak perusahaan.',
@@ -151,7 +156,8 @@ const showResponseTab = computed(() => {
     return (
         isLeader.value &&
         (props.group?.status === 'letter_published' ||
-            props.group?.status === 'applying')
+            props.group?.status === 'applying' ||
+            props.group?.status === 'loa_review')
     );
 });
 
@@ -350,10 +356,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
 
             <!-- ── Sticky Tabs ── -->
             <TabsRoot
-                :default-value="activeGroupTab"
-                @update:model-value="
-                    (val) => (activeGroupTab = val as typeof activeGroupTab)
-                "
+                v-model="activeGroupTab"
             >
                 <div
                     class="sticky top-0 z-20 border-b border-border/60 bg-background/95 max-w-[99.5%] backdrop-blur-sm"
@@ -453,7 +456,9 @@ watch(showJoinConfirmDialog, (isOpen) => {
                         value="response"
                         class="mt-0 space-y-4"
                     >
-                        <InternshipLetterTab :group="group" />
+                        <InternshipLetterTab
+                            :group="group"
+                        />
                     </TabsContent>
                 </div>
             </TabsRoot>

@@ -77,9 +77,7 @@ const filteredPrint = computed(() => {
 });
 
 const filteredWaiting = computed(() => {
-    // Exclude the ones that have uploaded a company response (receivedResponse)
     return props.waitingResponse
-        .filter((sub) => !sub.company_response_path)
         .filter(
             (sub) =>
                 sub.company_name
