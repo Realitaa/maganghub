@@ -202,28 +202,35 @@ const getDialogSteps = (status: string) => {
         },
         {
             step: 2,
-            title: 'Surat Terbit',
+            title: 'Menunggu Verifikasi',
             description:
-                'Surat permohonan magang telah diterbitkan. Antar surat ke perusahaan tujuan dan tunggu surat balasan.',
-            icon: FileCheck,
+                'Pengajuan telah dikirim ke program studi dan sedang menunggu verifikasi oleh admin/operator.',
+            icon: FileText,
         },
         {
             step: 3,
+            title: 'Surat Terbit',
+            description:
+                'Surat permohonan magang telah diterbitkan oleh program studi. Silakan ambil lembar surat fisik ke operator/admin.',
+            icon: FileCheck,
+        },
+        {
+            step: 4,
             title: step4Label,
             description:
                 status === 'rejected'
                     ? 'Permohonan magang tidak dapat diterima. Silakan diskusikan dengan pembimbing untuk langkah selanjutnya.'
-                    : 'Pihak instansi/perusahaan sedang meninjau permohonan magang kelompok Anda.',
+                    : 'Silakan antar surat pengantar ke perusahaan tujuan dan tunggu surat balasan (LoA).',
             icon: step4Icon,
         },
         {
-            step: 4,
+            step: 5,
             title: 'Magang Dimulai',
             description: 'Selamat melaksanakan magang di perusahaan tujuan!',
             icon: Trophy,
         },
         {
-            step: 5,
+            step: 6,
             title: 'Selesai',
             description:
                 'Masa magang kelompok ini telah selesai. Terima kasih telah menggunakan MagangHub.',
@@ -465,7 +472,7 @@ function getStepIcon(item: any, index: number) {
             return XCircle;
         }
 
-        if (status === 'accepted' || status === 'partially_accepted') {
+        if (status === 'accepted' || status === 'partially_accepted' || status === 'completed') {
             return CheckCircle2;
         }
 
@@ -479,6 +486,14 @@ function getStepIcon(item: any, index: number) {
 
         if (status === 'letter_published') {
             return FileCheck;
+        }
+
+        if (status === 'applying') {
+            return Clock;
+        }
+
+        if (status === 'internship_started') {
+            return Trophy;
         }
 
         return Trophy;

@@ -24,7 +24,7 @@ import GroupMembersTab from '@/components/groups/GroupMembersTab.vue';
 import GroupShareDialog from '@/components/groups/GroupShareDialog.vue';
 import GroupStatusDialog from '@/components/groups/GroupStatusDialog.vue';
 import NoGroupState from '@/components/groups/NoGroupState.vue';
-import CompanyResponseTab from '@/components/submissions/CompanyResponseTab.vue';
+import InternshipLetterTab from '@/components/submissions/InternshipLetterTab.vue';
 import InternshipSubmissionForm from '@/components/submissions/InternshipSubmissionForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -408,7 +408,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                                     value="response"
                                     class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
-                                    Surat Balasan
+                                    Surat Magang
                                 </TabsTrigger>
                             </TabsList>
                             <ScrollBar orientation="horizontal" />
@@ -447,13 +447,13 @@ watch(showJoinConfirmDialog, (isOpen) => {
                         <GroupHistoryTab :group="group" />
                     </TabsContent>
 
-                    <!-- ─ Company Response Tab ─ -->
+                    <!-- ─ Internship Letter Tab ─ -->
                     <TabsContent
                         v-if="showResponseTab"
                         value="response"
                         class="mt-0 space-y-4"
                     >
-                        <CompanyResponseTab :group="group" />
+                        <InternshipLetterTab :group="group" />
                     </TabsContent>
                 </div>
             </TabsRoot>
