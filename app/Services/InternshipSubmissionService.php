@@ -51,6 +51,8 @@ class InternshipSubmissionService
             'company_contact' => ['nullable', 'string', 'max:255'],
             'division' => ['nullable', 'string', 'max:255'],
             'field_of_interest' => ['nullable', 'string', 'max:255'],
+            'company_type' => ['nullable', 'string', 'in:Multinasional,Nasional,Startup Teknologi'],
+            'working_model' => ['nullable', 'string', 'in:WFO,WFA,Hybrid'],
             'start_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
             'end_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after:today', 'after:start_date'],
         ])->validate();
@@ -114,6 +116,8 @@ class InternshipSubmissionService
             'company_contact' => ['required', 'string', 'max:255'],
             'division' => ['nullable', 'string', 'max:255'],
             'field_of_interest' => ['required', 'string', 'max:255'],
+            'company_type' => ['required', 'string', 'in:Multinasional,Nasional,Startup Teknologi'],
+            'working_model' => ['required', 'string', 'in:WFO,WFA,Hybrid'],
             'start_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:today', 'after:start_date'],
         ], [
@@ -121,6 +125,10 @@ class InternshipSubmissionService
             'company_address.required' => 'Alamat perusahaan wajib diisi.',
             'company_contact.required' => 'Kontak perusahaan wajib diisi.',
             'field_of_interest.required' => 'Bidang yang diminati wajib diisi.',
+            'company_type.required' => 'Tipe perusahaan wajib diisi.',
+            'company_type.in' => 'Tipe perusahaan harus salah satu dari: Multinasional, Nasional, atau Startup Teknologi.',
+            'working_model.required' => 'Model pengerjaan magang wajib diisi.',
+            'working_model.in' => 'Model pengerjaan magang harus salah satu dari: WFO, WFA, atau Hybrid.',
             'start_date.required' => 'Tanggal mulai wajib diisi.',
             'start_date.after_or_equal' => 'Tanggal mulai tidak boleh tanggal yang sudah lalu.',
             'end_date.required' => 'Tanggal selesai wajib diisi.',

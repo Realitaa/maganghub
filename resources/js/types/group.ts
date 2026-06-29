@@ -23,6 +23,8 @@ export type Submission = {
     company_contact: string;
     division: string;
     field_of_interest: string;
+    company_type?: string | null;
+    working_model?: string | null;
     start_date: string;
     end_date: string;
     status: string;

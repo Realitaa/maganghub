@@ -173,6 +173,8 @@ describe('internship submission', function () {
                 'company_address' => 'Sudirman 12',
                 'company_contact' => '021-12345',
                 'field_of_interest' => 'Web',
+                'company_type' => 'Startup Teknologi',
+                'working_model' => 'WFA',
                 'division' => 'Web',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -193,6 +195,8 @@ describe('internship submission', function () {
                 'company_address' => 'Sudirman 12',
                 'company_contact' => '021-12345',
                 'field_of_interest' => '', // Empty
+                'company_type' => 'Startup Teknologi',
+                'working_model' => 'WFA',
                 'division' => 'Web',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -213,6 +217,8 @@ describe('internship submission', function () {
                 'company_address' => 'Sudirman 12',
                 'company_contact' => '021-12345',
                 'field_of_interest' => 'Web Dev',
+                'company_type' => 'Startup Teknologi',
+                'working_model' => 'WFA',
                 'division' => null, // Optional
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -237,6 +243,8 @@ describe('internship submission', function () {
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
                 'field_of_interest' => 'Data Engineering',
+                'company_type' => 'Multinasional',
+                'working_model' => 'Hybrid',
                 'division' => 'Data Analyst',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -251,6 +259,8 @@ describe('internship submission', function () {
         $submission = InternshipSubmission::where('group_id', $group->id)->first();
         expect($submission->status)->toBe('submitted');
         expect($submission->company_name)->toBe('PT Global Solusi');
+        expect($submission->company_type)->toBe('Multinasional');
+        expect($submission->working_model)->toBe('Hybrid');
 
         // Assert group is locked as submitted
         expect($group->fresh()->status)->toBe('submitted');
@@ -322,6 +332,8 @@ describe('internship submission', function () {
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
                 'field_of_interest' => 'Data Analyst',
+                'company_type' => 'Multinasional',
+                'working_model' => 'Hybrid',
                 'division' => 'Data Analyst',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-10-01',
@@ -342,6 +354,8 @@ describe('internship submission', function () {
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
                 'field_of_interest' => 'Data Analyst',
+                'company_type' => 'Multinasional',
+                'working_model' => 'Hybrid',
                 'division' => 'Data Analyst',
                 'start_date' => now()->subDay()->format('Y-m-d'), // Yesterday
                 'end_date' => now()->addDays(5)->format('Y-m-d'),
@@ -362,6 +376,8 @@ describe('internship submission', function () {
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
                 'field_of_interest' => 'Data Analyst',
+                'company_type' => 'Multinasional',
+                'working_model' => 'Hybrid',
                 'division' => 'Data Analyst',
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => now()->format('Y-m-d'), // Today (not after today)
@@ -382,6 +398,8 @@ describe('internship submission', function () {
                 'company_address' => 'Jl. Merdeka No. 45',
                 'company_contact' => 'hr@global.com',
                 'field_of_interest' => 'Data Analyst',
+                'company_type' => 'Multinasional',
+                'working_model' => 'Hybrid',
                 'division' => 'Data Analyst',
                 'start_date' => now()->addDays(5)->format('Y-m-d'),
                 'end_date' => now()->addDays(3)->format('Y-m-d'), // Before start_date
@@ -390,6 +408,86 @@ describe('internship submission', function () {
             ->assertInertiaFlash('toast', [
                 'type' => 'error',
                 'message' => 'Tanggal selesai harus setelah tanggal mulai dan setelah hari ini.',
+            ]);
+    });
+
+    it('requires company_type and working_model when submitting proposal', function () {
+        ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => 'Web Dev',
+                'company_type' => '', // Empty
+                'working_model' => 'WFA',
+                'division' => 'Web',
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Tipe perusahaan wajib diisi.',
+            ]);
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => 'Web Dev',
+                'company_type' => 'Startup Teknologi',
+                'working_model' => '', // Empty
+                'division' => 'Web',
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Model pengerjaan magang wajib diisi.',
+            ]);
+    });
+
+    it('requires valid company_type and working_model when submitting proposal', function () {
+        ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => 'Web Dev',
+                'company_type' => 'Invalid Type', // Invalid
+                'working_model' => 'WFA',
+                'division' => 'Web',
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Tipe perusahaan harus salah satu dari: Multinasional, Nasional, atau Startup Teknologi.',
+            ]);
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Nusantara',
+                'company_address' => 'Sudirman 12',
+                'company_contact' => '021-12345',
+                'field_of_interest' => 'Web Dev',
+                'company_type' => 'Startup Teknologi',
+                'working_model' => 'Invalid Model', // Invalid
+                'division' => 'Web',
+                'start_date' => '2026-07-01',
+                'end_date' => '2026-10-01',
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Model pengerjaan magang harus salah satu dari: WFO, WFA, atau Hybrid.',
             ]);
     });
 });

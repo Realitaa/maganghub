@@ -24,6 +24,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
@@ -254,6 +255,22 @@ return;
                             </div>
                             <div>
                                 <Label class="text-[10px] text-muted-foreground"
+                                    >Tipe Perusahaan</Label
+                                >
+                                <p class="mt-0.5 font-medium text-foreground">
+                                    {{ submissionDetail.company_type }}
+                                </p>
+                            </div>
+                            <div>
+                                <Label class="text-[10px] text-muted-foreground"
+                                    >Model Kerja</Label
+                                >
+                                <p class="mt-0.5 font-medium text-foreground">
+                                    {{ submissionDetail.working_model }}
+                                </p>
+                            </div>
+                            <div>
+                                <Label class="text-[10px] text-muted-foreground"
                                     >Divisi Pekerjaan (Opsional)</Label
                                 >
                                 <p class="mt-0.5 font-medium text-foreground">
@@ -319,76 +336,78 @@ return;
                             <Users class="h-4 w-4" />
                             Daftar Anggota Kelompok
                         </h3>
-                        <div class="grid gap-3">
-                            <div
-                                v-for="membership in submissionDetail.submission_memberships"
-                                :key="membership.id"
-                                class="relative flex flex-col md:flex-row justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 transition-all duration-300 shadow-sm hover:border-border hover:shadow-md"
-                            >
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary border border-primary/10 shadow-xs"
-                                    >
-                                        {{
-                                            membership.user.name
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        }}
-                                    </div>
-                                    <div class="space-y-1 min-w-0">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <p class="font-bold text-foreground text-sm tracking-tight leading-none">
-                                                {{ membership.user.name }}
+                        <ScrollArea class="h-120">
+                            <div class="grid gap-3">
+                                <div
+                                    v-for="membership in submissionDetail.submission_memberships"
+                                    :key="membership.id"
+                                    class="relative flex flex-col md:flex-row justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 transition-all duration-300 shadow-sm hover:border-border hover:shadow-md"
+                                >
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary border border-primary/10 shadow-xs"
+                                        >
+                                            {{
+                                                membership.user.name
+                                                    .charAt(0)
+                                                    .toUpperCase()
+                                            }}
+                                        </div>
+                                        <div class="space-y-1 min-w-0">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <p class="font-bold text-foreground text-sm tracking-tight leading-none">
+                                                    {{ membership.user.name }}
+                                                </p>
+                                                <Badge
+                                                    v-if="membership.user.id === leaderId"
+                                                    variant="default"
+                                                    class="px-2 py-0 bg-primary/10 text-primary text-[10px] border-none font-medium"
+                                                >
+                                                    Ketua Kelompok
+                                                </Badge>
+                                            </div>
+                                            <p class="text-xs text-muted-foreground font-mono">
+                                                {{ membership.user.nim }} <span class="text-muted-foreground/40 font-sans mx-1">|</span> Semester {{ membership.user.semester ?? '-' }}
                                             </p>
-                                            <Badge
-                                                v-if="membership.user.id === leaderId"
-                                                variant="default"
-                                                class="px-2 py-0 bg-primary/10 text-primary text-[10px] border-none font-medium"
-                                            >
-                                                Ketua Kelompok
-                                            </Badge>
-                                        </div>
-                                        <p class="text-xs text-muted-foreground font-mono">
-                                            {{ membership.user.nim }} <span class="text-muted-foreground/40 font-sans mx-1">|</span> Semester {{ membership.user.semester ?? '-' }}
-                                        </p>
-                                        
-                                        <!-- Contact details inside a clean grid -->
-                                        <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                                            <div class="flex items-center gap-1.5 min-w-0">
-                                                <Mail class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                <span class="truncate font-normal">{{ membership.user.email }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-1.5 min-w-0">
-                                                <Phone class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                <span class="truncate font-normal">{{ membership.user.phone || '-' }}</span>
-                                            </div>
-                                            <div class="flex items-start gap-1.5 sm:col-span-2 mt-0.5">
-                                                <MapPin class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-0.5" />
-                                                <span class="line-clamp-2 leading-relaxed font-normal">{{ membership.user.address || '-' }}</span>
+                                            
+                                            <!-- Contact details inside a clean grid -->
+                                            <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                    <Mail class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                                                    <span class="truncate font-normal">{{ membership.user.email }}</span>
+                                                </div>
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                    <Phone class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                                                    <span class="truncate font-normal">{{ membership.user.phone || '-' }}</span>
+                                                </div>
+                                                <div class="flex items-start gap-1.5 sm:col-span-2 mt-0.5">
+                                                    <MapPin class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-0.5" />
+                                                    <span class="line-clamp-2 leading-relaxed font-normal">{{ membership.user.address || '-' }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <!-- Print button (Only show in view mode) -->
-                                <div v-if="mode === 'view'" class="flex items-center self-end md:self-center shrink-0">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        class="h-8 cursor-pointer gap-1.5 border-primary/20 bg-background font-medium text-primary hover:bg-primary/5 hover:text-primary transition-all"
-                                        @click="
-                                            handleDownloadIndividualLetter(
-                                                submissionDetail.id,
-                                                membership.user.id,
-                                            )
-                                        "
-                                    >
-                                        <Printer class="h-3.5 w-3.5" />
-                                        Cetak Surat
-                                    </Button>
+                                    
+                                    <!-- Print button (Only show in view mode) -->
+                                    <div v-if="mode === 'view'" class="flex items-center self-end md:self-center shrink-0">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            class="h-8 cursor-pointer gap-1.5 border-primary/20 bg-background font-medium text-primary hover:bg-primary/5 hover:text-primary transition-all"
+                                            @click="
+                                                handleDownloadIndividualLetter(
+                                                    submissionDetail.id,
+                                                    membership.user.id,
+                                                )
+                                            "
+                                        >
+                                            <Printer class="h-3.5 w-3.5" />
+                                            Cetak Surat
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </ScrollArea>
                     </div>
                     </div>
 

@@ -9,12 +9,15 @@ import {
 import {
     AlertCircle,
     Building2,
+    CircleQuestionMark,
     FileText,
     Phone,
     Calendar,
     MapPin,
     Save,
     Send,
+    Briefcase,
+    Laptop,
 } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
 import GoogleMapLink from '@/components/GoogleMapLink.vue';
@@ -36,7 +39,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
     store as submissionStore,
@@ -61,6 +73,8 @@ const submissionForm = useForm({
     company_contact: props.group?.active_submission?.company_contact ?? '',
     division: props.group?.active_submission?.division ?? '',
     field_of_interest: props.group?.active_submission?.field_of_interest ?? '',
+    company_type: props.group?.active_submission?.company_type ?? '',
+    working_model: props.group?.active_submission?.working_model ?? '',
     start_date: props.group?.active_submission?.start_date
         ? props.group.active_submission.start_date.substring(0, 10)
         : '',
@@ -77,6 +91,8 @@ watch(
         submissionForm.company_contact = newSub?.company_contact ?? '';
         submissionForm.division = newSub?.division ?? '';
         submissionForm.field_of_interest = newSub?.field_of_interest ?? '';
+        submissionForm.company_type = newSub?.company_type ?? '';
+        submissionForm.working_model = newSub?.working_model ?? '';
         submissionForm.start_date = newSub?.start_date
             ? newSub.start_date.substring(0, 10)
             : '';
@@ -208,6 +224,7 @@ function submitSubmissionProposal() {
                     <Label
                         for="company_name"
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
                     >
                         <Building2 class="h-3.5 w-3.5" />
                         Nama Perusahaan / Instansi
@@ -230,6 +247,7 @@ function submitSubmissionProposal() {
                     <Label
                         for="field_of_interest"
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
                     >
                         <FileText class="h-3.5 w-3.5" />
                         Bidang yang Diminati
@@ -245,6 +263,80 @@ function submitSubmissionProposal() {
                         class="text-xs text-destructive"
                     >
                         {{ submissionForm.errors.field_of_interest }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="company_type"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
+                    >
+                        <Briefcase class="h-3.5 w-3.5" />
+                        Tipe Perusahaan
+                    </Label>
+                    <Select v-model="submissionForm.company_type" :disabled="!isSubmissionEditable">
+                        <SelectTrigger id="company_type" class="w-full">
+                            <SelectValue placeholder="Pilih Tipe Perusahaan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="Multinasional">Multinasional</SelectItem>
+                                <SelectItem value="Nasional">Nasional</SelectItem>
+                                <SelectItem value="Startup Teknologi">Startup Teknologi</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <span
+                        v-if="submissionForm.errors.company_type"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.company_type }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="working_model"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
+                    >
+                        <Laptop class="h-3.5 w-3.5" />
+                        Model Pengerjaan Magang
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <CircleQuestionMark class="size-3.5 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Model Pengerjaan Magang: 
+                                    <br>
+                                    WFO: Work From Office (Bekerja di kantor)
+                                    <br>
+                                    WFA: Work From Anywhere (Bekerja di manapun)
+                                    <br>
+                                    Hybrid: Campuran WFO dan WFA
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </Label>
+                    <Select v-model="submissionForm.working_model" :disabled="!isSubmissionEditable">
+                        <SelectTrigger id="working_model" class="w-full">
+                            <SelectValue placeholder="Pilih Model Pengerjaan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="WFO">WFO</SelectItem>
+                                <SelectItem value="WFA">WFA</SelectItem>
+                                <SelectItem value="Hybrid">Hybrid</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <span
+                        v-if="submissionForm.errors.working_model"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.working_model }}
                     </span>
                 </div>
 
@@ -276,6 +368,7 @@ function submitSubmissionProposal() {
                     <Label
                         for="company_contact"
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
                     >
                         <Phone class="h-3.5 w-3.5" />
                         Kontak Instansi (No. Telp / Email)
@@ -298,6 +391,7 @@ function submitSubmissionProposal() {
                     <Label
                         for="start_date"
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
                     >
                         <Calendar class="h-3.5 w-3.5" />
                         Tanggal Mulai
@@ -355,6 +449,7 @@ function submitSubmissionProposal() {
                     <Label
                         for="end_date"
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                        required
                     >
                         <Calendar class="h-3.5 w-3.5" />
                         Tanggal Selesai
@@ -413,6 +508,7 @@ function submitSubmissionProposal() {
                 <Label
                     for="company_address"
                     class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    required
                 >
                     <MapPin class="h-3.5 w-3.5" />
                     Alamat Lengkap Perusahaan

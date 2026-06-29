@@ -105,6 +105,8 @@ test('submitting a proposal records SUBMISSION_CREATED in group timeline', funct
         'company_address' => 'Test Address',
         'company_contact' => '08123',
         'field_of_interest' => 'Web Dev',
+        'company_type' => 'Multinasional',
+        'working_model' => 'Hybrid',
         'start_date' => '2026-07-01',
         'end_date' => '2026-10-01',
     ];
@@ -135,6 +137,8 @@ test('approving/rejecting submission records SUBMISSION_APPROVED and SUBMISSION_
         'company_address' => 'Test Address',
         'company_contact' => '08123',
         'field_of_interest' => 'Web Dev',
+        'company_type' => 'Multinasional',
+        'working_model' => 'Hybrid',
         'start_date' => '2026-07-01',
         'end_date' => '2026-10-01',
     ];
@@ -185,6 +189,8 @@ test('marking as applying records APPLICATION_LETTER_PRINTED in group timeline',
         'company_address' => 'Test Address',
         'company_contact' => '08123',
         'field_of_interest' => 'Web Dev',
+        'company_type' => 'Multinasional',
+        'working_model' => 'Hybrid',
         'start_date' => '2026-07-01',
         'end_date' => '2026-10-01',
     ];
@@ -221,6 +227,8 @@ test('uploading reply records COMPANY_REPLY_UPLOADED in group timeline', functio
         'company_address' => 'Test Address',
         'company_contact' => '08123',
         'field_of_interest' => 'Web Dev',
+        'company_type' => 'Multinasional',
+        'working_model' => 'Hybrid',
         'start_date' => '2026-07-01',
         'end_date' => '2026-10-01',
     ];
@@ -266,6 +274,8 @@ test('processing placement decision records ADMINISTRATION_COMPLETED in group ti
         'company_address' => 'Test Address',
         'company_contact' => '08123',
         'field_of_interest' => 'Web Dev',
+        'company_type' => 'Multinasional',
+        'working_model' => 'Hybrid',
         'start_date' => '2026-07-01',
         'end_date' => '2026-10-01',
     ];

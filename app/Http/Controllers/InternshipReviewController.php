@@ -64,7 +64,7 @@ class InternshipReviewController extends Controller
 
         $submission->load([
             'group.leader:id,name,email,nim',
-            'submissionMemberships.user:id,name,email,nim',
+            'submissionMemberships.user:id,name,email,nim,address,phone,semester',
         ]);
 
         return response()->json([
