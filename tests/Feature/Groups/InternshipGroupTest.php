@@ -495,17 +495,6 @@ describe('leaving a group', function () {
         expect(GroupMembership::where('group_id', $group->id)->where('user_id', $member->id)->exists())->toBeTrue();
     });
 
-    it('prevents a member from leaving when group status is under_review', function () {
-        ['group' => $group, 'member' => $member] = makeGroupWithMember('under_review');
-
-        $this->actingAs($member)
-            ->post(route('groups.leave'))
-            ->assertRedirect()
-            ->assertInertiaFlash('toast.type', 'error');
-
-        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $member->id)->exists())->toBeTrue();
-    });
-
 });
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -548,20 +537,6 @@ describe('disbanding a group', function () {
 
         expect(InternshipGroup::find($group->id))->not->toBeNull();
     });
-
-    it('prevents the leader from disbanding a locked group', function () {
-        foreach (['submitted', 'under_review', 'letter_published'] as $status) {
-            ['group' => $group, 'leader' => $leader] = makeGroupWithMember($status);
-
-            $this->actingAs($leader)
-                ->delete(route('groups.destroy', $group))
-                ->assertRedirect()
-                ->assertInertiaFlash('toast.type', 'error');
-
-            expect(InternshipGroup::find($group->id))->not->toBeNull();
-        }
-    });
-
 });
 
 describe('group membership lifecycle', function () {

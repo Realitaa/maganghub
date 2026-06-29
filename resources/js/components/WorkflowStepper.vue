@@ -58,7 +58,6 @@ const setItemRef = (el: any, index: number) => {
 const statusToStepIndex: Record<string, number> = {
     forming: 0,
     submitted: 1,
-    under_review: 1,
     letter_published: 2,
     applying: 3,
     accepted: 3,
@@ -94,11 +93,6 @@ const statusColors: Record<
         border: 'border-yellow-500',
         bg: 'bg-yellow-500/10',
         text: 'text-yellow-500',
-    },
-    under_review: {
-        border: 'border-orange-500',
-        bg: 'bg-orange-500/10',
-        text: 'text-orange-500',
     },
     letter_published: {
         border: 'border-green-500',
@@ -184,7 +178,6 @@ const landingSteps = [
 ];
 
 const getDialogSteps = (status: string) => {
-    const isUnderReview = status === 'under_review';
     let step4Label = 'Menunggu Balasan';
     let step4Icon: any = Clock;
 
@@ -209,21 +202,13 @@ const getDialogSteps = (status: string) => {
         },
         {
             step: 2,
-            title: isUnderReview ? 'Sedang Ditinjau' : 'Pengajuan Dikirim',
-            description: isUnderReview
-                ? 'Tim program studi sedang meninjau pengajuan kelompok Anda.'
-                : 'Pengajuan telah dikirim ke program studi dan sedang menunggu verifikasi oleh admin/operator.',
-            icon: isUnderReview ? Clock : FileText,
-        },
-        {
-            step: 3,
             title: 'Surat Terbit',
             description:
                 'Surat permohonan magang telah diterbitkan. Antar surat ke perusahaan tujuan dan tunggu surat balasan.',
             icon: FileCheck,
         },
         {
-            step: 4,
+            step: 3,
             title: step4Label,
             description:
                 status === 'rejected'
@@ -232,13 +217,13 @@ const getDialogSteps = (status: string) => {
             icon: step4Icon,
         },
         {
-            step: 5,
+            step: 4,
             title: 'Magang Dimulai',
             description: 'Selamat melaksanakan magang di perusahaan tujuan!',
             icon: Trophy,
         },
         {
-            step: 6,
+            step: 5,
             title: 'Selesai',
             description:
                 'Masa magang kelompok ini telah selesai. Terima kasih telah menggunakan MagangHub.',
@@ -303,7 +288,6 @@ function getStatusBgClass(status: string): string {
     const map: Record<string, string> = {
         forming: 'bg-blue-500',
         submitted: 'bg-yellow-500',
-        under_review: 'bg-orange-500',
         letter_published: 'bg-green-500',
         applying: 'bg-yellow-500',
         accepted: 'bg-green-500',
@@ -487,10 +471,6 @@ function getStepIcon(item: any, index: number) {
 
         if (status === 'submitted') {
             return FileText;
-        }
-
-        if (status === 'under_review' || status === 'applying') {
-            return Clock;
         }
 
         if (status === 'forming') {

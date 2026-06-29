@@ -55,13 +55,6 @@ const statusInfo = computed(() => {
             description:
                 'Pengajuan telah dikirim ke program studi dan sedang menunggu verifikasi oleh admin/operator.',
         },
-        under_review: {
-            icon: Clock,
-            label: 'Sedang Ditinjau',
-            color: 'text-orange-500',
-            description:
-                'Tim program studi sedang meninjau pengajuan kelompok Anda.',
-        },
         letter_published: {
             icon: FileCheck,
             label: 'Surat Terbit',

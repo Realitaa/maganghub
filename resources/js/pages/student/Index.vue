@@ -85,7 +85,6 @@ const groupStatusLabel = computed(() => {
     const labels: Record<string, string> = {
         forming: 'Pembentukan',
         submitted: 'Menunggu Verifikasi',
-        under_review: 'Sedang Ditinjau',
         letter_published: 'Surat Terbit',
         applying: 'Menunggu Balasan',
         accepted: 'Diterima',
@@ -102,7 +101,6 @@ const statusIcon = computed(() => {
     const map: Record<string, object> = {
         forming: Users,
         submitted: Clock,
-        under_review: Clock,
         letter_published: FileCheck,
         applying: Clock,
         accepted: CheckCircle2,
@@ -119,7 +117,6 @@ const statusIconColor = computed(() => {
     const map: Record<string, string> = {
         forming: 'text-blue-500',
         submitted: 'text-yellow-500',
-        under_review: 'text-orange-500',
         letter_published: 'text-green-500',
         applying: 'text-yellow-500',
         accepted: 'text-green-500',
@@ -138,7 +135,6 @@ const statusDescription = computed(() => {
     const map: Record<string, string> = {
         forming: 'Kelompok masih dalam tahap pembentukan.',
         submitted: 'Pengajuan menunggu verifikasi admin.',
-        under_review: 'Pengajuan sedang ditinjau tim prodi.',
         letter_published: `Surat terbit, antar ke ${company}.`,
         applying: `${company} sedang meninjau permohonan.`,
         accepted: `Diterima di ${company}.`,

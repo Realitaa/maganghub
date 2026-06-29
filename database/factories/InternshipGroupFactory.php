@@ -35,14 +35,6 @@ class InternshipGroupFactory extends Factory
     }
 
     /**
-     * Mark the group as under review.
-     */
-    public function underReview(): static
-    {
-        return $this->state(['status' => 'under_review']);
-    }
-
-    /**
      * Mark the group as company-rejected.
      */
     public function companyRejected(): static
