@@ -28,6 +28,7 @@ import CompanyResponseTab from '@/components/submissions/CompanyResponseTab.vue'
 import InternshipSubmissionForm from '@/components/submissions/InternshipSubmissionForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { home } from '@/routes';
 
 defineOptions({
@@ -359,64 +360,63 @@ watch(showJoinConfirmDialog, (isOpen) => {
                 "
             >
                 <div
-                    class="sticky top-16 z-20 border-b border-border/60 bg-background/95 backdrop-blur-sm"
+                    class="sticky top-0 z-20 border-b border-border/60 bg-background/95 max-w-[99.5%] backdrop-blur-sm"
                 >
                     <div class="px-4 md:px-8">
-                        <TabsList
-                            class="flex h-auto scrollbar-none gap-0 overflow-x-auto rounded-none bg-transparent p-0"
-                            style="
-                                -webkit-overflow-scrolling: touch;
-                                white-space: nowrap;
-                            "
-                        >
-                            <TabsTrigger
-                                value="members"
-                                class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                        <ScrollArea class="w-full">
+                            <TabsList
+                                class="flex h-auto w-max min-w-full gap-0 rounded-none bg-transparent p-0 pb-2.5 md:pb-0"
                             >
-                                Anggota
-                                <Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs">
-                                    {{ group.memberships.length }}
-                                </Badge>
-                            </TabsTrigger>
-                            <TabsTrigger
-                                v-if="isLeader"
-                                value="requests"
-                                class="relative items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-                            >
-                                Permintaan
-                                <Badge
-                                    v-if="group.join_requests.length > 0"
-                                    class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                <TabsTrigger
+                                    value="members"
+                                    class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
-                                    {{ group.join_requests.length }}
-                                </Badge>
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="submissions"
-                                class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-                            >
-                                Pengajuan
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="history"
-                                class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-                            >
-                                Riwayat
-                                <Badge
-                                    v-if="group.timelines?.length"
-                                    class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                    Anggota
+                                    <Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs">
+                                        {{ group.memberships.length }}
+                                    </Badge>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    v-if="isLeader"
+                                    value="requests"
+                                    class="relative items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
-                                    {{ group.timelines?.length }}
-                                </Badge>
-                            </TabsTrigger>
-                            <TabsTrigger
-                                v-if="showResponseTab"
-                                value="response"
-                                class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-                            >
-                                Surat Balasan
-                            </TabsTrigger>
-                        </TabsList>
+                                    Permintaan
+                                    <Badge
+                                        v-if="group.join_requests.length > 0"
+                                        class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                    >
+                                        {{ group.join_requests.length }}
+                                    </Badge>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="submissions"
+                                    class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                >
+                                    Pengajuan
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="history"
+                                    class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                >
+                                    Riwayat
+                                    <Badge
+                                        v-if="group.timelines?.length"
+                                        class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                    >
+                                        {{ group.timelines?.length }}
+                                    </Badge>
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    v-if="showResponseTab"
+                                    value="response"
+                                    class="relative shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                >
+                                    Surat Balasan
+                                </TabsTrigger>
+                            </TabsList>
+                            <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
                     </div>
                 </div>
 
