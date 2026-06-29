@@ -126,7 +126,11 @@ describe('Generate Letter', function () {
             ->assertRedirect();
 
         expect($submission->fresh()->status)->toBe('letter_published');
-        expect($submission->fresh()->letter_path)->not->toBeNull();
+        $memberships = $submission->fresh()->submissionMemberships;
+        expect($memberships)->not->toBeEmpty();
+        foreach ($memberships as $membership) {
+            expect($membership->letter_path)->not->toBeNull();
+        }
     });
 
     it('stores generated document', function () {
@@ -138,8 +142,10 @@ describe('Generate Letter', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        $path = $submission->fresh()->letter_path;
-        Storage::assertExists($path);
+        $memberships = $submission->fresh()->submissionMemberships;
+        foreach ($memberships as $membership) {
+            Storage::assertExists($membership->letter_path);
+        }
     });
 
     it('uses submission memberships snapshot instead of current group memberships', function () {
@@ -154,8 +160,9 @@ describe('Generate Letter', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        // Read XML from generated DOCX and assert there are 2 members listed in table
-        $path = $submission->fresh()->letter_path;
+        // Read XML from generated DOCX for the leader membership
+        $leaderMembership = $submission->fresh()->submissionMemberships()->where('user_id', $group->leader_id)->first();
+        $path = $leaderMembership->letter_path;
         $tempFile = tempnam(sys_get_temp_dir(), 'out_docx_');
         file_put_contents($tempFile, Storage::get($path));
 
@@ -165,10 +172,8 @@ describe('Generate Letter', function () {
         $zip->close();
         unlink($tempFile);
 
-        // Leader name & member name from snapshot should be inside
+        // Leader name from snapshot should be inside
         expect(html_entity_decode($xml))->toContain($group->leader->name);
-        $members = $submission->submissionMemberships()->with('user')->get();
-        expect(html_entity_decode($xml))->toContain($members[1]->user->name);
     });
 
     it('generates document only once and does not regenerate on re-approval attempts', function () {
@@ -181,7 +186,8 @@ describe('Generate Letter', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        $firstPath = $submission->fresh()->letter_path;
+        $leaderMembership = $submission->fresh()->submissionMemberships()->where('user_id', $submission->group->leader_id)->first();
+        $firstPath = $leaderMembership->letter_path;
         expect($firstPath)->not->toBeNull();
 
         // Temporarily reset status to test calling approve on it
@@ -192,7 +198,8 @@ describe('Generate Letter', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        expect($submission->fresh()->letter_path)->toBe($firstPath);
+        $secondPath = $submission->fresh()->submissionMemberships()->where('user_id', $submission->group->leader_id)->first()->letter_path;
+        expect($secondPath)->toBe($firstPath);
     });
 });
 
@@ -201,7 +208,7 @@ describe('Download Letter', function () {
         Storage::fake();
     });
 
-    it('administrator can download generated letter', function () {
+    it('administrator can download generated letter as zip', function () {
         setupFakeTemplate();
         $operator = User::factory()->create(['role' => 'operator']);
         $admin = User::factory()->create(['role' => 'administrator']);
@@ -209,21 +216,46 @@ describe('Download Letter', function () {
 
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
-        $this->actingAs($admin)
+        $response = $this->actingAs($admin)
             ->get(route('groups.submissions.download-letter', $submission->id))
             ->assertOk();
+
+        $filename = 'surat_permohonan_magang_'.($submission->group->code ?? $submission->id).'.zip';
+        $response->assertHeader('Content-Disposition', 'attachment; filename='.$filename);
     });
 
-    it('operator can download generated letter', function () {
+    it('operator can download generated letter as zip', function () {
         setupFakeTemplate();
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
-        $this->actingAs($operator)
+        $response = $this->actingAs($operator)
             ->get(route('groups.submissions.download-letter', $submission->id))
             ->assertOk();
+
+        $filename = 'surat_permohonan_magang_'.($submission->group->code ?? $submission->id).'.zip';
+        $response->assertHeader('Content-Disposition', 'attachment; filename='.$filename);
+    });
+
+    it('operator can download individual student letter', function () {
+        setupFakeTemplate();
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
+
+        $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
+
+        $response = $this->actingAs($operator)
+            ->get(route('groups.submissions.download-letter', [
+                'submission' => $submission->id,
+                'user_id' => $leader->id,
+            ]))
+            ->assertOk();
+
+        $safeName = str_replace([' ', '/', '\\'], '_', $leader->name);
+        $filename = 'surat_permohonan_magang_'.$safeName.'_'.($submission->group->code ?? $submission->id).'.docx';
+        $response->assertHeader('Content-Disposition', 'attachment; filename='.$filename);
     });
 
     it('leader cannot download generated letter', function () {
@@ -473,8 +505,9 @@ describe('Edge Cases', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        // The generated XML should NOT contain the new member, only the snapshot members (leader and original member)
-        $path = $submission->fresh()->letter_path;
+        // The generated XML should NOT contain the new member, only the snapshot members
+        $leaderMembership = $submission->fresh()->submissionMemberships()->where('user_id', $group->leader_id)->first();
+        $path = $leaderMembership->letter_path;
         $tempFile = tempnam(sys_get_temp_dir(), 'out_docx_');
         file_put_contents($tempFile, Storage::get($path));
 
@@ -499,7 +532,8 @@ describe('Edge Cases', function () {
             ->post(route('review.submissions.approve', $submission->id))
             ->assertRedirect();
 
-        expect($submission->fresh()->letter_path)->not->toBeNull();
+        $leaderMembership = $submission->fresh()->submissionMemberships()->where('user_id', $group->leader_id)->first();
+        expect($leaderMembership->letter_path)->not->toBeNull();
     });
 
     it('document generation fails safely when template is missing', function () {
@@ -516,7 +550,9 @@ describe('Edge Cases', function () {
             ]);
 
         expect($submission->fresh()->status)->toBe('submitted'); // Rolled back / not changed
-        expect($submission->fresh()->letter_path)->toBeNull();
+        foreach ($submission->fresh()->submissionMemberships as $membership) {
+            expect($membership->letter_path)->toBeNull();
+        }
     });
 
     it('download fails gracefully if document file is missing', function () {
@@ -526,8 +562,10 @@ describe('Edge Cases', function () {
 
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
-        // Delete generated file from Storage
-        Storage::delete($submission->fresh()->letter_path);
+        // Delete generated files from Storage
+        foreach ($submission->fresh()->submissionMemberships as $membership) {
+            Storage::delete($membership->letter_path);
+        }
 
         $this->actingAs($operator)
             ->get(route('groups.submissions.download-letter', $submission->id))

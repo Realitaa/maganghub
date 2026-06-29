@@ -388,8 +388,8 @@ return;
                                         </div>
                                     </div>
                                     
-                                    <!-- Print button (Only show in view mode) -->
-                                    <div v-if="mode === 'view'" class="flex items-center self-end md:self-center shrink-0">
+                                    <!-- Print button (Only show in view mode and if approved) -->
+                                    <div v-if="mode === 'view' && submissionDetail.status !== 'submitted'" class="flex items-center self-end md:self-center shrink-0">
                                         <Button
                                             size="sm"
                                             variant="outline"
@@ -443,6 +443,7 @@ return;
                         class="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 border-t border-border/60 pt-4"
                     >
                         <Button
+                            v-if="submissionDetail.status !== 'submitted'"
                             variant="outline"
                             class="cursor-pointer border-primary/30 text-primary hover:bg-primary/5 w-full sm:w-auto"
                             @click="handleDownloadLetter(submissionDetail.id)"

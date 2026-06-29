@@ -44,10 +44,6 @@ class InternshipSubmissionPolicy
      */
     public function downloadLetter(User $user, InternshipSubmission $submission): bool
     {
-        if (! $submission->letter_path) {
-            return false;
-        }
-
         return in_array($user->role, ['operator', 'administrator']);
     }
 

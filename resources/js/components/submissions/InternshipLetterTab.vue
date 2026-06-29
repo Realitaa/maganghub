@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { FileText, CheckCircle2, Upload, AlertCircle, Download } from '@lucide/vue';
+import { FileText, CheckCircle2, Upload, AlertCircle } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { uploadResponse, downloadLetter } from '@/routes/groups/submissions';
+import { uploadResponse } from '@/routes/groups/submissions';
 
 import type { Group } from '@/types';
 
@@ -44,15 +44,6 @@ function handleResponseUpload(event: Event) {
         );
     }
 }
-
-function downloadLetterFile() {
-    if (props.group?.active_submission) {
-        window.open(
-            downloadLetter.url({ submission: props.group.active_submission.id }),
-            '_blank',
-        );
-    }
-}
 </script>
 
 <template>
@@ -86,19 +77,6 @@ function downloadLetterFile() {
                     <p class="text-xs text-muted-foreground">
                         Setelah Anda mengambil surat fisik dari operator/admin, status kelompok Anda akan diperbarui oleh admin menjadi <strong>"Menunggu Balasan"</strong> (Applying), di mana Anda dapat mengunggah surat balasan dari perusahaan.
                     </p>
-                </div>
-
-                <div class="flex flex-wrap gap-3 pt-2">
-                    <Button
-                        v-if="group.active_submission?.letter_path"
-                        variant="outline"
-                        size="sm"
-                        class="gap-1.5"
-                        @click="downloadLetterFile"
-                    >
-                        <Download class="h-4 w-4" />
-                        Unduh Salinan Surat (PDF)
-                    </Button>
                 </div>
             </div>
         </template>

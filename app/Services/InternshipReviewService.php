@@ -85,19 +85,21 @@ class InternshipReviewService
             // Record timeline
             $this->timelineService->submissionApproved($lockedSubmission->group);
 
-            // Generate document if not already generated
-            if (! $lockedSubmission->letter_path) {
-                try {
-                    $generator = app(DocumentGeneratorService::class);
-                    $path = $generator->generateLetter($lockedSubmission);
-                    $lockedSubmission->update([
-                        'letter_path' => $path,
-                    ]);
-                } catch (\Exception $e) {
-                    throw ValidationException::withMessages([
-                        'error' => 'Gagal membuat dokumen permohonan magang: '.$e->getMessage(),
-                    ]);
+            // Generate all individual letters
+            try {
+                $generator = app(DocumentGeneratorService::class);
+                foreach ($lockedSubmission->submissionMemberships as $membership) {
+                    if (! $membership->letter_path) {
+                        $path = $generator->generateLetter($lockedSubmission, $membership->user_id);
+                        $membership->update([
+                            'letter_path' => $path,
+                        ]);
+                    }
                 }
+            } catch (\Exception $e) {
+                throw ValidationException::withMessages([
+                    'error' => 'Gagal membuat dokumen permohonan magang: '.$e->getMessage(),
+                ]);
             }
 
             return $lockedSubmission;

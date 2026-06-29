@@ -297,6 +297,9 @@ describe('ready to print / siap magang workflow', function () {
 
         $submission->update([
             'status' => 'letter_published',
+        ]);
+        $membership = $submission->submissionMemberships()->where('user_id', $leader->id)->first();
+        $membership->update([
             'letter_path' => 'letters/permohonan_magang_test.docx',
         ]);
         Storage::put('letters/permohonan_magang_test.docx', 'dummy content');
@@ -308,7 +311,7 @@ describe('ready to print / siap magang workflow', function () {
             ]));
 
         $response->assertSuccessful();
-        $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.str_replace(' ', '_', $leader->name).'_'.$submission->group->code.'.docx');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.str_replace(' ', '_', $leader->name).'_'.($submission->group->code ?? $submission->id).'.docx');
     });
 
     it('prevents downloading an individual letter for a non-member of the group', function () {
@@ -318,9 +321,7 @@ describe('ready to print / siap magang workflow', function () {
 
         $submission->update([
             'status' => 'letter_published',
-            'letter_path' => 'letters/permohonan_magang_test.docx',
         ]);
-        Storage::put('letters/permohonan_magang_test.docx', 'dummy content');
 
         $this->actingAs($operator)
             ->get(route('groups.submissions.download-letter', [
