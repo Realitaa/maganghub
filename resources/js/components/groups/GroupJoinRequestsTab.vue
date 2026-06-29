@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Clock, UserCheck, UserX } from '@lucide/vue';
+import { Clock, Check, UserX, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import {
@@ -66,7 +66,7 @@ function rejectJoinRequest(requestId: number) {
                         class="gap-1.5 border-green-600/30 text-green-600 hover:bg-green-600/10 hover:text-green-600"
                         @click="approveJoinRequest(req.id)"
                     >
-                        <UserCheck class="h-3.5 w-3.5" />
+                        <Check class="h-3.5 w-3.5" />
                         Terima
                     </Button>
                     <Button
@@ -75,7 +75,7 @@ function rejectJoinRequest(requestId: number) {
                         class="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         @click="rejectJoinRequest(req.id)"
                     >
-                        <UserX class="h-3.5 w-3.5" />
+                        <X class="h-3.5 w-3.5" />
                         Tolak
                     </Button>
                 </div>
@@ -84,10 +84,11 @@ function rejectJoinRequest(requestId: number) {
 
         <div
             v-else-if="isLeader"
-            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-10 text-center"
+            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-10 text-center space-y-2"
         >
+            <UserX class="size-6 mx-auto" />
             <p class="text-sm font-medium">Belum ada permintaan aktif</p>
-            <p class="mt-1 text-xs text-muted-foreground">
+            <p class="text-xs text-muted-foreground">
                 Permintaan bergabung baru akan muncul di tab ini.
             </p>
         </div>

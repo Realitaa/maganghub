@@ -10,7 +10,7 @@ import {
     Share2,
     FileCheck,
     Trash2,
-    UserMinus,
+    ArrowLeftToLine,
 } from '@lucide/vue';
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui';
 import { ref, onMounted, computed, watch } from 'vue';
@@ -266,8 +266,10 @@ watch(showJoinConfirmDialog, (isOpen) => {
                             </h1>
                         </div>
                         <p class="text-sm text-muted-foreground">
-                            Kelola anggota, pengajuan, dan perkembangan kelompok
-                            magang.
+                            {{ 
+                                isLeader ? 'Kelola anggota, pengajuan, dan perkembangan kelompok magang.'
+                                : 'Lihat perkembangan kelompok magangmu.'
+                            }}
                         </p>
 
                         <!-- Leave / Disband actions -->
@@ -297,7 +299,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                                 class="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
                                 @click="showLeaveConfirm = true"
                             >
-                                <UserMinus class="h-3.5 w-3.5" />
+                                <ArrowLeftToLine class="h-3.5 w-3.5" />
                                 Keluar dari Kelompok
                             </Button>
                         </div>

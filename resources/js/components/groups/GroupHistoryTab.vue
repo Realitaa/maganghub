@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     FilePlus,
+    FileClock,
     XCircle,
     CheckCircle2,
     Printer,
@@ -182,10 +183,11 @@ const getTimelineMeta = (type: string) => {
 
         <div
             v-else
-            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-12 text-center"
+            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-12 text-center space-y-2"
         >
+            <FileClock class="h-6 w-6 mx-auto" />
             <p class="text-sm font-medium">Belum ada riwayat aktivitas</p>
-            <p class="mt-1 text-xs text-muted-foreground">
+            <p class="text-xs text-muted-foreground">
                 Aktivitas kelompok magangmu akan tercatat di sini.
             </p>
         </div>
