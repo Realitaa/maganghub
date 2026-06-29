@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('groups/by-code/{code}', [InternshipGroupController::class, 'showByCode'])->name('groups.by-code');
     Route::post('groups/leave', [InternshipGroupController::class, 'leave'])->name('groups.leave');
     Route::post('groups/{group}/banner', [InternshipGroupController::class, 'updateBanner'])->name('groups.banner.update');
+    Route::post('groups/{group}/kick', [InternshipGroupController::class, 'kick'])->name('groups.kick');
     Route::delete('groups/{group}', [InternshipGroupController::class, 'destroy'])->name('groups.destroy');
 
     Route::post('groups/submissions', [InternshipSubmissionController::class, 'store'])->name('groups.submissions.store');

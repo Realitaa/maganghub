@@ -8,6 +8,7 @@ use App\Models\InternshipGroup;
 use App\Models\User;
 use App\Notifications\JoinRequestAcceptedNotification;
 use App\Notifications\JoinRequestRejectedNotification;
+use App\Notifications\KickedFromGroupNotification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -267,6 +268,59 @@ class InternshipGroupService
         }
 
         $group->delete();
+    }
+
+    /**
+     * Kick a member from the group. Only the leader can do this, and only in allowed statuses.
+     *
+     * @throws ValidationException
+     */
+    public function kickMember(User $leader, User $member): void
+    {
+        $membership = $leader->groupMembership()->with('group')->first();
+
+        if (! $membership) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
+            ]);
+        }
+
+        $group = $membership->group;
+
+        if ($group->leader_id !== $leader->id) {
+            throw ValidationException::withMessages([
+                'error' => 'Hanya ketua kelompok yang dapat mengeluarkan anggota.',
+            ]);
+        }
+
+        if ($member->id === $leader->id) {
+            throw ValidationException::withMessages([
+                'error' => 'Ketua kelompok tidak dapat mengeluarkan diri sendiri.',
+            ]);
+        }
+
+        $allowedStatuses = ['forming', 'company_rejected'];
+        if (! in_array($group->status, $allowedStatuses)) {
+            throw ValidationException::withMessages([
+                'error' => 'Anggota tidak dapat dikeluarkan pada status kelompok saat ini.',
+            ]);
+        }
+
+        $memberMembership = GroupMembership::where('group_id', $group->id)
+            ->where('user_id', $member->id)
+            ->first();
+
+        if (! $memberMembership) {
+            throw ValidationException::withMessages([
+                'error' => 'Mahasiswa tersebut bukan merupakan anggota kelompok Anda.',
+            ]);
+        }
+
+        $memberMembership->delete();
+
+        // Send notification to the kicked user
+        $groupName = $group->activeSubmission?->company_name ?: $group->leader->name;
+        $member->notify(new KickedFromGroupNotification($groupName, $leader->name));
     }
 
     /**

@@ -22,4 +22,12 @@ class InternshipGroupPolicy
     {
         return $group->leader_id === $user->id;
     }
+
+    /**
+     * Determine whether the user can kick a member from the internship group.
+     */
+    public function kick(User $user, InternshipGroup $group): bool
+    {
+        return $group->leader_id === $user->id;
+    }
 }

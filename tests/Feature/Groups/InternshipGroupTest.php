@@ -706,3 +706,78 @@ describe('fetching group by code', function () {
     });
 
 });
+
+// ────────────────────────────────────────────────────────────────────────────
+// 10. Kicking a Member
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('kicking a member', function () {
+
+    it('allows the leader to kick a member when group is in forming status', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupWithMember('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.kick', $group), ['user_id' => $member->id])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'success')
+            ->assertInertiaFlash('toast.message', 'Berhasil mengeluarkan anggota dari kelompok.');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $member->id)->exists())->toBeFalse();
+
+        // Also assert notification was sent
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $member->id,
+            'type' => \App\Notifications\KickedFromGroupNotification::class,
+        ]);
+    });
+
+    it('prevents non-leaders from kicking a member', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupWithMember('forming');
+        $otherMember = User::factory()->create(['role' => 'student']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $otherMember->id]);
+
+        $this->actingAs($member)
+            ->post(route('groups.kick', $group), ['user_id' => $otherMember->id])
+            ->assertForbidden();
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $otherMember->id)->exists())->toBeTrue();
+    });
+
+    it('prevents kicking leader', function () {
+        ['group' => $group, 'leader' => $leader] = makeGroupWithMember('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.kick', $group), ['user_id' => $leader->id])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'error');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $leader->id)->exists())->toBeTrue();
+    });
+
+    it('prevents kicking a member from another group', function () {
+        ['group' => $group, 'leader' => $leader] = makeGroupWithMember('forming');
+        $otherGroup = InternshipGroup::factory()->create();
+        $otherMember = User::factory()->create(['role' => 'student']);
+        GroupMembership::factory()->create(['group_id' => $otherGroup->id, 'user_id' => $otherMember->id]);
+
+        $this->actingAs($leader)
+            ->post(route('groups.kick', $group), ['user_id' => $otherMember->id])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'error');
+
+        expect(GroupMembership::where('group_id', $otherGroup->id)->where('user_id', $otherMember->id)->exists())->toBeTrue();
+    });
+
+    it('prevents kicking a member when group status is submitted', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupWithMember('submitted');
+
+        $this->actingAs($leader)
+            ->post(route('groups.kick', $group), ['user_id' => $member->id])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.type', 'error');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $member->id)->exists())->toBeTrue();
+    });
+
+});
+

@@ -6,6 +6,7 @@ use App\Http\Requests\Groups\JoinGroupRequest;
 use App\Http\Requests\Groups\UpdateGroupBannerRequest;
 use App\Models\GroupJoinRequest;
 use App\Models\InternshipGroup;
+use App\Models\User;
 use App\Services\InternshipGroupService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -161,6 +162,34 @@ class InternshipGroupController extends Controller
             return Inertia::flash('toast', [
                 'type' => 'success',
                 'message' => 'Berhasil membubarkan kelompok magang.',
+            ])->back();
+        } catch (ValidationException $e) {
+            return Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => collect($e->errors())->flatten()->first(),
+            ])->back();
+        }
+    }
+
+    /**
+     * Kick a member from the internship group.
+     */
+    public function kick(Request $request, InternshipGroup $group): RedirectResponse
+    {
+        Gate::authorize('kick', $group);
+
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $member = User::findOrFail($request->integer('user_id'));
+
+        try {
+            $this->groupService->kickMember(auth()->user(), $member);
+
+            return Inertia::flash('toast', [
+                'type' => 'success',
+                'message' => 'Berhasil mengeluarkan anggota dari kelompok.',
             ])->back();
         } catch (ValidationException $e) {
             return Inertia::flash('toast', [
