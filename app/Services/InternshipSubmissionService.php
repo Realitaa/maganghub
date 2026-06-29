@@ -51,8 +51,8 @@ class InternshipSubmissionService
             'company_contact' => ['nullable', 'string', 'max:255'],
             'division' => ['nullable', 'string', 'max:255'],
             'field_of_interest' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date', 'date_format:Y-m-d'],
-            'end_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'start_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'end_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after:today', 'after:start_date'],
         ])->validate();
 
         // Find existing draft submission or create a new one
@@ -114,16 +114,17 @@ class InternshipSubmissionService
             'company_contact' => ['required', 'string', 'max:255'],
             'division' => ['nullable', 'string', 'max:255'],
             'field_of_interest' => ['required', 'string', 'max:255'],
-            'start_date' => ['required', 'date', 'date_format:Y-m-d'],
-            'end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:start_date'],
+            'start_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:today', 'after:start_date'],
         ], [
             'company_name.required' => 'Nama perusahaan wajib diisi.',
             'company_address.required' => 'Alamat perusahaan wajib diisi.',
             'company_contact.required' => 'Kontak perusahaan wajib diisi.',
             'field_of_interest.required' => 'Bidang yang diminati wajib diisi.',
             'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'start_date.after_or_equal' => 'Tanggal mulai tidak boleh tanggal yang sudah lalu.',
             'end_date.required' => 'Tanggal selesai wajib diisi.',
-            'end_date.after' => 'Tanggal selesai harus setelah tanggal mulai.',
+            'end_date.after' => 'Tanggal selesai harus setelah tanggal mulai dan setelah hari ini.',
         ])->validate();
 
         // Get active members of the group

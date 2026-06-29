@@ -332,4 +332,65 @@ describe('internship submission', function () {
                 'message' => 'Kelompok harus memiliki minimal dua anggota sebelum mengajukan magang.',
             ]);
     });
+
+    it('prevents submitting proposal with past start_date', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Global Solusi',
+                'company_address' => 'Jl. Merdeka No. 45',
+                'company_contact' => 'hr@global.com',
+                'field_of_interest' => 'Data Analyst',
+                'division' => 'Data Analyst',
+                'start_date' => now()->subDay()->format('Y-m-d'), // Yesterday
+                'end_date' => now()->addDays(5)->format('Y-m-d'),
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Tanggal mulai tidak boleh tanggal yang sudah lalu.',
+            ]);
+    });
+
+    it('prevents submitting proposal with past or today end_date', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Global Solusi',
+                'company_address' => 'Jl. Merdeka No. 45',
+                'company_contact' => 'hr@global.com',
+                'field_of_interest' => 'Data Analyst',
+                'division' => 'Data Analyst',
+                'start_date' => now()->format('Y-m-d'),
+                'end_date' => now()->format('Y-m-d'), // Today (not after today)
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Tanggal selesai harus setelah tanggal mulai dan setelah hari ini.',
+            ]);
+    });
+
+    it('prevents submitting proposal where end_date is before start_date', function () {
+        ['group' => $group, 'leader' => $leader, 'member' => $member] = makeGroupForSubmission('forming');
+
+        $this->actingAs($leader)
+            ->post(route('groups.submissions.submit'), [
+                'company_name' => 'PT Global Solusi',
+                'company_address' => 'Jl. Merdeka No. 45',
+                'company_contact' => 'hr@global.com',
+                'field_of_interest' => 'Data Analyst',
+                'division' => 'Data Analyst',
+                'start_date' => now()->addDays(5)->format('Y-m-d'),
+                'end_date' => now()->addDays(3)->format('Y-m-d'), // Before start_date
+            ])
+            ->assertRedirect()
+            ->assertInertiaFlash('toast', [
+                'type' => 'error',
+                'message' => 'Tanggal selesai harus setelah tanggal mulai dan setelah hari ini.',
+            ]);
+    });
 });
+

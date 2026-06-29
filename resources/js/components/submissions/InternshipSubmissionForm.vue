@@ -4,6 +4,7 @@ import {
     parseDate,
     DateFormatter,
     getLocalTimeZone,
+    today,
 } from '@internationalized/date';
 import {
     AlertCircle,
@@ -111,6 +112,34 @@ const endDateValue = computed({
         submissionForm.end_date = val ? val.toString() : '';
     },
 });
+
+const minStartDate = computed(() => today(getLocalTimeZone()));
+
+const minEndDate = computed(() => {
+    if (startDateValue.value) {
+        return startDateValue.value.add({ days: 1 });
+    }
+
+    return today(getLocalTimeZone()).add({ days: 1 });
+});
+
+watch(
+    () => submissionForm.start_date,
+    (newStartDate) => {
+        if (newStartDate && submissionForm.end_date) {
+            try {
+                const start = parseDate(newStartDate);
+                const end = parseDate(submissionForm.end_date);
+
+                if (start.compare(end) >= 0) {
+                    submissionForm.end_date = '';
+                }
+            } catch {
+                // ignore
+            }
+        }
+    }
+);
 
 function saveSubmissionDraft() {
     isProcessing.value = true;
@@ -308,6 +337,7 @@ function submitSubmissionProposal() {
                             <CalendarComponent
                                 locale="id-ID"
                                 v-model="startDateValue"
+                                :min-value="minStartDate"
                                 initial-focus
                                 @update:model-value="close"
                             />
@@ -364,6 +394,7 @@ function submitSubmissionProposal() {
                             <CalendarComponent
                                 locale="id-ID"
                                 v-model="endDateValue"
+                                :min-value="minEndDate"
                                 initial-focus
                                 @update:model-value="close"
                             />
