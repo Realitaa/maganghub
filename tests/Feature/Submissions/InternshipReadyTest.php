@@ -5,6 +5,8 @@ use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\SubmissionMembership;
 use App\Models\User;
+use App\Notifications\InternshipRejectedNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -188,8 +190,19 @@ describe('ready to print / siap magang workflow', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
-        $submission->update(['status' => 'loa_review']);
+        // Seed fake files
+        Storage::disk('local')->put('letters/letter1.pdf', 'content1');
+        Storage::disk('local')->put('letters/letter2.pdf', 'content2');
+        Storage::disk('local')->put('responses/reply.pdf', 'content3');
+
+        $submission->update([
+            'status' => 'loa_review',
+            'company_response_path' => 'responses/reply.pdf',
+        ]);
         $group->update(['status' => 'loa_review']);
+
+        $submission->submissionMemberships()->where('user_id', $leader->id)->first()->update(['letter_path' => 'letters/letter1.pdf']);
+        $submission->submissionMemberships()->where('user_id', $member->id)->first()->update(['letter_path' => 'letters/letter2.pdf']);
 
         $this->actingAs($operator)
             ->post(route('review.submissions.company-decision', $submission->id), [
@@ -202,15 +215,25 @@ describe('ready to print / siap magang workflow', function () {
             ]);
 
         expect($submission->fresh()->status)->toBe('rejected');
-        expect($group->fresh()->status)->toBe('rejected');
+        expect($group->fresh()->status)->toBe('forming');
 
         expect($submission->submissionMemberships()->where('user_id', $leader->id)->first()->status)->toBe('rejected');
         expect($submission->submissionMemberships()->where('user_id', $member->id)->first()->status)->toBe('rejected');
 
-        expect($group->memberships()->count())->toBe(0);
+        // Document paths should be set to null and files deleted
+        expect($submission->fresh()->company_response_path)->toBeNull();
+        expect($submission->submissionMemberships()->where('user_id', $leader->id)->first()->letter_path)->toBeNull();
+        expect($submission->submissionMemberships()->where('user_id', $member->id)->first()->letter_path)->toBeNull();
+        Storage::disk('local')->assertMissing('letters/letter1.pdf');
+        Storage::disk('local')->assertMissing('letters/letter2.pdf');
+        Storage::disk('local')->assertMissing('responses/reply.pdf');
+
+        // Memberships should NOT be deleted
+        expect($group->memberships()->count())->toBe(2);
     });
 
     it('processes company outcome decision: partially accepted (leader accepted, member rejected)', function () {
+        Notification::fake();
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
@@ -242,9 +265,15 @@ describe('ready to print / siap magang workflow', function () {
         expect($group->memberships()->where('user_id', $member->id)->exists())->toBeFalse();
         expect($group->memberships()->where('user_id', $leader->id)->exists())->toBeTrue();
         expect($group->fresh()->leader_id)->toBe($leader->id);
+
+        Notification::assertSentTo($member, InternshipRejectedNotification::class, function ($notification) use ($submission) {
+            return $notification->companyName === $submission->company_name && $notification->rejectionNote === 'Kuota divisi penuh';
+        });
+        Notification::assertNotSentTo($leader, InternshipRejectedNotification::class);
     });
 
     it('processes company outcome decision: partially accepted (leader rejected, member accepted, requires new leader)', function () {
+        Notification::fake();
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
@@ -288,6 +317,11 @@ describe('ready to print / siap magang workflow', function () {
 
         expect($group->memberships()->where('user_id', $leader->id)->exists())->toBeFalse();
         expect($group->memberships()->where('user_id', $member->id)->exists())->toBeTrue();
+
+        Notification::assertSentTo($leader, InternshipRejectedNotification::class, function ($notification) use ($submission) {
+            return $notification->companyName === $submission->company_name && $notification->rejectionNote === 'Posisi tidak sesuai';
+        });
+        Notification::assertNotSentTo($member, InternshipRejectedNotification::class);
     });
 
     it('allows operators to download individual student letters', function () {

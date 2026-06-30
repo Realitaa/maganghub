@@ -37,6 +37,31 @@ class GroupTimelinePresenter
             case GroupTimelineType::AdministrationCompleted:
                 return 'Administrasi magang kelompokmu sudah selesai. Semangat menjalani magangnya.';
 
+            case GroupTimelineType::CompanyRejected:
+                $company = $timeline->metadata['company_name'] ?? 'Perusahaan';
+                return "Pengajuan magang kelompok ke {$company} ditolak oleh perusahaan. Silakan ubah formulir pengajuan untuk kembali mengajukan magang.";
+
+            case GroupTimelineType::CompanyPartiallyAccepted:
+                $company = $timeline->metadata['company_name'] ?? 'Perusahaan';
+                $message = "Hasil keputusan penempatan dari {$company}:";
+                
+                $acceptedNames = $timeline->metadata['accepted_names'] ?? [];
+                if (! empty($acceptedNames)) {
+                    $message .= "\n- Anggota diterima: " . implode(', ', $acceptedNames);
+                }
+
+                $rejectedNames = $timeline->metadata['rejected_names'] ?? [];
+                if (! empty($rejectedNames)) {
+                    $message .= "\n- Anggota ditolak: " . implode(', ', $rejectedNames);
+                }
+
+                $newLeaderName = $timeline->metadata['new_leader_name'] ?? null;
+                if (! empty($newLeaderName)) {
+                    $message .= "\n- Ketua kelompok baru: {$newLeaderName}";
+                }
+
+                return $message;
+
             default:
                 return '';
         }

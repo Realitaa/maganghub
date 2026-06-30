@@ -3,7 +3,12 @@
 namespace App\Services;
 
 use App\Models\InternshipSubmission;
+use App\Models\GroupTimeline;
+use App\Models\User;
+use App\Enums\GroupTimelineType;
+use App\Notifications\InternshipRejectedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class InternshipReviewService
@@ -174,19 +179,40 @@ class InternshipReviewService
 
                 $lockedSubmission->submissionMemberships()->update(['status' => 'accepted']);
             } elseif ($decision === 'all_rejected') {
-                // 2. All Rejected
+                // 2. All Rejected (Reset to forming, clear documents to save storage)
                 $lockedSubmission->update(['status' => 'rejected']);
-                $group->update(['status' => 'rejected']);
+                $group->update(['status' => 'forming']);
 
                 $lockedSubmission->submissionMemberships()->update(['status' => 'rejected']);
 
-                // Delete all group memberships to free members
-                $group->memberships()->delete();
+                // Delete member letters from storage and nullify db path
+                foreach ($lockedSubmission->submissionMemberships as $subMem) {
+                    if ($subMem->letter_path) {
+                        Storage::delete($subMem->letter_path);
+                        $subMem->update(['letter_path' => null]);
+                    }
+                }
+
+                // Delete company response letter from storage and nullify db path
+                if ($lockedSubmission->company_response_path) {
+                    Storage::delete($lockedSubmission->company_response_path);
+                    $lockedSubmission->update(['company_response_path' => null]);
+                }
+
+                // Add timeline entry
+                GroupTimeline::create([
+                    'group_id' => $group->id,
+                    'type' => GroupTimelineType::CompanyRejected,
+                    'metadata' => [
+                        'company_name' => $lockedSubmission->company_name,
+                    ],
+                ]);
             } elseif ($decision === 'partially_accepted') {
                 // 3. Partially Accepted
-                // We must update each member's decision
                 $acceptedUserIds = [];
                 $rejectedUserIds = [];
+                $acceptedNames = [];
+                $rejectedNames = [];
 
                 foreach ($memberDecisions as $mDecision) {
                     $userId = $mDecision['user_id'] ?? null;
@@ -208,10 +234,20 @@ class InternshipReviewService
                         ]);
                     }
 
+                    $user = User::find($userId);
+                    $userName = $user ? $user->name : "User ID {$userId}";
+
                     if ($mStatus === 'accepted') {
                         $acceptedUserIds[] = $userId;
+                        $acceptedNames[] = $userName;
                     } else {
                         $rejectedUserIds[] = $userId;
+                        $rejectedNames[] = $userName;
+
+                        // Notify rejected member
+                        if ($user) {
+                            $user->notify(new InternshipRejectedNotification($lockedSubmission->company_name, $rejectionNote));
+                        }
                     }
                 }
 
@@ -224,6 +260,7 @@ class InternshipReviewService
 
                 // If leader is rejected, check new leader choice
                 $isLeaderRejected = in_array($group->leader_id, $rejectedUserIds);
+                $newLeaderName = null;
                 if ($isLeaderRejected) {
                     if (! $newLeaderId || ! in_array($newLeaderId, $acceptedUserIds)) {
                         throw ValidationException::withMessages([
@@ -231,6 +268,8 @@ class InternshipReviewService
                         ]);
                     }
                     $group->update(['leader_id' => $newLeaderId]);
+                    $newLeaderUser = User::find($newLeaderId);
+                    $newLeaderName = $newLeaderUser ? $newLeaderUser->name : null;
                 }
 
                 // Update submission & group status
@@ -241,6 +280,18 @@ class InternshipReviewService
                 if (! empty($rejectedUserIds)) {
                     $group->memberships()->whereIn('user_id', $rejectedUserIds)->delete();
                 }
+
+                // Add timeline entry
+                GroupTimeline::create([
+                    'group_id' => $group->id,
+                    'type' => GroupTimelineType::CompanyPartiallyAccepted,
+                    'metadata' => [
+                        'company_name' => $lockedSubmission->company_name,
+                        'accepted_names' => $acceptedNames,
+                        'rejected_names' => $rejectedNames,
+                        'new_leader_name' => $newLeaderName,
+                    ],
+                ]);
             } else {
                 throw ValidationException::withMessages([
                     'error' => 'Keputusan tidak valid.',

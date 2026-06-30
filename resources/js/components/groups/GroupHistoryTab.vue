@@ -79,6 +79,18 @@ const getTimelineMeta = (type: string) => {
                 colorClass: 'bg-red-500 text-white dark:bg-red-600',
                 cardClass: 'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
+        case 'COMPANY_REJECTED':
+            return {
+                icon: XCircle,
+                colorClass: 'bg-red-500 text-white dark:bg-red-600',
+                cardClass: 'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+            };
+        case 'COMPANY_PARTIALLY_ACCEPTED':
+            return {
+                icon: CheckCircle2,
+                colorClass: 'bg-yellow-500 text-white dark:bg-yellow-600',
+                cardClass: 'border-l-4 border-l-yellow-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+            };
         case 'SUBMISSION_APPROVED':
             return {
                 icon: CheckCircle2,
