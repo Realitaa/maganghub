@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\InternshipSubmission;
-use App\Models\GroupTimeline;
-use App\Models\User;
 use App\Enums\GroupTimelineType;
+use App\Models\GroupTimeline;
+use App\Models\InternshipSubmission;
+use App\Models\User;
 use App\Notifications\InternshipRejectedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

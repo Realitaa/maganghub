@@ -29,6 +29,7 @@ class UserService
         }
 
         $studentClass = StudentClass::firstOrCreate(['name' => $classInput]);
+
         return $studentClass->id;
     }
 

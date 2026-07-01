@@ -200,7 +200,10 @@ function submitForm() {
                 </div>
 
                 <!-- Dynamic fields for student -->
-                <div class="grid grid-cols-2 gap-3" v-if="form.role === 'student'">
+                <div
+                    class="grid grid-cols-2 gap-3"
+                    v-if="form.role === 'student'"
+                >
                     <div class="space-y-1.5">
                         <Label for="form-nim" required>NIM</Label>
                         <Input
@@ -225,19 +228,26 @@ function submitForm() {
                                     class="pr-10"
                                 />
                                 <AutocompleteTrigger>
-                                    <ChevronDown class="h-4 w-4 text-muted-foreground" />
+                                    <ChevronDown
+                                        class="h-4 w-4 text-muted-foreground"
+                                    />
                                 </AutocompleteTrigger>
                             </AutocompleteAnchor>
 
                             <AutocompleteContent>
                                 <AutocompleteViewport>
-                                    <AutocompleteEmpty>Tidak ada Kelas.</AutocompleteEmpty>
+                                    <AutocompleteEmpty
+                                        >Tidak ada Kelas.</AutocompleteEmpty
+                                    >
                                     <AutocompleteGroup>
                                         <AutocompleteItem
                                             v-for="c in classes"
                                             :key="c.id"
                                             :value="c.name"
-                                            @select="form.student_class_id = c.id.toString()"
+                                            @select="
+                                                form.student_class_id =
+                                                    c.id.toString()
+                                            "
                                         >
                                             {{ c.name }}
                                         </AutocompleteItem>

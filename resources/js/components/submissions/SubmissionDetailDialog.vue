@@ -96,8 +96,8 @@ watch(
 
 const leaderId = computed(() => {
     if (!submissionDetail.value) {
-return null;
-}
+        return null;
+    }
 
     if (submissionDetail.value.group?.leader_id) {
         return submissionDetail.value.group.leader_id;
@@ -147,8 +147,8 @@ function submitApprove() {
     const subId = props.submissionId || submissionDetail.value?.id;
 
     if (!subId) {
-return;
-}
+        return;
+    }
 
     processing.value = true;
     router.post(
@@ -174,8 +174,8 @@ function submitReject() {
     const subId = props.submissionId || submissionDetail.value?.id;
 
     if (!subId || !rejectNotes.value.trim()) {
-return;
-}
+        return;
+    }
 
     processing.value = true;
     router.post(
@@ -199,15 +199,22 @@ return;
     <div>
         <!-- ───── DETAIL / REVIEW DIALOG ───── -->
         <Dialog :open="open" @update:open="(val) => emit('update:open', val)">
-            <DialogContent class="max-h-[85vh] overflow-y-auto sm:max-w-[650px] lg:max-w-[1000px]">
+            <DialogContent
+                class="max-h-[85vh] overflow-y-auto sm:max-w-[650px] lg:max-w-[1000px]"
+            >
                 <DialogHeader class="border-b border-border/60 pb-4">
                     <DialogTitle class="text-base font-bold text-foreground">
-                        {{ mode === 'review' ? 'Review Pengajuan Magang' : 'Detail Pengajuan & Cetak Surat' }}
+                        {{
+                            mode === 'review'
+                                ? 'Review Pengajuan Magang'
+                                : 'Detail Pengajuan & Cetak Surat'
+                        }}
                     </DialogTitle>
                     <DialogDescription class="text-xs">
-                        {{ mode === 'review'
-                            ? 'Informasi lengkap draf dokumen permohonan magang kelompok.'
-                            : 'Informasi data pengajuan dan anggota untuk dokumen cetak surat permohonan magang kelompok.'
+                        {{
+                            mode === 'review'
+                                ? 'Informasi lengkap draf dokumen permohonan magang kelompok.'
+                                : 'Informasi data pengajuan dan anggota untuk dokumen cetak surat permohonan magang kelompok.'
                         }}
                     </DialogDescription>
                 </DialogHeader>
@@ -225,190 +232,282 @@ return;
 
                 <!-- Detail Content -->
                 <div v-else-if="submissionDetail" class="space-y-6 pt-4">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    <div
+                        class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2"
+                    >
                         <!-- Perusahaan Info -->
-                    <div class="space-y-3">
-                        <h3
-                            class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-primary uppercase"
-                        >
-                            <Building2 class="h-4 w-4" />
-                            Instansi / Perusahaan Tujuan
-                        </h3>
-                        <div
-                            class="grid gap-3 rounded-xl border border-border/80 bg-muted/10 p-4 text-xs sm:grid-cols-2"
-                        >
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Nama Perusahaan</Label
-                                >
-                                <p class="mt-0.5 font-medium text-foreground">
-                                    {{ submissionDetail.company_name }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Bidang yang Diminati</Label
-                                >
-                                <p class="mt-0.5 font-medium text-foreground">
-                                    {{ submissionDetail.field_of_interest }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Tipe Perusahaan</Label
-                                >
-                                <p class="mt-0.5 font-medium text-foreground">
-                                    {{ submissionDetail.company_type }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Model Kerja</Label
-                                >
-                                <p class="mt-0.5 font-medium text-foreground">
-                                    {{ submissionDetail.working_model }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Divisi Pekerjaan (Opsional)</Label
-                                >
-                                <p class="mt-0.5 font-medium text-foreground">
-                                    {{ submissionDetail.division || '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Kontak Hubungan</Label
-                                >
-                                <p
-                                    class="mt-0.5 flex items-center gap-1 font-medium text-foreground"
-                                >
-                                    <Phone class="h-3 w-3 text-muted-foreground" />
-                                    {{ submissionDetail.company_contact }}
-                                </p>
-                            </div>
-                            <div>
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Tanggal Pelaksanaan</Label
-                                >
-                                <p
-                                    class="mt-0.5 flex items-center gap-1 font-medium text-foreground"
-                                >
-                                    <Calendar
-                                        class="h-3 w-3 text-muted-foreground"
-                                    />
-                                    {{ formatDate(submissionDetail.start_date) }} -
-                                    {{ formatDate(submissionDetail.end_date) }}
-                                </p>
-                            </div>
-                            <div
-                                class="border-t border-border/60 pt-2 sm:col-span-2"
+                        <div class="space-y-3">
+                            <h3
+                                class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-primary uppercase"
                             >
-                                <Label class="text-[10px] text-muted-foreground"
-                                    >Alamat Lengkap</Label
-                                >
-                                <p
-                                    class="mt-0.5 flex items-start gap-1 text-foreground"
-                                >
-                                    <MapPin
-                                        class="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground"
-                                    />
-                                    {{ submissionDetail.company_address }}
-                                </p>
-                            </div>
-                        </div>
-                        <GoogleMapLink 
-                            :query="submissionDetail.company_name" 
-                            :text="`Lihat ${submissionDetail.company_name} di Google Maps`"
-                        />
-                        <GoogleMapLink 
-                            :query="submissionDetail.company_address" 
-                            :text="`Lihat ${submissionDetail.company_address} di Google Maps`"
-                        />
-                    </div>
-
-                    <!-- Anggota List -->
-                    <div class="space-y-3">
-                        <h3
-                            class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-primary uppercase"
-                        >
-                            <Users class="h-4 w-4" />
-                            Daftar Anggota Kelompok
-                        </h3>
-                        <ScrollArea class="h-120">
-                            <div class="grid gap-3">
+                                <Building2 class="h-4 w-4" />
+                                Instansi / Perusahaan Tujuan
+                            </h3>
+                            <div
+                                class="grid gap-3 rounded-xl border border-border/80 bg-muted/10 p-4 text-xs sm:grid-cols-2"
+                            >
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Nama Perusahaan</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.company_name }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Bidang yang Diminati</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.field_of_interest }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Tipe Perusahaan</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.company_type }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Model Kerja</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.working_model }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Divisi Pekerjaan (Opsional)</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.division || '-' }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Kontak Hubungan</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 flex items-center gap-1 font-medium text-foreground"
+                                    >
+                                        <Phone
+                                            class="h-3 w-3 text-muted-foreground"
+                                        />
+                                        {{ submissionDetail.company_contact }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Tanggal Pelaksanaan</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 flex items-center gap-1 font-medium text-foreground"
+                                    >
+                                        <Calendar
+                                            class="h-3 w-3 text-muted-foreground"
+                                        />
+                                        {{
+                                            formatDate(
+                                                submissionDetail.start_date,
+                                            )
+                                        }}
+                                        -
+                                        {{
+                                            formatDate(
+                                                submissionDetail.end_date,
+                                            )
+                                        }}
+                                    </p>
+                                </div>
                                 <div
-                                    v-for="membership in submissionDetail.submission_memberships"
-                                    :key="membership.id"
-                                    class="relative flex flex-col md:flex-row justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 transition-all duration-300 shadow-sm hover:border-border hover:shadow-md"
+                                    class="border-t border-border/60 pt-2 sm:col-span-2"
                                 >
-                                    <div class="flex items-start gap-3">
-                                        <div
-                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary border border-primary/10 shadow-xs"
-                                        >
-                                            {{
-                                                membership.user.name
-                                                    .charAt(0)
-                                                    .toUpperCase()
-                                            }}
-                                        </div>
-                                        <div class="space-y-1 min-w-0">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <p class="font-bold text-foreground text-sm tracking-tight leading-none">
-                                                    {{ membership.user.name }}
-                                                </p>
-                                                <Badge
-                                                    v-if="membership.user.id === leaderId"
-                                                    variant="default"
-                                                    class="px-2 py-0 bg-primary/10 text-primary text-[10px] border-none font-medium"
-                                                >
-                                                    Ketua Kelompok
-                                                </Badge>
-                                            </div>
-                                            <p class="text-xs text-muted-foreground font-mono">
-                                                {{ membership.user.nim }} <span class="text-muted-foreground/40 font-sans mx-1">|</span> Semester {{ membership.user.semester ?? '-' }}
-                                            </p>
-                                            
-                                            <!-- Contact details inside a clean grid -->
-                                            <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                                                <div class="flex items-center gap-1.5 min-w-0">
-                                                    <Mail class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                    <span class="truncate font-normal">{{ membership.user.email }}</span>
-                                                </div>
-                                                <div class="flex items-center gap-1.5 min-w-0">
-                                                    <Phone class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                                                    <span class="truncate font-normal">{{ membership.user.phone || '-' }}</span>
-                                                </div>
-                                                <div class="flex items-start gap-1.5 sm:col-span-2 mt-0.5">
-                                                    <MapPin class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-0.5" />
-                                                    <span class="line-clamp-2 leading-relaxed font-normal">{{ membership.user.address || '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Print button (Only show in view mode and if approved) -->
-                                    <div v-if="mode === 'view' && submissionDetail.status !== 'submitted'" class="flex items-center self-end md:self-center shrink-0">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            class="h-8 cursor-pointer gap-1.5 border-primary/20 bg-background font-medium text-primary hover:bg-primary/5 hover:text-primary transition-all"
-                                            @click="
-                                                handleDownloadIndividualLetter(
-                                                    submissionDetail.id,
-                                                    membership.user.id,
-                                                )
-                                            "
-                                        >
-                                            <Printer class="h-3.5 w-3.5" />
-                                            Cetak Surat
-                                        </Button>
-                                    </div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
+                                        >Alamat Lengkap</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 flex items-start gap-1 text-foreground"
+                                    >
+                                        <MapPin
+                                            class="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                                        />
+                                        {{ submissionDetail.company_address }}
+                                    </p>
                                 </div>
                             </div>
-                        </ScrollArea>
-                    </div>
+                            <GoogleMapLink
+                                :query="submissionDetail.company_name"
+                                :text="`Lihat ${submissionDetail.company_name} di Google Maps`"
+                            />
+                            <GoogleMapLink
+                                :query="submissionDetail.company_address"
+                                :text="`Lihat ${submissionDetail.company_address} di Google Maps`"
+                            />
+                        </div>
+
+                        <!-- Anggota List -->
+                        <div class="space-y-3">
+                            <h3
+                                class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-primary uppercase"
+                            >
+                                <Users class="h-4 w-4" />
+                                Daftar Anggota Kelompok
+                            </h3>
+                            <ScrollArea class="h-120">
+                                <div class="grid gap-3">
+                                    <div
+                                        v-for="membership in submissionDetail.submission_memberships"
+                                        :key="membership.id"
+                                        class="relative flex flex-col justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-all duration-300 hover:border-border hover:shadow-md md:flex-row"
+                                    >
+                                        <div class="flex items-start gap-3">
+                                            <div
+                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-primary/10 text-sm font-semibold text-primary shadow-xs"
+                                            >
+                                                {{
+                                                    membership.user.name
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                }}
+                                            </div>
+                                            <div class="min-w-0 space-y-1">
+                                                <div
+                                                    class="flex flex-wrap items-center gap-2"
+                                                >
+                                                    <p
+                                                        class="text-sm leading-none font-bold tracking-tight text-foreground"
+                                                    >
+                                                        {{
+                                                            membership.user.name
+                                                        }}
+                                                    </p>
+                                                    <Badge
+                                                        v-if="
+                                                            membership.user
+                                                                .id === leaderId
+                                                        "
+                                                        variant="default"
+                                                        class="border-none bg-primary/10 px-2 py-0 text-[10px] font-medium text-primary"
+                                                    >
+                                                        Ketua Kelompok
+                                                    </Badge>
+                                                </div>
+                                                <p
+                                                    class="font-mono text-xs text-muted-foreground"
+                                                >
+                                                    {{ membership.user.nim }}
+                                                    <span
+                                                        class="mx-1 font-sans text-muted-foreground/40"
+                                                        >|</span
+                                                    >
+                                                    Semester
+                                                    {{
+                                                        membership.user
+                                                            .semester ?? '-'
+                                                    }}
+                                                </p>
+
+                                                <!-- Contact details inside a clean grid -->
+                                                <div
+                                                    class="grid grid-cols-1 gap-x-4 gap-y-1.5 pt-2 text-xs text-muted-foreground sm:grid-cols-2"
+                                                >
+                                                    <div
+                                                        class="flex min-w-0 items-center gap-1.5"
+                                                    >
+                                                        <Mail
+                                                            class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60"
+                                                        />
+                                                        <span
+                                                            class="truncate font-normal"
+                                                            >{{
+                                                                membership.user
+                                                                    .email
+                                                            }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex min-w-0 items-center gap-1.5"
+                                                    >
+                                                        <Phone
+                                                            class="h-3.5 w-3.5 shrink-0 text-muted-foreground/60"
+                                                        />
+                                                        <span
+                                                            class="truncate font-normal"
+                                                            >{{
+                                                                membership.user
+                                                                    .phone ||
+                                                                '-'
+                                                            }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="mt-0.5 flex items-start gap-1.5 sm:col-span-2"
+                                                    >
+                                                        <MapPin
+                                                            class="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground/60"
+                                                        />
+                                                        <span
+                                                            class="line-clamp-2 leading-relaxed font-normal"
+                                                            >{{
+                                                                membership.user
+                                                                    .address ||
+                                                                '-'
+                                                            }}</span
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Print button (Only show in view mode and if approved) -->
+                                        <div
+                                            v-if="
+                                                mode === 'view' &&
+                                                submissionDetail.status !==
+                                                    'submitted'
+                                            "
+                                            class="flex shrink-0 items-center self-end md:self-center"
+                                        >
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-8 cursor-pointer gap-1.5 border-primary/20 bg-background font-medium text-primary transition-all hover:bg-primary/5 hover:text-primary"
+                                                @click="
+                                                    handleDownloadIndividualLetter(
+                                                        submissionDetail.id,
+                                                        membership.user.id,
+                                                    )
+                                                "
+                                            >
+                                                <Printer class="h-3.5 w-3.5" />
+                                                Cetak Surat
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ScrollArea>
+                        </div>
                     </div>
 
                     <!-- Footer Actions -->
@@ -440,12 +539,12 @@ return;
                     <!-- VIEW Mode Actions -->
                     <div
                         v-else
-                        class="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 border-t border-border/60 pt-4"
+                        class="flex flex-col items-stretch gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                         <Button
                             v-if="submissionDetail.status !== 'submitted'"
                             variant="outline"
-                            class="cursor-pointer border-primary/30 text-primary hover:bg-primary/5 w-full sm:w-auto"
+                            class="w-full cursor-pointer border-primary/30 text-primary hover:bg-primary/5 sm:w-auto"
                             @click="handleDownloadLetter(submissionDetail.id)"
                             id="btn-print-letter"
                         >
@@ -460,7 +559,10 @@ return;
                                 >Tutup</Button
                             >
                             <Button
-                                v-if="submissionDetail.status === 'letter_published'"
+                                v-if="
+                                    submissionDetail.status ===
+                                    'letter_published'
+                                "
                                 variant="default"
                                 class="cursor-pointer bg-primary hover:bg-primary/95"
                                 @click="handleMarkApplying(submissionDetail.id)"

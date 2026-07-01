@@ -152,7 +152,9 @@ function submitImport() {
                 </Alert>
 
                 <div class="space-y-2">
-                    <Label for="import-file-input" required>Pilih File XLSX / CSV</Label>
+                    <Label for="import-file-input" required
+                        >Pilih File XLSX / CSV</Label
+                    >
                     <Input
                         id="import-file-input"
                         type="file"

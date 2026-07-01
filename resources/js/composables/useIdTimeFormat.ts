@@ -28,7 +28,7 @@ export function useIdTimeFormat() {
     }
 
     /**
-     * Formats a date to show 'Hari Ini, HH:mm' if today, 'Kemarin, HH:mm' if yesterday, 
+     * Formats a date to show 'Hari Ini, HH:mm' if today, 'Kemarin, HH:mm' if yesterday,
      * otherwise 'D MMMM YYYY, HH:mm' (e.g., 'Hari Ini, 12:00' or '28 Juni 2026, 12:00').
      */
     function formatFAT(date: string | Date | number): string {
@@ -39,7 +39,7 @@ export function useIdTimeFormat() {
         }
 
         const today = new Date();
-        
+
         // Compare dates based on day boundaries (local time)
         const inputYear = inputDate.getFullYear();
         const inputMonth = inputDate.getMonth();
@@ -49,8 +49,16 @@ export function useIdTimeFormat() {
         const todayMonth = today.getMonth();
         const todayDay = today.getDate();
 
-        const inputStartOfDay = new Date(inputYear, inputMonth, inputDay).getTime();
-        const todayStartOfDay = new Date(todayYear, todayMonth, todayDay).getTime();
+        const inputStartOfDay = new Date(
+            inputYear,
+            inputMonth,
+            inputDay,
+        ).getTime();
+        const todayStartOfDay = new Date(
+            todayYear,
+            todayMonth,
+            todayDay,
+        ).getTime();
 
         const diffMs = todayStartOfDay - inputStartOfDay;
         const oneDayMs = 24 * 60 * 60 * 1000;
@@ -65,7 +73,9 @@ export function useIdTimeFormat() {
         } else if (diffDays === 1) {
             return `Kemarin, ${timeStr}`;
         } else {
-            return useDateFormat(inputDate, 'D MMMM YYYY, HH:mm', { locales: 'id-ID' }).value;
+            return useDateFormat(inputDate, 'D MMMM YYYY, HH:mm', {
+                locales: 'id-ID',
+            }).value;
         }
     }
 

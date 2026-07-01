@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { FileText, CheckCircle2, Upload, AlertCircle, Clock } from '@lucide/vue';
+import {
+    FileText,
+    CheckCircle2,
+    Upload,
+    AlertCircle,
+    Clock,
+} from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -54,50 +60,67 @@ function handleResponseUpload(event: Event) {
                 class="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/20"
             >
                 <div
-                    class="rounded-full bg-blue-100 p-2 text-blue-700 dark:bg-blue-900 dark:text-blue-350"
+                    class="dark:text-blue-350 rounded-full bg-blue-100 p-2 text-blue-700 dark:bg-blue-900"
                 >
                     <FileText class="h-5 w-5" />
                 </div>
                 <div class="space-y-1">
-                    <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                    <p
+                        class="text-sm font-semibold text-blue-900 dark:text-blue-100"
+                    >
                         Surat Permohonan Magang Telah Terbit
                     </p>
                     <p class="text-xs text-blue-700 dark:text-blue-300">
-                        Surat permohonan magang kelompok Anda telah diterbitkan oleh program studi.
-                        Silakan <strong>mengambil lembar surat fisik ke operator/admin program studi</strong>.
+                        Surat permohonan magang kelompok Anda telah diterbitkan
+                        oleh program studi. Silakan
+                        <strong
+                            >mengambil lembar surat fisik ke operator/admin
+                            program studi</strong
+                        >.
                     </p>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div class="space-y-4 rounded-xl border border-border bg-card p-5">
                 <div class="space-y-1">
                     <h4 class="text-sm font-semibold text-foreground">
                         Langkah Selanjutnya:
                     </h4>
                     <p class="text-xs text-muted-foreground">
-                        Setelah Anda mengambil surat fisik dari operator/admin, status kelompok Anda akan diperbarui oleh admin menjadi <strong>"Menunggu Balasan"</strong> (Applying), di mana Anda dapat mengunggah surat balasan dari perusahaan.
+                        Setelah Anda mengambil surat fisik dari operator/admin,
+                        status kelompok Anda akan diperbarui oleh admin menjadi
+                        <strong>"Menunggu Balasan"</strong> (Applying), di mana
+                        Anda dapat mengunggah surat balasan dari perusahaan.
                     </p>
                 </div>
             </div>
         </template>
 
         <!-- Status: Applying or LoA Review -->
-        <template v-else-if="group.status === 'applying' || group.status === 'loa_review'">
+        <template
+            v-else-if="
+                group.status === 'applying' || group.status === 'loa_review'
+            "
+        >
             <div
                 v-if="group.status === 'loa_review'"
                 class="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/20"
             >
                 <div
-                    class="rounded-full bg-blue-100 p-2 text-blue-700 dark:bg-blue-900 dark:text-blue-350"
+                    class="dark:text-blue-350 rounded-full bg-blue-100 p-2 text-blue-700 dark:bg-blue-900"
                 >
                     <Clock class="h-5 w-5" />
                 </div>
                 <div class="space-y-1">
-                    <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                    <p
+                        class="text-sm font-semibold text-blue-900 dark:text-blue-100"
+                    >
                         Surat Balasan Sedang Ditinjau
                     </p>
                     <p class="text-xs text-blue-700 dark:text-blue-300">
-                        Surat balasan dari perusahaan (LoA) telah berhasil diunggah dan sedang diperiksa oleh operator/administrator. Harap menunggu hasil penempatan.
+                        Surat balasan dari perusahaan (LoA) telah berhasil
+                        diunggah dan sedang diperiksa oleh
+                        operator/administrator. Harap menunggu hasil penempatan.
                     </p>
                 </div>
             </div>
@@ -107,27 +130,38 @@ function handleResponseUpload(event: Event) {
                 class="flex items-start gap-3 rounded-xl border border-yellow-200 bg-yellow-50/30 p-4 dark:border-yellow-900/50 dark:bg-yellow-950/10"
             >
                 <div
-                    class="rounded-full bg-yellow-100 p-2 text-yellow-750 dark:bg-yellow-900 dark:text-yellow-350"
+                    class="text-yellow-750 dark:text-yellow-350 rounded-full bg-yellow-100 p-2 dark:bg-yellow-900"
                 >
                     <AlertCircle class="h-5 w-5" />
                 </div>
                 <div class="space-y-1">
-                    <p class="text-sm font-semibold text-yellow-900 dark:text-yellow-100">
+                    <p
+                        class="text-sm font-semibold text-yellow-900 dark:text-yellow-100"
+                    >
                         Surat Sedang Diajukan ke Perusahaan
                     </p>
                     <p class="text-xs text-yellow-700 dark:text-yellow-300">
-                        Silakan <strong>mengantarkan surat pengantar magang ke pihak perusahaan/instansi tujuan</strong> ({{ group.active_submission?.company_name }}). Setelah mendapatkan surat balasan, silakan unggah di bawah ini.
+                        Silakan
+                        <strong
+                            >mengantarkan surat pengantar magang ke pihak
+                            perusahaan/instansi tujuan</strong
+                        >
+                        ({{ group.active_submission?.company_name }}). Setelah
+                        mendapatkan surat balasan, silakan unggah di bawah ini.
                     </p>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div class="space-y-4 rounded-xl border border-border bg-card p-5">
                 <div class="space-y-2">
                     <h4 class="text-sm font-semibold text-foreground">
                         Unggah Surat Balasan (Letter of Acceptance -- LoA)
                     </h4>
-                    <p class="text-xs text-muted-foreground leading-relaxed">
-                        Pastikan format file surat balasan dari perusahaan adalah <strong>PDF, DOCX, PNG, JPG, atau JPEG</strong> dengan ukuran tidak melebihi <strong>2MB</strong>.
+                    <p class="text-xs leading-relaxed text-muted-foreground">
+                        Pastikan format file surat balasan dari perusahaan
+                        adalah
+                        <strong>PDF, DOCX, PNG, JPG, atau JPEG</strong> dengan
+                        ukuran tidak melebihi <strong>2MB</strong>.
                     </p>
                 </div>
 
@@ -139,7 +173,9 @@ function handleResponseUpload(event: Event) {
                     <CheckCircle2
                         class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
                     />
-                    <span>Surat balasan perusahaan telah berhasil diunggah.</span>
+                    <span
+                        >Surat balasan perusahaan telah berhasil diunggah.</span
+                    >
                 </div>
 
                 <div class="flex flex-wrap gap-3 pt-2">
@@ -172,7 +208,7 @@ function handleResponseUpload(event: Event) {
 
                 <p
                     v-if="responseUploadForm.errors.file"
-                    class="text-xs font-medium text-destructive mt-1"
+                    class="mt-1 text-xs font-medium text-destructive"
                 >
                     {{ responseUploadForm.errors.file }}
                 </p>

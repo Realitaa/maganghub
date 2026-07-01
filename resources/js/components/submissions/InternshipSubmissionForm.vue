@@ -48,7 +48,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
     store as submissionStore,
@@ -154,7 +158,7 @@ watch(
                 // ignore
             }
         }
-    }
+    },
 );
 
 function saveSubmissionDraft() {
@@ -275,15 +279,24 @@ function submitSubmissionProposal() {
                         <Briefcase class="h-3.5 w-3.5" />
                         Tipe Perusahaan
                     </Label>
-                    <Select v-model="submissionForm.company_type" :disabled="!isSubmissionEditable">
+                    <Select
+                        v-model="submissionForm.company_type"
+                        :disabled="!isSubmissionEditable"
+                    >
                         <SelectTrigger id="company_type" class="w-full">
                             <SelectValue placeholder="Pilih Tipe Perusahaan" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                <SelectItem value="Multinasional">Multinasional</SelectItem>
-                                <SelectItem value="Nasional">Nasional</SelectItem>
-                                <SelectItem value="Startup Teknologi">Startup Teknologi</SelectItem>
+                                <SelectItem value="Multinasional"
+                                    >Multinasional</SelectItem
+                                >
+                                <SelectItem value="Nasional"
+                                    >Nasional</SelectItem
+                                >
+                                <SelectItem value="Startup Teknologi"
+                                    >Startup Teknologi</SelectItem
+                                >
                             </SelectGroup>
                         </SelectContent>
                     </Select>
@@ -305,22 +318,27 @@ function submitSubmissionProposal() {
                         Model Pengerjaan Magang
                         <Tooltip>
                             <TooltipTrigger>
-                                <CircleQuestionMark class="size-3.5 cursor-help" />
+                                <CircleQuestionMark
+                                    class="size-3.5 cursor-help"
+                                />
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>
-                                    Model Pengerjaan Magang: 
-                                    <br>
+                                    Model Pengerjaan Magang:
+                                    <br />
                                     WFO: Work From Office (Bekerja di kantor)
-                                    <br>
+                                    <br />
                                     WFA: Work From Anywhere (Bekerja di manapun)
-                                    <br>
+                                    <br />
                                     Hybrid: Campuran WFO dan WFA
                                 </p>
                             </TooltipContent>
                         </Tooltip>
                     </Label>
-                    <Select v-model="submissionForm.working_model" :disabled="!isSubmissionEditable">
+                    <Select
+                        v-model="submissionForm.working_model"
+                        :disabled="!isSubmissionEditable"
+                    >
                         <SelectTrigger id="working_model" class="w-full">
                             <SelectValue placeholder="Pilih Model Pengerjaan" />
                         </SelectTrigger>
@@ -529,17 +547,17 @@ function submitSubmissionProposal() {
                 </span>
             </div>
 
-                <GoogleMapLink 
-                    v-if="submissionForm.company_name"
-                    :query="submissionForm.company_name" 
-                    :text="`Lihat ${submissionForm.company_name} di Google Maps`"
-                    class="mb-2"
-                />
-                <GoogleMapLink 
-                    v-if="submissionForm.company_address"
-                    :query="submissionForm.company_address" 
-                    :text="`Lihat ${submissionForm.company_address} di Google Maps`"
-                />
+            <GoogleMapLink
+                v-if="submissionForm.company_name"
+                :query="submissionForm.company_name"
+                :text="`Lihat ${submissionForm.company_name} di Google Maps`"
+                class="mb-2"
+            />
+            <GoogleMapLink
+                v-if="submissionForm.company_address"
+                :query="submissionForm.company_address"
+                :text="`Lihat ${submissionForm.company_address} di Google Maps`"
+            />
 
             <div
                 v-if="isSubmissionEditable"

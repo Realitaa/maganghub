@@ -5,6 +5,7 @@ use App\Models\GroupMembership;
 use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\User;
+use App\Notifications\KickedFromGroupNotification;
 use Inertia\Testing\AssertableInertia as Assert;
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -702,7 +703,7 @@ describe('kicking a member', function () {
         // Also assert notification was sent
         $this->assertDatabaseHas('notifications', [
             'notifiable_id' => $member->id,
-            'type' => \App\Notifications\KickedFromGroupNotification::class,
+            'type' => KickedFromGroupNotification::class,
         ]);
     });
 
@@ -755,4 +756,3 @@ describe('kicking a member', function () {
     });
 
 });
-

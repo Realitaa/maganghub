@@ -28,9 +28,16 @@ const { isCurrentUrl } = useCurrentUrl();
                     :is-active="isCurrentUrl(item.href)"
                     :tooltip="item.title"
                 >
-                    <Link :href="item.href" :class="state === 'collapsed' ? 'flex justify-center' : ''">
+                    <Link
+                        :href="item.href"
+                        :class="
+                            state === 'collapsed' ? 'flex justify-center' : ''
+                        "
+                    >
                         <component :is="item.icon" />
-                        <span v-if="state === 'expanded'">{{ item.title }}</span>
+                        <span v-if="state === 'expanded'">{{
+                            item.title
+                        }}</span>
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

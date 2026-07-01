@@ -52,7 +52,9 @@ function rejectJoinRequest(requestId: number) {
                     </div>
                     <div>
                         <p class="text-sm font-medium">
-                            {{ req.user.name }} ({{ req.user.nim ?? req.user.email }})
+                            {{ req.user.name }} ({{
+                                req.user.nim ?? req.user.email
+                            }})
                         </p>
                         <p class="text-xs text-muted-foreground">
                             {{ formatTimeAgo(req.created_at) }}
@@ -84,9 +86,9 @@ function rejectJoinRequest(requestId: number) {
 
         <div
             v-else-if="isLeader"
-            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-10 text-center space-y-2"
+            class="space-y-2 rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-10 text-center"
         >
-            <UserX class="size-6 mx-auto" />
+            <UserX class="mx-auto size-6" />
             <p class="text-sm font-medium">Belum ada permintaan aktif</p>
             <p class="text-xs text-muted-foreground">
                 Permintaan bergabung baru akan muncul di tab ini.

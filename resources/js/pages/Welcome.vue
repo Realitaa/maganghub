@@ -336,10 +336,10 @@ const faqs = [
                             <p
                                 class="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl"
                             >
-                                MagangHub membantu mahasiswa, kelompok magang, dan
-                                administrator kampus mengelola proses pengajuan,
-                                monitoring, dan pelaporan magang dalam satu platform
-                                terpadu.
+                                MagangHub membantu mahasiswa, kelompok magang,
+                                dan administrator kampus mengelola proses
+                                pengajuan, monitoring, dan pelaporan magang
+                                dalam satu platform terpadu.
                             </p>
 
                             <!-- CTA Buttons -->
@@ -415,8 +415,8 @@ const faqs = [
                         <p
                             class="mb-6 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase"
                         >
-                            Dipersiapkan untuk Mendukung Kolaborasi Kampus dan Dunia
-                            Industri
+                            Dipersiapkan untuk Mendukung Kolaborasi Kampus dan
+                            Dunia Industri
                         </p>
                         <div class="relative w-full overflow-hidden py-6">
                             <LogoLoop
@@ -463,11 +463,12 @@ const faqs = [
                             <p
                                 class="mt-5 text-base leading-relaxed text-muted-foreground"
                             >
-                                Program magang kerja merupakan jembatan emas bagi
-                                mahasiswa untuk mentransformasikan ilmu teoritis
-                                kampus ke dalam praktik industri riil. Magang
-                                berkontribusi nyata dalam mempersiapkan daya saing
-                                lulusan sebelum resmi memasuki pasar tenaga kerja.
+                                Program magang kerja merupakan jembatan emas
+                                bagi mahasiswa untuk mentransformasikan ilmu
+                                teoritis kampus ke dalam praktik industri riil.
+                                Magang berkontribusi nyata dalam mempersiapkan
+                                daya saing lulusan sebelum resmi memasuki pasar
+                                tenaga kerja.
                             </p>
 
                             <div class="mt-8 space-y-4">
@@ -487,8 +488,8 @@ const faqs = [
                                             class="mt-0.5 text-xs text-muted-foreground"
                                         >
                                             Memahami budaya kerja profesional,
-                                            kedisiplinan instansi, dan etos kerja
-                                            industri.
+                                            kedisiplinan instansi, dan etos
+                                            kerja industri.
                                         </p>
                                     </div>
                                 </div>
@@ -508,8 +509,8 @@ const faqs = [
                                             class="mt-0.5 text-xs text-muted-foreground"
                                         >
                                             Mengasah hard skills teknis lapangan
-                                            serta soft skills pemecahan masalah dan
-                                            komunikasi.
+                                            serta soft skills pemecahan masalah
+                                            dan komunikasi.
                                         </p>
                                     </div>
                                 </div>
@@ -638,8 +639,9 @@ const faqs = [
                             Alur Pengajuan yang Terintegrasi
                         </h2>
                         <p class="mt-4 text-base text-muted-foreground">
-                            Langkah mudah mengajukan magang dari awal pembentukan
-                            kelompok hingga masa magang resmi dimulai.
+                            Langkah mudah mengajukan magang dari awal
+                            pembentukan kelompok hingga masa magang resmi
+                            dimulai.
                         </p>
                     </div>
 
@@ -656,7 +658,10 @@ const faqs = [
                 <div
                     class="pointer-events-none absolute inset-0 opacity-10 mix-blend-overlay"
                 >
-                    <svg viewBox="0 0 100 100" class="h-full w-full fill-current">
+                    <svg
+                        viewBox="0 0 100 100"
+                        class="h-full w-full fill-current"
+                    >
                         <circle cx="20" cy="20" r="30" />
                         <circle cx="80" cy="80" r="40" />
                     </svg>
@@ -713,7 +718,11 @@ const faqs = [
                     </div>
 
                     <!-- Custom Accordion -->
-                    <Accordion type="single" collapsible class="w-full space-y-4">
+                    <Accordion
+                        type="single"
+                        collapsible
+                        class="w-full space-y-4"
+                    >
                         <AccordionItem
                             v-for="(faq, index) in faqs"
                             :key="index"
@@ -771,15 +780,17 @@ const faqs = [
                     <div
                         class="relative z-10 mx-auto flex max-w-2xl flex-col items-center"
                     >
-                        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                        <h2
+                            class="text-3xl font-bold tracking-tight sm:text-4xl"
+                        >
                             Siap Memulai Magang?
                         </h2>
                         <p
                             class="mt-4 text-base leading-relaxed text-emerald-50/90"
                         >
-                            Kelola seluruh proses administrasi magang kampus Anda
-                            dalam satu platform yang terintegrasi dan terpantau
-                            dengan baik.
+                            Kelola seluruh proses administrasi magang kampus
+                            Anda dalam satu platform yang terintegrasi dan
+                            terpantau dengan baik.
                         </p>
                         <div class="mt-8 flex justify-center">
                             <Button

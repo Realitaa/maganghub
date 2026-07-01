@@ -269,9 +269,10 @@ watch(showJoinConfirmDialog, (isOpen) => {
                             </h1>
                         </div>
                         <p class="text-sm text-muted-foreground">
-                            {{ 
-                                isLeader ? 'Kelola anggota, pengajuan, dan perkembangan kelompok magang.'
-                                : 'Lihat perkembangan kelompok magangmu.'
+                            {{
+                                isLeader
+                                    ? 'Kelola anggota, pengajuan, dan perkembangan kelompok magang.'
+                                    : 'Lihat perkembangan kelompok magangmu.'
                             }}
                         </p>
 
@@ -355,11 +356,9 @@ watch(showJoinConfirmDialog, (isOpen) => {
             </div>
 
             <!-- ── Sticky Tabs ── -->
-            <TabsRoot
-                v-model="activeGroupTab"
-            >
+            <TabsRoot v-model="activeGroupTab">
                 <div
-                    class="sticky top-0 z-20 border-b border-border/60 bg-background/95 max-w-[99.5%] backdrop-blur-sm"
+                    class="sticky top-0 z-20 max-w-[99.5%] border-b border-border/60 bg-background/95 backdrop-blur-sm"
                 >
                     <div class="px-4 md:px-8">
                         <ScrollArea class="w-full">
@@ -368,22 +367,24 @@ watch(showJoinConfirmDialog, (isOpen) => {
                             >
                                 <TabsTrigger
                                     value="members"
-                                    class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                    class="relative flex shrink-0 items-center gap-1 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
                                     Anggota
-                                    <Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs">
+                                    <Badge
+                                        class="h-5 min-w-5 rounded-full px-1 font-mono text-xs tabular-nums"
+                                    >
                                         {{ group.memberships.length }}
                                     </Badge>
                                 </TabsTrigger>
                                 <TabsTrigger
                                     v-if="isLeader"
                                     value="requests"
-                                    class="relative items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                    class="relative shrink-0 items-center gap-1 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
                                     Permintaan
                                     <Badge
                                         v-if="group.join_requests.length > 0"
-                                        class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                        class="h-5 min-w-5 rounded-full px-1 font-mono text-xs tabular-nums"
                                     >
                                         {{ group.join_requests.length }}
                                     </Badge>
@@ -396,12 +397,12 @@ watch(showJoinConfirmDialog, (isOpen) => {
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="history"
-                                    class="relative flex items-center gap-1 shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                                    class="relative flex shrink-0 items-center gap-1 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                                 >
                                     Riwayat
                                     <Badge
                                         v-if="group.timelines?.length"
-                                        class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums text-xs"
+                                        class="h-5 min-w-5 rounded-full px-1 font-mono text-xs tabular-nums"
                                     >
                                         {{ group.timelines?.length }}
                                     </Badge>
@@ -427,7 +428,11 @@ watch(showJoinConfirmDialog, (isOpen) => {
                     </TabsContent>
 
                     <!-- ─ Requests Tab ─ -->
-                    <TabsContent v-if="isLeader" value="requests" class="mt-0 space-y-4">
+                    <TabsContent
+                        v-if="isLeader"
+                        value="requests"
+                        class="mt-0 space-y-4"
+                    >
                         <GroupJoinRequestsTab
                             :group="group"
                             :is-leader="isLeader"
@@ -456,9 +461,7 @@ watch(showJoinConfirmDialog, (isOpen) => {
                         value="response"
                         class="mt-0 space-y-4"
                     >
-                        <InternshipLetterTab
-                            :group="group"
-                        />
+                        <InternshipLetterTab :group="group" />
                     </TabsContent>
                 </div>
             </TabsRoot>

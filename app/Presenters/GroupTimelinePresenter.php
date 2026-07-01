@@ -39,20 +39,21 @@ class GroupTimelinePresenter
 
             case GroupTimelineType::CompanyRejected:
                 $company = $timeline->metadata['company_name'] ?? 'Perusahaan';
+
                 return "Pengajuan magang kelompok ke {$company} ditolak oleh perusahaan. Silakan ubah formulir pengajuan untuk kembali mengajukan magang.";
 
             case GroupTimelineType::CompanyPartiallyAccepted:
                 $company = $timeline->metadata['company_name'] ?? 'Perusahaan';
                 $message = "Hasil keputusan penempatan dari {$company}:";
-                
+
                 $acceptedNames = $timeline->metadata['accepted_names'] ?? [];
                 if (! empty($acceptedNames)) {
-                    $message .= "\n- Anggota diterima: " . implode(', ', $acceptedNames);
+                    $message .= "\n- Anggota diterima: ".implode(', ', $acceptedNames);
                 }
 
                 $rejectedNames = $timeline->metadata['rejected_names'] ?? [];
                 if (! empty($rejectedNames)) {
-                    $message .= "\n- Anggota ditolak: " . implode(', ', $rejectedNames);
+                    $message .= "\n- Anggota ditolak: ".implode(', ', $rejectedNames);
                 }
 
                 $newLeaderName = $timeline->metadata['new_leader_name'] ?? null;

@@ -29,7 +29,10 @@ const isLeader = computed(() => {
 });
 
 const isEditable = computed(() => {
-    return props.group.status === 'forming' || props.group.status === 'company_rejected';
+    return (
+        props.group.status === 'forming' ||
+        props.group.status === 'company_rejected'
+    );
 });
 
 function kickMember() {
@@ -49,7 +52,7 @@ function kickMember() {
             onFinish: () => {
                 isProcessing.value = false;
             },
-        }
+        },
     );
 }
 </script>
@@ -109,20 +112,43 @@ function kickMember() {
         </div>
 
         <!-- Kick Confirmation Dialog -->
-        <Dialog :open="!!memberToKick" @update:open="val => { if (!val) memberToKick = null }">
+        <Dialog
+            :open="!!memberToKick"
+            @update:open="
+                (val) => {
+                    if (!val) memberToKick = null;
+                }
+            "
+        >
             <DialogContent class="sm:max-w-[400px]">
                 <DialogHeader>
                     <DialogTitle>Keluarkan Anggota Kelompok</DialogTitle>
                     <DialogDescription>
-                        Apakah Anda yakin ingin mengeluarkan <span class="font-semibold text-foreground">{{ memberToKick?.name }}</span> dari kelompok magang Anda?
+                        Apakah Anda yakin ingin mengeluarkan
+                        <span class="font-semibold text-foreground">{{
+                            memberToKick?.name
+                        }}</span>
+                        dari kelompok magang Anda?
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" @click="memberToKick = null" :disabled="isProcessing">
+                    <Button
+                        variant="outline"
+                        @click="memberToKick = null"
+                        :disabled="isProcessing"
+                    >
                         Batal
                     </Button>
-                    <Button variant="destructive" @click="kickMember" :disabled="isProcessing" id="btn-confirm-kick-member">
-                        <Spinner v-if="isProcessing" class="mr-2 h-4 w-4 animate-spin" />
+                    <Button
+                        variant="destructive"
+                        @click="kickMember"
+                        :disabled="isProcessing"
+                        id="btn-confirm-kick-member"
+                    >
+                        <Spinner
+                            v-if="isProcessing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                        />
                         Ya, Keluarkan
                     </Button>
                 </DialogFooter>

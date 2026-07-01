@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Submissions\UploadResponseLetterRequest;
 use App\Models\InternshipSubmission;
 use App\Models\User;
-use App\Services\DocumentGeneratorService;
 use App\Services\GroupTimelineService;
 use App\Services\InternshipSubmissionService;
 use Illuminate\Http\RedirectResponse;
@@ -127,6 +126,7 @@ class InternshipSubmissionController extends Controller
         }
 
         $zipName = 'surat_permohonan_magang_'.($submission->group->code ?? $submission->id).'.zip';
+
         return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
     }
 

@@ -284,9 +284,14 @@ function centerActiveStep() {
     nextTick(() => {
         setTimeout(() => {
             const scrollAreaEl = containerRef.value as any;
-            const container = scrollAreaEl?.$el?.querySelector('[data-slot="scroll-area-viewport"]')
-                || scrollAreaEl?.querySelector('[data-slot="scroll-area-viewport"]')
-                || scrollAreaEl;
+            const container =
+                scrollAreaEl?.$el?.querySelector(
+                    '[data-slot="scroll-area-viewport"]',
+                ) ||
+                scrollAreaEl?.querySelector(
+                    '[data-slot="scroll-area-viewport"]',
+                ) ||
+                scrollAreaEl;
             const activeIdx = currentStepIndex.value;
             const activeEl = itemRefs.value[activeIdx];
 
@@ -497,7 +502,11 @@ function getStepIcon(item: any, index: number) {
             return XCircle;
         }
 
-        if (status === 'accepted' || status === 'partially_accepted' || status === 'completed') {
+        if (
+            status === 'accepted' ||
+            status === 'partially_accepted' ||
+            status === 'completed'
+        ) {
             return CheckCircle2;
         }
 
@@ -537,7 +546,7 @@ function getStepIcon(item: any, index: number) {
         <Stepper
             :model-value="activeStep"
             :orientation="orientation"
-            class="relative w-full p-1 flex flex-col space-y-8 before:absolute before:top-2 before:bottom-2 before:left-[27px] before:w-[2px] before:bg-border"
+            class="relative flex w-full flex-col space-y-8 p-1 before:absolute before:top-2 before:bottom-2 before:left-[27px] before:w-[2px] before:bg-border"
         >
             <StepperItem
                 v-for="(item, index) in steps"
@@ -545,7 +554,7 @@ function getStepIcon(item: any, index: number) {
                 :step="item.step"
                 :ref="(el) => setItemRef(el, index)"
                 @mouseenter="handleMouseEnter(item.step)"
-                class="group relative z-10 transition-all duration-300 flex w-full items-start gap-4"
+                class="group relative z-10 flex w-full items-start gap-4 transition-all duration-300"
             >
                 <StepperTrigger
                     class="flex cursor-default items-center justify-center p-0 hover:bg-transparent"
@@ -593,10 +602,7 @@ function getStepIcon(item: any, index: number) {
         </Stepper>
     </ScrollArea>
 
-    <div
-        v-else
-        ref="containerRef"
-    >
+    <div v-else ref="containerRef">
         <Stepper
             :model-value="activeStep"
             :orientation="orientation"

@@ -491,4 +491,3 @@ describe('internship submission', function () {
             ]);
     });
 });
-

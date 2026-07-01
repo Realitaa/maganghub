@@ -8,13 +8,13 @@ import {
     FileUp,
     Sparkles,
     AlertCircle,
-    Clock
+    Clock,
 } from '@lucide/vue';
 import {
     Stepper,
     StepperItem,
     StepperTrigger,
-    StepperIndicator
+    StepperIndicator,
 } from '@/components/ui/stepper';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import type { Group } from '@/types';
@@ -28,9 +28,9 @@ const { formatFAT } = useIdTimeFormat();
 // Helper to parse title and reason
 const parseTimelineTitle = (title: string, metadata: any) => {
     if (!title) {
-return { message: '', reason: null };
-}
-    
+        return { message: '', reason: null };
+    }
+
     // Check if the title contains "\n\nAlasan:\n"
     const splitKey = '\n\nAlasan:\n';
 
@@ -39,10 +39,10 @@ return { message: '', reason: null };
 
         return {
             message: parts[0],
-            reason: parts[1] || null
+            reason: parts[1] || null,
         };
     }
-    
+
     // Fallback: check if the title has "Alasan:\n"
     const altSplitKey = 'Alasan:\n';
 
@@ -51,7 +51,7 @@ return { message: '', reason: null };
 
         return {
             message: parts[0].trim(),
-            reason: parts[1] || null
+            reason: parts[1] || null,
         };
     }
 
@@ -60,7 +60,7 @@ return { message: '', reason: null };
 
     return {
         message: title,
-        reason: reason
+        reason: reason,
     };
 };
 
@@ -71,55 +71,64 @@ const getTimelineMeta = (type: string) => {
             return {
                 icon: FilePlus,
                 colorClass: 'bg-blue-500 text-white dark:bg-blue-600',
-                cardClass: 'border-l-4 border-l-blue-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-blue-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'SUBMISSION_REJECTED':
             return {
                 icon: XCircle,
                 colorClass: 'bg-red-500 text-white dark:bg-red-600',
-                cardClass: 'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'COMPANY_REJECTED':
             return {
                 icon: XCircle,
                 colorClass: 'bg-red-500 text-white dark:bg-red-600',
-                cardClass: 'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-red-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'COMPANY_PARTIALLY_ACCEPTED':
             return {
                 icon: CheckCircle2,
                 colorClass: 'bg-yellow-500 text-white dark:bg-yellow-600',
-                cardClass: 'border-l-4 border-l-yellow-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-yellow-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'SUBMISSION_APPROVED':
             return {
                 icon: CheckCircle2,
                 colorClass: 'bg-emerald-500 text-white dark:bg-emerald-600',
-                cardClass: 'border-l-4 border-l-emerald-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-emerald-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'APPLICATION_LETTER_PRINTED':
             return {
                 icon: Printer,
                 colorClass: 'bg-indigo-500 text-white dark:bg-indigo-600',
-                cardClass: 'border-l-4 border-l-indigo-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-indigo-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'COMPANY_REPLY_UPLOADED':
             return {
                 icon: FileUp,
                 colorClass: 'bg-amber-500 text-white dark:bg-amber-600',
-                cardClass: 'border-l-4 border-l-amber-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-amber-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         case 'ADMINISTRATION_COMPLETED':
             return {
                 icon: Sparkles,
                 colorClass: 'bg-purple-600 text-white dark:bg-purple-700',
-                cardClass: 'border-l-4 border-l-purple-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-purple-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
         default:
             return {
                 icon: Clock,
                 colorClass: 'bg-slate-500 text-white dark:bg-slate-600',
-                cardClass: 'border-l-4 border-l-slate-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+                cardClass:
+                    'border-l-4 border-l-slate-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
     }
 };
@@ -146,11 +155,11 @@ const getTimelineMeta = (type: string) => {
                 class="group relative z-10 flex w-full items-start gap-4 transition-all duration-300"
             >
                 <StepperTrigger
-                    class="flex cursor-default pointer-events-none items-center justify-center p-0 hover:bg-transparent bg-transparent border-none"
+                    class="pointer-events-none flex cursor-default items-center justify-center border-none bg-transparent p-0 hover:bg-transparent"
                 >
                     <StepperIndicator
                         :class="[
-                            'z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 border-none shadow-sm',
+                            'z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-none shadow-sm transition-all duration-300',
                             getTimelineMeta(timeline.type).colorClass,
                         ]"
                     >
@@ -162,29 +171,50 @@ const getTimelineMeta = (type: string) => {
                 </StepperTrigger>
 
                 <div
-                    class="flex-1 rounded-xl border p-4 transition-all duration-300 shadow-sm"
+                    class="flex-1 rounded-xl border p-4 shadow-sm transition-all duration-300"
                     :class="getTimelineMeta(timeline.type).cardClass"
                 >
                     <div class="flex items-center justify-between gap-4">
-                        <span class="text-xs text-muted-foreground font-medium">
+                        <span class="text-xs font-medium text-muted-foreground">
                             {{ formatFAT(timeline.created_at) }}
                         </span>
                     </div>
 
-                    <p class="mt-2 text-sm font-medium text-foreground whitespace-pre-line leading-relaxed">
-                        {{ parseTimelineTitle(timeline.title, timeline.metadata).message }}
+                    <p
+                        class="mt-2 text-sm leading-relaxed font-medium whitespace-pre-line text-foreground"
+                    >
+                        {{
+                            parseTimelineTitle(
+                                timeline.title,
+                                timeline.metadata,
+                            ).message
+                        }}
                     </p>
 
                     <div
-                        v-if="parseTimelineTitle(timeline.title, timeline.metadata).reason"
+                        v-if="
+                            parseTimelineTitle(
+                                timeline.title,
+                                timeline.metadata,
+                            ).reason
+                        "
                         class="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-700 dark:bg-red-500/10 dark:text-red-400"
                     >
-                        <div class="flex gap-2 items-start">
-                            <AlertCircle class="h-4 w-4 shrink-0 mt-0.5" />
+                        <div class="flex items-start gap-2">
+                            <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
                             <div>
-                                <span class="font-semibold block mb-0.5">Alasan Penolakan:</span>
-                                <p class="whitespace-pre-line font-normal leading-normal">
-                                    {{ parseTimelineTitle(timeline.title, timeline.metadata).reason }}
+                                <span class="mb-0.5 block font-semibold"
+                                    >Alasan Penolakan:</span
+                                >
+                                <p
+                                    class="leading-normal font-normal whitespace-pre-line"
+                                >
+                                    {{
+                                        parseTimelineTitle(
+                                            timeline.title,
+                                            timeline.metadata,
+                                        ).reason
+                                    }}
                                 </p>
                             </div>
                         </div>
@@ -195,9 +225,9 @@ const getTimelineMeta = (type: string) => {
 
         <div
             v-else
-            class="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-12 text-center space-y-2"
+            class="space-y-2 rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-12 text-center"
         >
-            <FileClock class="h-6 w-6 mx-auto" />
+            <FileClock class="mx-auto h-6 w-6" />
             <p class="text-sm font-medium">Belum ada riwayat aktivitas</p>
             <p class="text-xs text-muted-foreground">
                 Aktivitas kelompok magangmu akan tercatat di sini.

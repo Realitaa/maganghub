@@ -71,7 +71,8 @@ const statusInfo = computed(() => {
             icon: Clock,
             label: 'Review Surat Balasan',
             color: 'text-yellow-500',
-            description: 'Surat balasan dari perusahaan sedang diperiksa oleh operator/administrator.',
+            description:
+                'Surat balasan dari perusahaan sedang diperiksa oleh operator/administrator.',
         },
         accepted: {
             icon: CheckCircle2,
@@ -112,7 +113,9 @@ const statusInfo = computed(() => {
 
 <template>
     <Dialog :open="open" @update:open="$emit('update:open', $event)">
-        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-2xl xl:max-w-7xl">
+        <DialogContent
+            class="max-h-[90vh] overflow-y-auto sm:max-w-2xl xl:max-w-7xl"
+        >
             <DialogHeader>
                 <DialogTitle>Status Kelompok</DialogTitle>
                 <DialogDescription>

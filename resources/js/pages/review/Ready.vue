@@ -77,19 +77,18 @@ const filteredPrint = computed(() => {
 });
 
 const filteredWaiting = computed(() => {
-    return props.waitingResponse
-        .filter(
-            (sub) =>
-                sub.company_name
-                    .toLowerCase()
-                    .includes(searchWaiting.value.toLowerCase()) ||
-                sub.group.leader.name
-                    .toLowerCase()
-                    .includes(searchWaiting.value.toLowerCase()) ||
-                sub.group.code
-                    .toLowerCase()
-                    .includes(searchWaiting.value.toLowerCase()),
-        );
+    return props.waitingResponse.filter(
+        (sub) =>
+            sub.company_name
+                .toLowerCase()
+                .includes(searchWaiting.value.toLowerCase()) ||
+            sub.group.leader.name
+                .toLowerCase()
+                .includes(searchWaiting.value.toLowerCase()) ||
+            sub.group.code
+                .toLowerCase()
+                .includes(searchWaiting.value.toLowerCase()),
+    );
 });
 
 const filteredReceived = computed(() => {
