@@ -14,7 +14,7 @@ import {
     Link as LinkIcon,
     Hourglass,
 } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     Carousel,
@@ -37,6 +37,42 @@ defineProps<{
 const joinCode = ref('');
 const isProcessing = ref(false);
 const page = usePage();
+const requirements = computed(() => (page.props.auth as any)?.requirements);
+
+const containerHeight = computed(() => {
+    let subtraction = 0;
+
+    if (!requirements.value) {
+        return;
+    }
+
+    let hasAlert = false;
+    let alertCount = 0;
+
+    if (!requirements.value.password_changed) {
+        subtraction += 70; // Approximate height of password alert
+            hasAlert = true;
+            alertCount++;
+        }
+
+        if (!requirements.value.profile_completed) {
+            subtraction += 70; // Approximate height of profile alert
+            hasAlert = true;
+            alertCount++;
+        }
+
+        if (hasAlert) {
+        subtraction += 8; // Top padding (pt-2 = 8px)
+    }
+
+    if (alertCount > 1) {
+        subtraction += 12; // Gap between alerts (space-y-3 = 12px)
+    }
+
+    return subtraction > 0
+        ? `calc(100vh - 5rem - ${subtraction}px)`
+        : 'calc(100vh - 5rem)';
+});
 
 // Carousel slides
 const slides = [
@@ -119,7 +155,8 @@ function cancelJoinRequest(requestId: number) {
 
 <template>
     <div
-        class="flex h-full items-center justify-center bg-background px-4 py-8 md:py-16"
+        class="flex h-[calc(100vh-5rem)] lg:h-[var(--container-height)] items-center justify-center bg-background px-4"
+        :style="{ '--container-height': containerHeight }"
     >
         <div class="mx-auto w-full max-w-7xl">
             <div
