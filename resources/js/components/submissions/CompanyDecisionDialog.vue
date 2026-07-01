@@ -37,6 +37,20 @@ const partialDecisions = ref<
 >({});
 const newLeaderId = ref<number | null>(null);
 
+function isInterningElsewhere(userId: number) {
+    if (!props.submission?.group?.memberships) return false;
+    
+    const mem = props.submission.group.memberships.find(m => m.user_id === userId);
+    
+    return mem && mem.status === 'interning_elsewhere';
+}
+
+const hasInterningElsewhere = computed(() => {
+    if (!props.submission?.group?.memberships) return false;
+    
+    return props.submission.group.memberships.some(m => m.status === 'interning_elsewhere');
+});
+
 // Watch when submission changes to reset step and build partialDecisions state
 watch(
     () => props.submission,
@@ -51,9 +65,10 @@ watch(
                 { status: 'accepted' | 'rejected'; rejection_note: string }
             > = {};
             sub.submission_memberships.forEach((m) => {
+                const elsewhere = isInterningElsewhere(m.user.id);
                 decisions[m.user.id] = {
-                    status: 'accepted',
-                    rejection_note: '',
+                    status: elsewhere ? 'rejected' : 'accepted',
+                    rejection_note: elsewhere ? 'Mahasiswa ini sudah diterima magang di kelompok lain.' : '',
                 };
             });
             partialDecisions.value = decisions;
@@ -224,7 +239,7 @@ function handleBackToDecision() {
                         variant="outline"
                         class="h-14 cursor-pointer justify-start border-border/80 px-4 text-left transition-all hover:border-green-500 hover:bg-green-50/20 hover:text-green-600 dark:hover:border-green-600 dark:hover:bg-green-950/20"
                         @click="selectDecision('all_accepted')"
-                        :disabled="processing"
+                        :disabled="processing || hasInterningElsewhere"
                         id="btn-decision-all-accepted"
                     >
                         <CheckCircle2 class="mr-3 h-5 w-5 text-green-500" />
@@ -233,9 +248,10 @@ function handleBackToDecision() {
                                 Semua Diterima
                             </div>
                             <div
-                                class="text-[10px] font-normal text-muted-foreground"
+                                class="text-[10px] font-normal"
+                                :class="hasInterningElsewhere ? 'text-destructive font-medium' : 'text-muted-foreground'"
                             >
-                                Seluruh anggota kelompok resmi diterima magang.
+                                {{ hasInterningElsewhere ? 'Terkunci: Ada anggota yang sudah diterima di kelompok lain.' : 'Seluruh anggota kelompok resmi diterima magang.' }}
                             </div>
                         </div>
                     </Button>
@@ -374,12 +390,12 @@ function handleBackToDecision() {
                                 <div class="flex gap-2">
                                     <label
                                         class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all"
-                                        :class="
-                                            partialDecisions[membership.user.id]
-                                                ?.status === 'accepted'
+                                        :class="[
+                                            partialDecisions[membership.user.id]?.status === 'accepted'
                                                 ? 'border-green-500/30 bg-green-500/10 text-green-600'
-                                                : 'border-border/80 bg-muted/10 text-muted-foreground'
-                                        "
+                                                : 'border-border/80 bg-muted/10 text-muted-foreground',
+                                            isInterningElsewhere(membership.user.id) ? 'opacity-50 cursor-not-allowed' : ''
+                                        ]"
                                     >
                                         <input
                                             type="radio"
@@ -390,6 +406,7 @@ function handleBackToDecision() {
                                             "
                                             value="accepted"
                                             class="sr-only"
+                                            :disabled="isInterningElsewhere(membership.user.id)"
                                             @change="
                                                 () => {
                                                     if (

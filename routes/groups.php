@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InternshipGroupController;
 use App\Http\Controllers\InternshipSubmissionController;
+use App\Http\Controllers\StudentGroupController;
 use Illuminate\Support\Facades\Route;
 
 // Public invite / OG splash page — no auth required so social crawlers can read OG tags
@@ -11,10 +12,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups', [InternshipGroupController::class, 'store'])->name('groups.store');
     Route::post('groups/join', [InternshipGroupController::class, 'join'])->name('groups.join');
     Route::get('groups/by-code/{code}', [InternshipGroupController::class, 'showByCode'])->name('groups.by-code');
-    Route::post('groups/leave', [InternshipGroupController::class, 'leave'])->name('groups.leave');
+    Route::post('groups/{group}/leave', [InternshipGroupController::class, 'leave'])->name('groups.leave');
     Route::post('groups/{group}/banner', [InternshipGroupController::class, 'updateBanner'])->name('groups.banner.update');
     Route::post('groups/{group}/kick', [InternshipGroupController::class, 'kick'])->name('groups.kick');
     Route::delete('groups/{group}', [InternshipGroupController::class, 'destroy'])->name('groups.destroy');
+
+    Route::get('groups/{group}', [StudentGroupController::class, 'show'])->name('student.groups.show');
 
     Route::post('groups/submissions', [InternshipSubmissionController::class, 'store'])->name('groups.submissions.store');
     Route::post('groups/submissions/submit', [InternshipSubmissionController::class, 'submit'])->name('groups.submissions.submit');

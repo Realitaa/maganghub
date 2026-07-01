@@ -87,11 +87,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the active group membership of this user.
+     * Get the group memberships of this user.
      */
-    public function groupMembership(): HasOne
+    public function groupMemberships(): HasMany
     {
-        return $this->hasOne(GroupMembership::class, 'user_id');
+        return $this->hasMany(GroupMembership::class, 'user_id');
     }
 
     /**

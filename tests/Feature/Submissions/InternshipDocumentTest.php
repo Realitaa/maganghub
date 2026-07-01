@@ -319,11 +319,10 @@ describe('Student Dashboard', function () {
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $submission->group_id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('student/Index')
-                ->has('group')
+                ->component('student/GroupDashboard')
                 ->where('group.active_submission.status', 'submitted')
             );
     });
@@ -336,11 +335,10 @@ describe('Student Dashboard', function () {
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $submission->group_id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('student/Index')
-                ->has('group')
+                ->component('student/GroupDashboard')
                 ->where('group.active_submission.status', 'letter_published')
             );
     });
@@ -354,20 +352,20 @@ describe('Student Dashboard', function () {
 
         // Check leader view
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $submission->group_id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('student/Index')
+                ->component('student/GroupDashboard')
                 ->where('auth.user.id', $leader->id)
                 ->where('group.leader_id', $leader->id)
             );
 
         // Check member view
         $this->actingAs($member)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $submission->group_id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('student/Index')
+                ->component('student/GroupDashboard')
                 ->where('auth.user.id', $member->id)
                 ->where('group.leader_id', $leader->id)
             );

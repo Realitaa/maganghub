@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\GroupTimelineType;
+use App\Models\GroupMembership;
 use App\Models\GroupTimeline;
 use App\Models\InternshipSubmission;
 use App\Models\User;
@@ -174,6 +175,13 @@ class InternshipReviewService
 
             if ($decision === 'all_accepted') {
                 // 1. All Accepted
+                $hasInterningElsewhere = $group->memberships()->where('status', 'interning_elsewhere')->exists();
+                if ($hasInterningElsewhere) {
+                    throw ValidationException::withMessages([
+                        'error' => 'Terdapat anggota yang sudah magang di kelompok lain. Anda tidak dapat menggunakan opsi Semua Diterima. Gunakan opsi Sebagian Diterima.',
+                    ]);
+                }
+
                 $lockedSubmission->update(['status' => 'accepted']);
                 $group->update(['status' => 'accepted']);
 
@@ -238,6 +246,13 @@ class InternshipReviewService
                     $userName = $user ? $user->name : "User ID {$userId}";
 
                     if ($mStatus === 'accepted') {
+                        $membership = $group->memberships()->where('user_id', $userId)->first();
+                        if ($membership && $membership->status === 'interning_elsewhere') {
+                            throw ValidationException::withMessages([
+                                'error' => "Mahasiswa {$userName} sudah melakukan magang di kelompok lain dan tidak dapat diterima.",
+                            ]);
+                        }
+                        
                         $acceptedUserIds[] = $userId;
                         $acceptedNames[] = $userName;
                     } else {
@@ -299,6 +314,15 @@ class InternshipReviewService
             }
 
             if ($decision === 'all_accepted' || $decision === 'partially_accepted') {
+                $acceptedIds = $decision === 'all_accepted'
+                    ? $lockedSubmission->submissionMemberships()->pluck('user_id')->toArray()
+                    : $acceptedUserIds;
+
+                // Update their memberships in other groups to 'interning_elsewhere'
+                GroupMembership::whereIn('user_id', $acceptedIds)
+                    ->where('group_id', '!=', $group->id)
+                    ->update(['status' => 'interning_elsewhere']);
+
                 $this->timelineService->administrationCompleted($group);
             }
 

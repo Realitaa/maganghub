@@ -27,9 +27,9 @@ class InternshipGroupService
             ]);
         }
 
-        if ($user->groupMembership()->exists()) {
+        if ($user->ledGroups()->exists()) {
             throw ValidationException::withMessages([
-                'error' => 'Kamu sudah tergabung dalam kelompok magang.',
+                'error' => 'Anda sudah menjadi ketua di kelompok magang lain.',
             ]);
         }
 
@@ -65,17 +65,17 @@ class InternshipGroupService
             ]);
         }
 
-        if ($user->groupMembership()->exists()) {
-            throw ValidationException::withMessages([
-                'error' => 'Kamu sudah tergabung dalam kelompok magang.',
-            ]);
-        }
-
         $group = InternshipGroup::where('code', $code)->first();
 
         if (! $group) {
             throw ValidationException::withMessages([
                 'code' => 'Kode kelompok tidak ditemukan.',
+            ]);
+        }
+
+        if ($group->memberships()->where('user_id', $user->id)->exists()) {
+            throw ValidationException::withMessages([
+                'error' => 'Kamu sudah tergabung dalam kelompok ini.',
             ]);
         }
 
@@ -159,12 +159,12 @@ class InternshipGroupService
 
         $student = $request->user;
 
-        // Race condition: student is already in a group
-        if ($student->groupMembership()->exists()) {
+        // Race condition: student is already in THIS group
+        if ($group->memberships()->where('user_id', $student->id)->exists()) {
             $request->update(['status' => 'cancelled']);
 
             throw ValidationException::withMessages([
-                'error' => 'Mahasiswa ini sudah bergabung ke kelompok lain.',
+                'error' => 'Mahasiswa ini sudah tergabung ke kelompok ini.',
             ]);
         }
 
@@ -180,11 +180,7 @@ class InternshipGroupService
         $groupName = $group->activeSubmission?->company_name ?: $group->leader->name;
         $student->notify(new JoinRequestAcceptedNotification($group->id, $groupName, $leader->name));
 
-        // Cancel all other pending requests from this student
-        GroupJoinRequest::where('user_id', $student->id)
-            ->where('id', '!=', $request->id)
-            ->where('status', 'pending')
-            ->update(['status' => 'cancelled']);
+        // Do not cancel other requests since they can join multiple groups
 
         return $membership;
     }
@@ -219,17 +215,15 @@ class InternshipGroupService
      *
      * @throws ValidationException
      */
-    public function leaveGroup(User $user): void
+    public function leaveGroup(User $user, InternshipGroup $group): void
     {
-        $membership = $user->groupMembership()->with('group')->first();
+        $membership = $group->memberships()->where('user_id', $user->id)->first();
 
         if (! $membership) {
             throw ValidationException::withMessages([
-                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
+                'error' => 'Kamu tidak tergabung dalam kelompok ini.',
             ]);
         }
-
-        $group = $membership->group;
 
         if ($group->leader_id === $user->id) {
             throw ValidationException::withMessages([
@@ -275,17 +269,15 @@ class InternshipGroupService
      *
      * @throws ValidationException
      */
-    public function kickMember(User $leader, User $member): void
+    public function kickMember(User $leader, User $member, InternshipGroup $group): void
     {
-        $membership = $leader->groupMembership()->with('group')->first();
+        $membership = $group->memberships()->where('user_id', $leader->id)->first();
 
         if (! $membership) {
             throw ValidationException::withMessages([
-                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
+                'error' => 'Kamu tidak tergabung dalam kelompok ini.',
             ]);
         }
-
-        $group = $membership->group;
 
         if ($group->leader_id !== $leader->id) {
             throw ValidationException::withMessages([

@@ -127,10 +127,10 @@ class InternshipGroupController extends Controller
     /**
      * Leave the current group.
      */
-    public function leave(): RedirectResponse
+    public function leave(InternshipGroup $group): RedirectResponse
     {
         try {
-            $this->groupService->leaveGroup(auth()->user());
+            $this->groupService->leaveGroup(auth()->user(), $group);
 
             return Inertia::flash('toast', [
                 'type' => 'success',
@@ -185,7 +185,7 @@ class InternshipGroupController extends Controller
         $member = User::findOrFail($request->integer('user_id'));
 
         try {
-            $this->groupService->kickMember(auth()->user(), $member);
+            $this->groupService->kickMember(auth()->user(), $member, $group);
 
             return Inertia::flash('toast', [
                 'type' => 'success',

@@ -48,9 +48,9 @@ describe('internship submission', function () {
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
-                ->has('group.active_submission')
-                ->where('group.active_submission.company_name', 'PT Test Technology')
-                ->where('group.active_submission.status', 'draft')
+                ->has('groups.0.active_submission')
+                ->where('groups.0.active_submission.company_name', 'PT Test Technology')
+                ->where('groups.0.active_submission.status', 'draft')
             );
     });
 
@@ -64,7 +64,7 @@ describe('internship submission', function () {
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',
-                'message' => 'Kamu tidak tergabung dalam kelompok magang.',
+                'message' => 'Hanya ketua kelompok yang dapat menyimpan draf pengajuan.',
             ]);
 
         $this->actingAs($student)
@@ -74,7 +74,7 @@ describe('internship submission', function () {
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',
-                'message' => 'Kamu tidak tergabung dalam kelompok magang.',
+                'message' => 'Hanya ketua kelompok yang dapat mengajukan magang.',
             ]);
     });
 
@@ -286,7 +286,7 @@ describe('internship submission', function () {
 
         // 1. Member cannot leave group
         $this->actingAs($member)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',

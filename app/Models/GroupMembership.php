@@ -12,10 +12,11 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $group_id
  * @property int $user_id
+ * @property string $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['group_id', 'user_id'])]
+#[Fillable(['group_id', 'user_id', 'status'])]
 class GroupMembership extends Model
 {
     use HasFactory;

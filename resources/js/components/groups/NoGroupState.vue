@@ -32,6 +32,7 @@ import type { PendingJoinRequest } from '@/types';
 defineProps<{
     isLocked: boolean;
     pendingJoinRequests: PendingJoinRequest[];
+    isLeaderInAnyGroup?: boolean;
 }>();
 
 const joinCode = ref('');
@@ -155,7 +156,7 @@ function cancelJoinRequest(requestId: number) {
 
 <template>
     <div
-        class="flex h-[calc(100vh-5rem)] lg:h-[var(--container-height)] items-center justify-center bg-background px-4"
+        class="flex min-h-[calc(100vh-5rem)] lg:min-h-(--container-height) items-center justify-center bg-background px-4 py-0!"
         :style="{ '--container-height': containerHeight }"
     >
         <div class="mx-auto w-full max-w-7xl">
@@ -242,6 +243,7 @@ function cancelJoinRequest(requestId: number) {
                             <!-- Actions for Unlocked State -->
                             <!-- New Group Button -->
                             <Button
+                                v-if="!isLeaderInAnyGroup"
                                 id="btn-create-group"
                                 size="xl"
                                 class="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full bg-primary font-semibold text-primary-foreground shadow-xs transition-all hover:bg-primary/95 sm:w-auto"
@@ -331,10 +333,15 @@ function cancelJoinRequest(requestId: number) {
 
                 <!-- RIGHT COLUMN: Visuals / Illustrations / Status (Col-span 5 on large screens) -->
                 <div
-                    class="flex w-full flex-col items-center justify-center lg:col-span-5"
+                    class="flex w-full flex-col items-center justify-center lg:col-span-5 lg:h-(--container-height)"
                 >
+                    <!-- Custom Right Column Content -->
+                    <template v-if="$slots['right-column']">
+                        <slot name="right-column" />
+                    </template>
+
                     <!-- Case 1: Locked State (Requirements Checklist) -->
-                    <template v-if="isLocked">
+                    <template v-else-if="isLocked">
                         <div
                             class="flex w-full max-w-md flex-col items-center rounded-3xl border border-border/80 bg-muted/20 p-8 shadow-xs dark:bg-muted/5"
                         >

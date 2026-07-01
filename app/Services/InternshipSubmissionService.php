@@ -21,17 +21,9 @@ class InternshipSubmissionService
      */
     public function saveDraft(User $user, array $data): InternshipSubmission
     {
-        $membership = $user->groupMembership()->with('group')->first();
+        $group = $user->ledGroups()->first();
 
-        if (! $membership) {
-            throw ValidationException::withMessages([
-                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
-            ]);
-        }
-
-        $group = $membership->group;
-
-        if ($group->leader_id !== $user->id) {
+        if (! $group) {
             throw ValidationException::withMessages([
                 'error' => 'Hanya ketua kelompok yang dapat menyimpan draf pengajuan.',
             ]);
@@ -86,17 +78,9 @@ class InternshipSubmissionService
      */
     public function submitProposal(User $user, array $data): InternshipSubmission
     {
-        $membership = $user->groupMembership()->with('group.memberships')->first();
+        $group = $user->ledGroups()->with('memberships')->first();
 
-        if (! $membership) {
-            throw ValidationException::withMessages([
-                'error' => 'Kamu tidak tergabung dalam kelompok magang.',
-            ]);
-        }
-
-        $group = $membership->group;
-
-        if ($group->leader_id !== $user->id) {
+        if (! $group) {
             throw ValidationException::withMessages([
                 'error' => 'Hanya ketua kelompok yang dapat mengajukan magang.',
             ]);

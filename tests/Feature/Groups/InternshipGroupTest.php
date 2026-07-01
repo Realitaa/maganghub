@@ -57,7 +57,7 @@ describe('dashboard', function () {
         $this->get(route('home'))->assertRedirect(route('login'));
     });
 
-    it('renders student/Index with null group when student has no group', function () {
+    it('renders student/Index with empty groups when student has no group', function () {
         $student = User::factory()->create(['role' => 'student']);
 
         $this->actingAs($student)
@@ -65,7 +65,7 @@ describe('dashboard', function () {
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
-                ->where('group', null)
+                ->where('groups', [])
                 ->where('pendingJoinRequests', [])
             );
     });
@@ -78,7 +78,7 @@ describe('dashboard', function () {
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/Index')
-                ->where('group', null)
+                ->where('groups', [])
                 ->has('pendingJoinRequests', 1)
             );
     });
@@ -87,11 +87,10 @@ describe('dashboard', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupWithMember();
 
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $group->id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('student/Index')
-                ->has('group')
+                ->component('student/GroupDashboard')
                 ->where('group.id', $group->id)
             );
     });
@@ -103,7 +102,7 @@ describe('dashboard', function () {
 
         // Leader sees requests
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $group->id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 1)
@@ -111,7 +110,7 @@ describe('dashboard', function () {
 
         // Member does NOT see requests
         $this->actingAs($member)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $group->id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 0)
@@ -151,7 +150,7 @@ describe('dashboard', function () {
             'status' => 'cancelled',
         ]);
 
-        GroupJoinRequest::factory()->create([
+        $staleStudentRequest = GroupJoinRequest::factory()->create([
             'group_id' => $group->id,
             'user_id' => $staleStudent->id,
             'status' => 'pending',
@@ -162,12 +161,14 @@ describe('dashboard', function () {
         GroupMembership::factory()->create(['group_id' => $otherGroup->id, 'user_id' => $staleStudent->id]);
 
         $this->actingAs($leader)
-            ->get(route('home'))
+            ->get(route('student.groups.show', $group->id))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->has('group.join_requests', 1)
+                ->has('group.join_requests', 2)
                 ->where('group.join_requests.0.id', $pendingRequest->id)
                 ->where('group.join_requests.0.status', 'pending')
+                ->where('group.join_requests.1.id', $staleStudentRequest->id)
+                ->where('group.join_requests.1.status', 'pending')
             );
     });
 
@@ -259,16 +260,16 @@ describe('requesting to join a group', function () {
             ->assertInertiaFlash('toast.type', 'error');
     });
 
-    it('prevents a student already in a group from sending a join request', function () {
+    it('allows a student already in a group to send another join request', function () {
         ['group' => $group, 'member' => $member] = makeGroupWithMember();
         $otherGroup = InternshipGroup::factory()->create();
 
         $this->actingAs($member)
             ->post(route('groups.join'), ['code' => $otherGroup->code])
             ->assertRedirect()
-            ->assertInertiaFlash('toast.type', 'error');
+            ->assertInertiaFlash('toast.type', 'success');
 
-        expect(GroupJoinRequest::where('user_id', $member->id)->exists())->toBeFalse();
+        expect(GroupJoinRequest::where('user_id', $member->id)->exists())->toBeTrue();
     });
 
     it('prevents sending a duplicate request to the same group', function () {
@@ -337,7 +338,7 @@ describe('canceling a join request', function () {
 
 describe('approving a join request', function () {
 
-    it('approves a join request and cancels all other pending requests from that student', function () {
+    it('approves a join request and keeps other pending requests from that student pending', function () {
         $student = User::factory()->create(['role' => 'student']);
 
         $leaderA = User::factory()->create(['role' => 'student']);
@@ -364,8 +365,8 @@ describe('approving a join request', function () {
 
         expect(GroupMembership::where('group_id', $groupB->id)->where('user_id', $student->id)->exists())->toBeTrue();
         expect($requestB->fresh()->status)->toBe('approved');
-        expect($requestA->fresh()->status)->toBe('cancelled');
-        expect($requestC->fresh()->status)->toBe('cancelled');
+        expect($requestA->fresh()->status)->toBe('pending');
+        expect($requestC->fresh()->status)->toBe('pending');
     });
 
     it('prevents a non-leader from approving a join request', function () {
@@ -381,29 +382,7 @@ describe('approving a join request', function () {
         expect(GroupMembership::where('user_id', $requester->id)->exists())->toBeFalse();
     });
 
-    it('handles race condition where student is already in a group when leader approves', function () {
-        $student = User::factory()->create(['role' => 'student']);
 
-        // Group A already accepted the student
-        $groupA = InternshipGroup::factory()->create();
-        GroupMembership::factory()->create(['group_id' => $groupA->id, 'user_id' => $groupA->leader_id]);
-        GroupMembership::factory()->create(['group_id' => $groupA->id, 'user_id' => $student->id]);
-
-        // Group B leader has a stale pending request
-        $leaderB = User::factory()->create(['role' => 'student']);
-        $groupB = InternshipGroup::factory()->create(['leader_id' => $leaderB->id]);
-        GroupMembership::factory()->create(['group_id' => $groupB->id, 'user_id' => $leaderB->id]);
-        $requestB = GroupJoinRequest::factory()->create(['group_id' => $groupB->id, 'user_id' => $student->id]);
-
-        $this->actingAs($leaderB)
-            ->post(route('groups.join-requests.approve', $requestB))
-            ->assertRedirect()
-            ->assertInertiaFlash('toast.type', 'error');
-
-        expect(GroupMembership::where('group_id', $groupB->id)->where('user_id', $student->id)->exists())->toBeFalse();
-        expect(GroupMembership::where('group_id', $groupA->id)->where('user_id', $student->id)->count())->toBe(1);
-        expect($requestB->fresh()->status)->toBe('cancelled');
-    });
 
 });
 
@@ -455,7 +434,7 @@ describe('leaving a group', function () {
         ['group' => $group, 'member' => $member] = makeGroupWithMember('forming');
 
         $this->actingAs($member)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast.type', 'success')
             ->assertInertiaFlash('toast.message', 'Berhasil keluar dari kelompok magang.');
@@ -467,7 +446,7 @@ describe('leaving a group', function () {
         ['group' => $group, 'member' => $member] = makeGroupWithMember('company_rejected');
 
         $this->actingAs($member)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast.type', 'success');
 
@@ -478,7 +457,7 @@ describe('leaving a group', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupWithMember('forming');
 
         $this->actingAs($leader)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast.type', 'error');
 
@@ -489,7 +468,7 @@ describe('leaving a group', function () {
         ['group' => $group, 'member' => $member] = makeGroupWithMember('submitted');
 
         $this->actingAs($member)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast.type', 'error');
 
@@ -576,7 +555,7 @@ describe('group membership lifecycle', function () {
 
         // 4. mahasiswa tersebut keluar dari kelompok
         $this->actingAs($student)
-            ->post(route('groups.leave'))
+            ->post(route('groups.leave', $group->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast.type', 'success');
 
