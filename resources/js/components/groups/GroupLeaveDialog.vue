@@ -13,8 +13,9 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { leave as groupLeave } from '@/routes/groups';
 
-defineProps<{
+const props = defineProps<{
     open: boolean;
+    groupId: number;
 }>();
 
 const emit = defineEmits<{
@@ -27,7 +28,7 @@ const isProcessing = ref(false);
 function leaveGroup() {
     isProcessing.value = true;
     router.post(
-        groupLeave.url(),
+        groupLeave.url(props.groupId),
         {},
         {
             onFinish: () => {

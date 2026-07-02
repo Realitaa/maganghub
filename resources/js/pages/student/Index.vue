@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Users, Clock, CheckCircle2, XCircle, FileCheck, FileSearchCorner } from '@lucide/vue';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
+import { Users, Clock, CheckCircle2, XCircle, FileCheck, FileSearchCorner, UserX } from '@lucide/vue';
 import { computed } from 'vue';
 import NoGroupState from '@/components/groups/NoGroupState.vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { home } from '@/routes';
 import { show } from '@/routes/student/groups';
+import { cancel as cancelRequest } from '@/routes/groups/join-requests';
 import type { Group, PendingJoinRequest } from '@/types';
 
 defineOptions({
@@ -90,6 +92,10 @@ function getStatusLabel(status: string) {
     return labels[status] ?? status;
 }
 
+function cancelJoinRequest(requestId: number) {
+    router.delete(cancelRequest.url(requestId));
+}
+
 </script>
 
 <template>
@@ -104,10 +110,47 @@ function getStatusLabel(status: string) {
             <!-- Show groups in the right column if there are any -->
             <template #right-column v-if="groups.length > 0 && !isLocked">
                 <div class="flex w-full flex-col lg:max-w-md xl:max-w-lg lg:pl-6 pt-12 lg:pt-0">
-                    <h2 class="mb-6 text-xl font-semibold tracking-tight text-foreground">Kelompok Magang Saya</h2>
+                    <h2 v-if="pendingJoinRequests.length === 0" class="mb-6 text-xl font-semibold tracking-tight text-foreground">Kelompok Magang Saya</h2>
                     
                     <ScrollArea class="w-full pr-4 pb-12 lg:pb-0 max-h-[60vh]">
                         <div class="flex flex-col space-y-5 pb-6">
+                            <!-- Pending Join Requests -->
+                            <div v-if="pendingJoinRequests.length > 0" class="mb-2">
+                                <h2 class="mb-4 text-xl font-semibold tracking-tight text-foreground">Permintaan Bergabung</h2>
+                                <div class="w-full space-y-3">
+                                    <div
+                                        v-for="req in pendingJoinRequests"
+                                        :key="req.id"
+                                        class="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <div class="rounded-lg bg-amber-500/10 p-2">
+                                                <Clock class="h-5 w-5 animate-pulse text-amber-600 dark:text-amber-400" />
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-foreground">
+                                                    Kelompok <span class="font-mono font-bold text-primary">{{ req.group.code }}</span>
+                                                </p>
+                                                <p class="mt-0.5 text-xs text-muted-foreground">
+                                                    Ketua: {{ req.group.leader.name }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            class="justify-start rounded-full font-medium text-destructive hover:bg-destructive/10 hover:text-destructive sm:justify-center"
+                                            @click="cancelJoinRequest(req.id)"
+                                        >
+                                            <UserX class="mr-1.5 h-4 w-4" />
+                                            Batalkan
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h2 v-if="pendingJoinRequests.length > 0" class="mb-1 mt-4 text-xl font-semibold tracking-tight text-foreground">Kelompok Magang Saya</h2>
+
                             <Link
                                 v-for="group in groups"
                                 :key="group.id"

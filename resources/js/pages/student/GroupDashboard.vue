@@ -458,7 +458,9 @@ const isSubmissionEditable = computed(() => {
 
         <!-- Leave Confirm -->
         <GroupLeaveDialog
+            v-if="group"
             v-model:open="showLeaveConfirm"
+            :group-id="group.id"
             @success="router.reload()"
         />
     </div>

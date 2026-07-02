@@ -132,10 +132,12 @@ class InternshipGroupController extends Controller
         try {
             $this->groupService->leaveGroup(auth()->user(), $group);
 
-            return Inertia::flash('toast', [
+            Inertia::flash('toast', [
                 'type' => 'success',
                 'message' => 'Berhasil keluar dari kelompok magang.',
-            ])->back();
+            ]);
+
+            return to_route('home');
         } catch (ValidationException $e) {
             return Inertia::flash('toast', [
                 'type' => 'error',
@@ -159,10 +161,12 @@ class InternshipGroupController extends Controller
         try {
             $this->groupService->disbandGroup(auth()->user(), $group);
 
-            return Inertia::flash('toast', [
+            Inertia::flash('toast', [
                 'type' => 'success',
                 'message' => 'Berhasil membubarkan kelompok magang.',
-            ])->back();
+            ]);
+
+            return to_route('home');
         } catch (ValidationException $e) {
             return Inertia::flash('toast', [
                 'type' => 'error',
