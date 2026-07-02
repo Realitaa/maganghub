@@ -382,8 +382,6 @@ describe('approving a join request', function () {
         expect(GroupMembership::where('user_id', $requester->id)->exists())->toBeFalse();
     });
 
-
-
 });
 
 // ────────────────────────────────────────────────────────────────────────────

@@ -50,10 +50,10 @@ class LandingPageTest extends TestCase
     public function test_landing_statistics_calculate_correctly()
     {
         Cache::flush();
-        
+
         // Students
         $students = User::factory()->count(10)->create(['role' => 'student']);
-        
+
         // Non-student
         User::factory()->create(['role' => 'administrator']);
 
@@ -68,7 +68,7 @@ class LandingPageTest extends TestCase
             'company_name' => 'Google',
             'company_type' => 'Perusahaan Multinasional',
         ]);
-        
+
         // 3 active members in group 1 (including leader)
         foreach ($students->take(3) as $student) {
             $group1->memberships()->create([
@@ -89,7 +89,7 @@ class LandingPageTest extends TestCase
             'company_name' => 'Telkom',
             'company_type' => 'Perusahaan Nasional',
         ]);
-        
+
         // 2 active members in group 2 (including leader)
         foreach ($students->skip(3)->take(2) as $student) {
             $group2->memberships()->create([
@@ -98,7 +98,7 @@ class LandingPageTest extends TestCase
                 'role' => $student->id === $students[3]->id ? 'leader' : 'member',
             ]);
         }
-        
+
         // Group 3: forming
         InternshipGroup::factory()->create([
             'status' => 'forming',
@@ -106,7 +106,7 @@ class LandingPageTest extends TestCase
         ]);
 
         $response = $this->get('/');
-        
+
         $response->assertInertia(fn ($page) => $page
             ->component('Welcome')
             ->where('statistics.total_students', 10)

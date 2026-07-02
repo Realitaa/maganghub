@@ -25,6 +25,7 @@ class HomeController extends Controller
 
             $groups = $memberships->map(function ($membership) {
                 $group = $membership->group;
+
                 return array_merge($group->toArray(), [
                     'banner_url' => $group->bannerUrl(),
                     'og_image_url' => $group->ogImageUrl(),

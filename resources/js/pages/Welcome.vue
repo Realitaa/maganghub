@@ -164,9 +164,24 @@ const features = [
 
 // Statistics counter state & animation
 const stats = ref([
-    { label: 'Mahasiswa Terdaftar', target: props.statistics.total_students, current: 0, suffix: '' },
-    { label: 'Kelompok Magang', target: props.statistics.total_groups, current: 0, suffix: '' },
-    { label: 'Perusahaan Mitra', target: props.statistics.total_companies, current: 0, suffix: '' },
+    {
+        label: 'Mahasiswa Terdaftar',
+        target: props.statistics.total_students,
+        current: 0,
+        suffix: '',
+    },
+    {
+        label: 'Kelompok Magang',
+        target: props.statistics.total_groups,
+        current: 0,
+        suffix: '',
+    },
+    {
+        label: 'Perusahaan Mitra',
+        target: props.statistics.total_companies,
+        current: 0,
+        suffix: '',
+    },
 ]);
 
 const faqs = [

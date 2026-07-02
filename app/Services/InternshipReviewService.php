@@ -252,7 +252,7 @@ class InternshipReviewService
                                 'error' => "Mahasiswa {$userName} sudah melakukan magang di kelompok lain dan tidak dapat diterima.",
                             ]);
                         }
-                        
+
                         $acceptedUserIds[] = $userId;
                         $acceptedNames[] = $userName;
                     } else {

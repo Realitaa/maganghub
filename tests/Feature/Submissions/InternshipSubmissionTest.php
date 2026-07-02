@@ -6,6 +6,7 @@ use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\SubmissionMembership;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -35,11 +36,11 @@ function makeGroupForSubmission(string $status = 'forming'): array
 
 describe('internship submission', function () {
     beforeEach(function () {
-        \Illuminate\Support\Carbon::setTestNow('2026-06-21');
+        Carbon::setTestNow('2026-06-21');
     });
 
     afterEach(function () {
-        \Illuminate\Support\Carbon::setTestNow();
+        Carbon::setTestNow();
     });
 
     it('eager loads active submission on student dashboard', function () {

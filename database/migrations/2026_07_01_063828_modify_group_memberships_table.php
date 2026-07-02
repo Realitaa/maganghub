@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('group_memberships', function (Blueprint $table) {
             // Drop the old unique constraint on user_id
             $table->dropUnique('group_memberships_user_id_unique');
-            
+
             // Add a status column to track interning_elsewhere, active, etc.
             $table->string('status')->default('active')->after('user_id');
-            
+
             // Add composite unique constraint
             $table->unique(['group_id', 'user_id']);
         });

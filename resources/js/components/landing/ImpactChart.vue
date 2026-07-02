@@ -70,9 +70,10 @@ onUnmounted(() => {
 
 // Process chart data, start angle, and slices
 const chartDetails = computed(() => {
-    const isAllZero = props.statistics.multinational === 0 &&
-                      props.statistics.national === 0 &&
-                      props.statistics.startup === 0;
+    const isAllZero =
+        props.statistics.multinational === 0 &&
+        props.statistics.national === 0 &&
+        props.statistics.startup === 0;
 
     if (isAllZero) {
         return {
@@ -87,7 +88,7 @@ const chartDetails = computed(() => {
                         enabled: true,
                         format: '{point.percentage:.1f}%',
                     },
-                }
+                },
             ],
             startAngle: -45,
         };

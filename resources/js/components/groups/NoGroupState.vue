@@ -52,17 +52,17 @@ const containerHeight = computed(() => {
 
     if (!requirements.value.password_changed) {
         subtraction += 70; // Approximate height of password alert
-            hasAlert = true;
-            alertCount++;
-        }
+        hasAlert = true;
+        alertCount++;
+    }
 
-        if (!requirements.value.profile_completed) {
-            subtraction += 70; // Approximate height of profile alert
-            hasAlert = true;
-            alertCount++;
-        }
+    if (!requirements.value.profile_completed) {
+        subtraction += 70; // Approximate height of profile alert
+        hasAlert = true;
+        alertCount++;
+    }
 
-        if (hasAlert) {
+    if (hasAlert) {
         subtraction += 8; // Top padding (pt-2 = 8px)
     }
 
@@ -156,7 +156,7 @@ function cancelJoinRequest(requestId: number) {
 
 <template>
     <div
-        class="flex min-h-[calc(100vh-5rem)] lg:min-h-(--container-height) items-center justify-center bg-background px-4 py-0!"
+        class="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-background px-4 py-0! lg:min-h-(--container-height)"
         :style="{ '--container-height': containerHeight }"
     >
         <div class="mx-auto w-full max-w-7xl">

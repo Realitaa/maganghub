@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import { Users, Clock, CheckCircle2, XCircle, FileCheck, FileSearchCorner, UserX } from '@lucide/vue';
+import {
+    Users,
+    Clock,
+    CheckCircle2,
+    XCircle,
+    FileCheck,
+    FileSearchCorner,
+    UserX,
+} from '@lucide/vue';
 import { computed } from 'vue';
 import NoGroupState from '@/components/groups/NoGroupState.vue';
 import { Badge } from '@/components/ui/badge';
@@ -95,13 +103,12 @@ function getStatusLabel(status: string) {
 function cancelJoinRequest(requestId: number) {
     router.delete(cancelRequest.url(requestId));
 }
-
 </script>
 
 <template>
     <Head title="Beranda" />
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex flex-1 flex-col">
         <NoGroupState
             :is-locked="isLocked"
             :pending-join-requests="pendingJoinRequests"
@@ -109,14 +116,28 @@ function cancelJoinRequest(requestId: number) {
         >
             <!-- Show groups in the right column if there are any -->
             <template #right-column v-if="groups.length > 0 && !isLocked">
-                <div class="flex w-full flex-col lg:max-w-md xl:max-w-lg lg:pl-6 pt-12 lg:pt-0">
-                    <h2 v-if="pendingJoinRequests.length === 0" class="mb-6 text-xl font-semibold tracking-tight text-foreground">Kelompok Magang Saya</h2>
-                    
-                    <ScrollArea class="w-full pr-4 pb-12 lg:pb-0 max-h-[60vh]">
+                <div
+                    class="flex w-full flex-col pt-12 lg:max-w-md lg:pt-0 lg:pl-6 xl:max-w-lg"
+                >
+                    <h2
+                        v-if="pendingJoinRequests.length === 0"
+                        class="mb-6 text-xl font-semibold tracking-tight text-foreground"
+                    >
+                        Kelompok Magang Saya
+                    </h2>
+
+                    <ScrollArea class="max-h-[60vh] w-full pr-4 pb-12 lg:pb-0">
                         <div class="flex flex-col space-y-5 pb-6">
                             <!-- Pending Join Requests -->
-                            <div v-if="pendingJoinRequests.length > 0" class="mb-2">
-                                <h2 class="mb-4 text-xl font-semibold tracking-tight text-foreground">Permintaan Bergabung</h2>
+                            <div
+                                v-if="pendingJoinRequests.length > 0"
+                                class="mb-2"
+                            >
+                                <h2
+                                    class="mb-4 text-xl font-semibold tracking-tight text-foreground"
+                                >
+                                    Permintaan Bergabung
+                                </h2>
                                 <div class="w-full space-y-3">
                                     <div
                                         v-for="req in pendingJoinRequests"
@@ -124,15 +145,30 @@ function cancelJoinRequest(requestId: number) {
                                         class="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
                                     >
                                         <div class="flex items-center gap-3">
-                                            <div class="rounded-lg bg-amber-500/10 p-2">
-                                                <Clock class="h-5 w-5 animate-pulse text-amber-600 dark:text-amber-400" />
+                                            <div
+                                                class="rounded-lg bg-amber-500/10 p-2"
+                                            >
+                                                <Clock
+                                                    class="h-5 w-5 animate-pulse text-amber-600 dark:text-amber-400"
+                                                />
                                             </div>
                                             <div>
-                                                <p class="text-sm font-semibold text-foreground">
-                                                    Kelompok <span class="font-mono font-bold text-primary">{{ req.group.code }}</span>
+                                                <p
+                                                    class="text-sm font-semibold text-foreground"
+                                                >
+                                                    Kelompok
+                                                    <span
+                                                        class="font-mono font-bold text-primary"
+                                                        >{{
+                                                            req.group.code
+                                                        }}</span
+                                                    >
                                                 </p>
-                                                <p class="mt-0.5 text-xs text-muted-foreground">
-                                                    Ketua: {{ req.group.leader.name }}
+                                                <p
+                                                    class="mt-0.5 text-xs text-muted-foreground"
+                                                >
+                                                    Ketua:
+                                                    {{ req.group.leader.name }}
                                                 </p>
                                             </div>
                                         </div>
@@ -148,8 +184,13 @@ function cancelJoinRequest(requestId: number) {
                                     </div>
                                 </div>
                             </div>
-                            
-                            <h2 v-if="pendingJoinRequests.length > 0" class="mb-1 mt-4 text-xl font-semibold tracking-tight text-foreground">Kelompok Magang Saya</h2>
+
+                            <h2
+                                v-if="pendingJoinRequests.length > 0"
+                                class="mt-4 mb-1 text-xl font-semibold tracking-tight text-foreground"
+                            >
+                                Kelompok Magang Saya
+                            </h2>
 
                             <Link
                                 v-for="group in groups"
@@ -159,40 +200,100 @@ function cancelJoinRequest(requestId: number) {
                             >
                                 <div class="relative h-28 w-full bg-muted">
                                     <img
-                                        :src="group.banner_url ?? '/assets/images/default-company-background.png'"
+                                        :src="
+                                            group.banner_url ??
+                                            '/assets/images/default-company-background.png'
+                                        "
                                         alt="Banner"
                                         class="h-full w-full object-cover"
                                     />
-                                    <div class="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
-                                    
-                                    <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                                        <span class="truncate font-medium text-white">
-                                            {{ group.active_submission?.company_name || 'Menunggu Perusahaan' }}
+                                    <div
+                                        class="absolute inset-0 bg-linear-to-t from-black/70 to-transparent"
+                                    />
+
+                                    <div
+                                        class="absolute right-4 bottom-3 left-4 flex items-center justify-between"
+                                    >
+                                        <span
+                                            class="truncate font-medium text-white"
+                                        >
+                                            {{
+                                                group.active_submission
+                                                    ?.company_name ||
+                                                'Menunggu Perusahaan'
+                                            }}
                                         </span>
-                                        <Badge variant="secondary" class="border-none bg-black/40 text-white backdrop-blur-sm">
-                                            {{ group.memberships?.length || 0 }} Anggota
+                                        <Badge
+                                            variant="secondary"
+                                            class="border-none bg-black/40 text-white backdrop-blur-sm"
+                                        >
+                                            {{ group.memberships?.length || 0 }}
+                                            Anggota
                                         </Badge>
                                     </div>
                                 </div>
-                                
-                                <div class="flex flex-1 flex-col justify-between space-y-3 p-4">
+
+                                <div
+                                    class="flex flex-1 flex-col justify-between space-y-3 p-4"
+                                >
                                     <div>
-                                        <div class="mb-2 flex items-center justify-between">
-                                            <span class="font-mono text-xs text-muted-foreground">Kode: {{ group.code }}</span>
-                                            <span v-if="group.leader_id === page.props.auth?.user?.id" class="text-xs font-semibold text-primary">Ketua</span>
-                                            <span v-else class="text-xs font-medium text-muted-foreground">Anggota</span>
-                                        </div>
-                                        
-                                        <div class="mt-3 flex items-center gap-2">
-                                            <div class="rounded-md p-1.5" :class="getStatusColor(group.status)">
-                                                <component :is="getStatusIcon(group.status)" class="h-4 w-4" />
-                                            </div>
-                                            <span class="text-sm font-medium">{{ getStatusLabel(group.status) }}</span>
+                                        <div
+                                            class="mb-2 flex items-center justify-between"
+                                        >
+                                            <span
+                                                class="font-mono text-xs text-muted-foreground"
+                                                >Kode: {{ group.code }}</span
+                                            >
+                                            <span
+                                                v-if="
+                                                    group.leader_id ===
+                                                    page.props.auth?.user?.id
+                                                "
+                                                class="text-xs font-semibold text-primary"
+                                                >Ketua</span
+                                            >
+                                            <span
+                                                v-else
+                                                class="text-xs font-medium text-muted-foreground"
+                                                >Anggota</span
+                                            >
                                         </div>
 
-                                        <div v-if="group.membership_status === 'interning_elsewhere'" class="mt-3 rounded-md border border-amber-500/20 bg-amber-500/10 p-2">
-                                            <p class="text-center font-medium text-xs text-amber-600 dark:text-amber-400">
-                                                Status keanggotaan: Magang di tempat lain
+                                        <div
+                                            class="mt-3 flex items-center gap-2"
+                                        >
+                                            <div
+                                                class="rounded-md p-1.5"
+                                                :class="
+                                                    getStatusColor(group.status)
+                                                "
+                                            >
+                                                <component
+                                                    :is="
+                                                        getStatusIcon(
+                                                            group.status,
+                                                        )
+                                                    "
+                                                    class="h-4 w-4"
+                                                />
+                                            </div>
+                                            <span class="text-sm font-medium">{{
+                                                getStatusLabel(group.status)
+                                            }}</span>
+                                        </div>
+
+                                        <div
+                                            v-if="
+                                                group.membership_status ===
+                                                'interning_elsewhere'
+                                            "
+                                            class="mt-3 rounded-md border border-amber-500/20 bg-amber-500/10 p-2"
+                                        >
+                                            <p
+                                                class="text-center text-xs font-medium text-amber-600 dark:text-amber-400"
+                                            >
+                                                Status keanggotaan: Magang di
+                                                tempat lain
                                             </p>
                                         </div>
                                     </div>

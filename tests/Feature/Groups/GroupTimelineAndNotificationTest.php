@@ -10,6 +10,7 @@ use App\Services\InternshipReviewService;
 use App\Services\InternshipSubmissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,11 +20,11 @@ beforeEach(function () {
     Storage::fake();
     Storage::fake('public');
     setupGroupTimelineFakeTemplate();
-    \Illuminate\Support\Carbon::setTestNow('2026-06-21');
+    Carbon::setTestNow('2026-06-21');
 });
 
 afterEach(function () {
-    \Illuminate\Support\Carbon::setTestNow();
+    Carbon::setTestNow();
 });
 
 function setupGroupTimelineFakeTemplate(): void

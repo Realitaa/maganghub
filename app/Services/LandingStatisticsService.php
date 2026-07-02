@@ -32,7 +32,7 @@ class LandingStatisticsService
     {
         $totalStudents = User::where('role', 'student')->count();
         $totalGroups = InternshipGroup::count();
-        
+
         $totalCompanies = InternshipSubmission::distinct('company_name')->count('company_name');
 
         // Calculate students accepted by company type
@@ -50,7 +50,7 @@ class LandingStatisticsService
         $startup = (int) $studentCountsByCompanyType->get('Startup Teknologi', 0);
 
         $totalAccepted = $multinational + $national + $startup;
-        
+
         // Prevent negative havenot just in case of data inconsistencies
         $havenot = max(0, $totalStudents - $totalAccepted);
 

@@ -160,7 +160,6 @@ const isSubmissionEditable = computed(() => {
             props.group?.status === 'company_rejected')
     );
 });
-
 </script>
 
 <template>
