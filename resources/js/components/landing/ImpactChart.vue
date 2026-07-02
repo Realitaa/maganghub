@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import HighchartsChart from '@/components/ui/highcharts/HighchartsChart.vue';
-
-export type CompanyStatistics = {
-    global: number;
-    multinational: number;
-    international: number;
-    national: number;
-    regional: number;
-    local: number;
-    havenot: number;
-};
+import type { CompanyStatistics } from '@/types';
 
 interface CompanyLevel {
     name: string;
@@ -79,59 +70,63 @@ onUnmounted(() => {
 
 // Process chart data, start angle, and slices
 const chartDetails = computed(() => {
-    // Company levels list with predefined emerald hues
+    const isAllZero = props.statistics.multinational === 0 &&
+                      props.statistics.national === 0 &&
+                      props.statistics.startup === 0;
+
+    if (isAllZero) {
+        return {
+            data: [
+                {
+                    name: 'Mahasiswa Siap Magang',
+                    y: props.statistics.havenot || 1,
+                    color: '#10b981', // Emerald 500
+                    sliced: false,
+                    showInLegend: true,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.percentage:.1f}%',
+                    },
+                }
+            ],
+            startAngle: -45,
+        };
+    }
+
+    // We only have 3 active slices and 1 inactive (Belum Magang)
+    // Force Perusahaan Multinasional to be sliced/exploded
     const companies: CompanyLevel[] = [
-        {
-            name: 'Perusahaan Global',
-            y: props.statistics.global,
-            color: '#047857',
-        },
         {
             name: 'Perusahaan Multinasional',
             y: props.statistics.multinational,
-            color: '#059669',
-        },
-        {
-            name: 'Perusahaan Internasional',
-            y: props.statistics.international,
-            color: '#10b981',
+            color: '#059669', // Emerald 600
+            sliced: true,
         },
         {
             name: 'Perusahaan Nasional',
             y: props.statistics.national,
-            color: '#34d399',
+            color: '#34d399', // Emerald 400
+            sliced: false,
         },
         {
-            name: 'Perusahaan Regional',
-            y: props.statistics.regional,
-            color: '#6ee7b7',
-        },
-        {
-            name: 'Perusahaan Lokal',
-            y: props.statistics.local,
-            color: '#a7f3d0',
+            name: 'Startup Teknologi',
+            y: props.statistics.startup,
+            color: '#a7f3d0', // Emerald 200
+            sliced: false,
         },
     ];
-
-    // Sort company levels in descending order of value to identify the biggest one
-    companies.sort((a, b) => b.y - a.y);
-
-    // Slice ONLY the biggest company level
-    companies.forEach((company, index) => {
-        company.sliced = index === 0;
-    });
 
     const totalCompanySum = companies.reduce((sum, item) => sum + item.y, 0);
     const totalSum = totalCompanySum + props.statistics.havenot;
 
-    // The biggest company level value
-    const biggestCompanyValue = companies[0]?.y || 0;
+    // The first slice (Multinasional) is explicitly selected to be exploded and face top-left
+    const explodedValue = companies[0]?.y || 0;
 
-    // To make the biggest company level face top-left (-45 degrees):
+    // To make the exploded slice face top-left (-45 degrees):
     // startAngle of the first slice should align its midpoint at -45 deg.
     // midpoint = startAngle + (p * 360) / 2 = -45
     // startAngle = -45 - 180 * p
-    const p = totalSum > 0 ? biggestCompanyValue / totalSum : 0;
+    const p = totalSum > 0 ? explodedValue / totalSum : 0;
     const startAngle = -45 - 180 * p;
 
     // Combine data: biggest company level is first (index 0), then other company levels, then havenot

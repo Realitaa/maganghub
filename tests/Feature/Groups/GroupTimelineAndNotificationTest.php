@@ -19,6 +19,11 @@ beforeEach(function () {
     Storage::fake();
     Storage::fake('public');
     setupGroupTimelineFakeTemplate();
+    \Illuminate\Support\Carbon::setTestNow('2026-06-21');
+});
+
+afterEach(function () {
+    \Illuminate\Support\Carbon::setTestNow();
 });
 
 function setupGroupTimelineFakeTemplate(): void

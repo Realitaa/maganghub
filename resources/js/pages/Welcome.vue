@@ -12,7 +12,7 @@ import {
     Check,
     ArrowRight,
 } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import CountUp from '@/components/landing/CountUp.vue';
 import {
@@ -40,6 +40,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import WorkflowStepper from '@/components/WorkflowStepper.vue';
 import { dashboard, home, login } from '@/routes';
+import type { CompanyStatistics } from '@/types';
 
 // state
 const hoveredStep = ref(6);
@@ -109,16 +110,18 @@ const companyLogos = [
     },
 ];
 
+// Props
+const props = defineProps<{
+    statistics: {
+        total_students: number;
+        total_groups: number;
+        total_companies: number;
+        pie_chart: CompanyStatistics;
+    };
+}>();
+
 // Statistics data for Impact section
-const landingStats = {
-    global: 40,
-    multinational: 75,
-    international: 60,
-    national: 110,
-    regional: 90,
-    local: 165,
-    havenot: 260,
-};
+const landingStats = computed(() => props.statistics.pie_chart);
 
 const features = [
     {
@@ -161,10 +164,9 @@ const features = [
 
 // Statistics counter state & animation
 const stats = ref([
-    { label: 'Mahasiswa Terdaftar', target: 1200, current: 0, suffix: '+' },
-    { label: 'Kelompok Magang', target: 350, current: 0, suffix: '+' },
-    { label: 'Perusahaan Mitra', target: 180, current: 0, suffix: '+' },
-    { label: 'Pengajuan Diproses', target: 95, current: 0, suffix: '%' },
+    { label: 'Mahasiswa Terdaftar', target: props.statistics.total_students, current: 0, suffix: '' },
+    { label: 'Kelompok Magang', target: props.statistics.total_groups, current: 0, suffix: '' },
+    { label: 'Perusahaan Mitra', target: props.statistics.total_companies, current: 0, suffix: '' },
 ]);
 
 const faqs = [
@@ -294,7 +296,7 @@ const faqs = [
             <!-- Hero Section -->
             <section
                 id="home"
-                class="relative flex min-h-[calc(100vh-2rem)] flex-col justify-center overflow-hidden bg-background py-20 md:py-24"
+                class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-background py-20 md:py-24"
             >
                 <!-- Ambient Glows -->
                 <div
@@ -435,6 +437,55 @@ const faqs = [
                 </div>
             </section>
 
+            <!-- Statistics Section -->
+            <section
+                class="relative overflow-hidden border-y border-emerald-500/25 bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 py-16 text-white md:py-20 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
+            >
+                <!-- Decorative vector patterns inside statistics section for texture -->
+                <div
+                    class="pointer-events-none absolute inset-0 opacity-10 mix-blend-overlay"
+                >
+                    <svg
+                        viewBox="0 0 100 100"
+                        class="h-full w-full fill-current"
+                    >
+                        <circle cx="20" cy="20" r="30" />
+                        <circle cx="80" cy="80" r="40" />
+                    </svg>
+                </div>
+
+                <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+                    <div
+                        class="grid grid-cols-1 gap-x-8 gap-y-12 divide-x-0 text-center md:grid-cols-3 md:divide-x md:divide-white/10"
+                    >
+                        <div
+                            v-for="stat in stats"
+                            :key="stat.label"
+                            class="flex flex-col items-center px-4"
+                        >
+                            <div
+                                class="text-5xl font-black tracking-tight text-yellow-300 drop-shadow-md sm:text-6xl"
+                            >
+                                <CountUp
+                                    :from="0"
+                                    :to="stat.target"
+                                    :suffix="stat.suffix"
+                                    separator="."
+                                    direction="up"
+                                    :duration="1.5"
+                                    :delay="0.1"
+                                />
+                            </div>
+                            <div
+                                class="mt-3 text-xs font-bold tracking-wider text-emerald-100/90 uppercase"
+                            >
+                                {{ stat.label }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Impact Section -->
             <section
                 class="relative overflow-hidden border-y border-emerald-100/30 bg-emerald-50/20 py-20 md:py-24 dark:border-emerald-950/20 dark:bg-emerald-950/5"
@@ -545,7 +596,7 @@ const faqs = [
                             <h3
                                 class="mb-2 text-center text-sm font-bold tracking-wide text-muted-foreground uppercase"
                             >
-                                Rasio Keterlibatan Magang Mahasiswa
+                                Status Mahasiswa terhadap Program Magang
                             </h3>
 
                             <div
@@ -647,55 +698,6 @@ const faqs = [
 
                     <!-- Timeline Steps -->
                     <WorkflowStepper mode="landing" v-model="hoveredStep" />
-                </div>
-            </section>
-
-            <!-- Statistics Section -->
-            <section
-                class="relative overflow-hidden border-y border-emerald-500/25 bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 py-16 text-white md:py-20 dark:from-emerald-900 dark:via-emerald-950 dark:to-teal-950"
-            >
-                <!-- Decorative vector patterns inside statistics section for texture -->
-                <div
-                    class="pointer-events-none absolute inset-0 opacity-10 mix-blend-overlay"
-                >
-                    <svg
-                        viewBox="0 0 100 100"
-                        class="h-full w-full fill-current"
-                    >
-                        <circle cx="20" cy="20" r="30" />
-                        <circle cx="80" cy="80" r="40" />
-                    </svg>
-                </div>
-
-                <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-                    <div
-                        class="grid grid-cols-2 gap-x-8 gap-y-12 divide-x-0 text-center md:grid-cols-4 md:divide-x md:divide-white/10"
-                    >
-                        <div
-                            v-for="stat in stats"
-                            :key="stat.label"
-                            class="flex flex-col items-center px-4"
-                        >
-                            <div
-                                class="text-5xl font-black tracking-tight text-yellow-300 drop-shadow-md sm:text-6xl"
-                            >
-                                <CountUp
-                                    :from="0"
-                                    :to="stat.target"
-                                    :suffix="stat.suffix"
-                                    separator="."
-                                    direction="up"
-                                    :duration="1.5"
-                                    :delay="0.1"
-                                />
-                            </div>
-                            <div
-                                class="mt-3 text-xs font-bold tracking-wider text-emerald-100/90 uppercase"
-                            >
-                                {{ stat.label }}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -887,7 +889,15 @@ const faqs = [
                             <ul class="space-y-2 text-xs">
                                 <li>
                                     <a
-                                        href="https://www.instagram.com/ilmukomputerunimed/"
+                                        href="https://youtube.com/@ilmukomputerunimed/"
+                                        target="_blank"
+                                        class="transition-colors duration-150 hover:text-white"
+                                        >YouTube</a
+                                    >
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://instagram.com/ilmukomputerunimed/"
                                         target="_blank"
                                         class="transition-colors duration-150 hover:text-white"
                                         >Instagram</a

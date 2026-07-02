@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { home } from '@/routes';
-import { show } from '@/routes/student/groups';
 import { cancel as cancelRequest } from '@/routes/groups/join-requests';
+import { show } from '@/routes/student/groups';
 import type { Group, PendingJoinRequest } from '@/types';
 
 defineOptions({

@@ -34,6 +34,13 @@ function makeGroupForSubmission(string $status = 'forming'): array
 // ────────────────────────────────────────────────────────────────────────────
 
 describe('internship submission', function () {
+    beforeEach(function () {
+        \Illuminate\Support\Carbon::setTestNow('2026-06-21');
+    });
+
+    afterEach(function () {
+        \Illuminate\Support\Carbon::setTestNow();
+    });
 
     it('eager loads active submission on student dashboard', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
