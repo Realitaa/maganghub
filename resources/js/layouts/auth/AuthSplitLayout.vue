@@ -297,7 +297,7 @@ defineProps<{
                     <!-- Desktop Brand Indicator -->
                     <AppLogo />
                     <h1
-                        class="mt-4 text-2xl font-bold tracking-tight text-foreground text-center"
+                        class="mt-4 text-center text-2xl font-bold tracking-tight text-foreground"
                         v-if="title"
                     >
                         {{ title }}

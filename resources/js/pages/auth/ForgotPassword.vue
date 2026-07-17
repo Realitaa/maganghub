@@ -14,7 +14,8 @@ import { email } from '@/routes/password';
 defineOptions({
     layout: {
         title: 'Lupa Kata Sandi?',
-        description: 'Masukkan Email atau NIM Anda untuk menerima tautan atur ulang kata sandi. Cek Spam folder jika tidak ada email yang masuk.',
+        description:
+            'Masukkan Email atau NIM Anda untuk menerima tautan atur ulang kata sandi. Cek Spam folder jika tidak ada email yang masuk.',
     },
 });
 
@@ -37,7 +38,7 @@ const updateCountdown = () => {
         countdown.value = remaining;
     } else {
         countdown.value = 0;
-        
+
         if (timer) {
             clearInterval(timer);
             timer = null;
@@ -115,10 +116,7 @@ onBeforeUnmount(() => {
             :disabled="processing || countdown > 0"
             data-test="email-password-reset-link-button"
         >
-            <Spinner
-                v-if="processing"
-                class="mr-2 h-4 w-4 animate-spin"
-            />
+            <Spinner v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
             <span v-if="countdown > 0">Tunggu {{ countdown }} detik</span>
             <span v-else>Kirim Tautan Atur Ulang</span>
         </Button>

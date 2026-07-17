@@ -76,7 +76,11 @@ const currentIdentity = ref('');
                 >
                 <Link
                     v-if="canResetPassword"
-                    :href="passwordRequest({ query: { identity: currentIdentity } }).url"
+                    :href="
+                        passwordRequest({
+                            query: { identity: currentIdentity },
+                        }).url
+                    "
                     class="text-xs font-medium text-primary hover:underline"
                 >
                     Lupa kata sandi?
@@ -120,10 +124,7 @@ const currentIdentity = ref('');
             :disabled="processing"
             data-test="login-button"
         >
-            <Spinner
-                v-if="processing"
-                class="mr-2 h-4 w-4 animate-spin"
-            />
+            <Spinner v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
             Masuk
         </Button>
     </Form>

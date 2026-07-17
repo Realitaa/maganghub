@@ -13,5 +13,5 @@ return [
     */
 
     'profile_updated' => 'Profile updated successfully.',
-    
+
 ];

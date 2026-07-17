@@ -52,7 +52,11 @@ defineOptions({
                 <AlertTitle>Email Masih Kosong</AlertTitle>
                 <AlertDescription>
                     Anda harus mengisi alamat email terlebih dahulu di halaman
-                    <Link :href="editProfile().url" class="font-medium underline hover:text-primary">Pengaturan Profil</Link>
+                    <Link
+                        :href="editProfile().url"
+                        class="font-medium underline hover:text-primary"
+                        >Pengaturan Profil</Link
+                    >
                     sebelum dapat memperbarui kata sandi Anda.
                 </AlertDescription>
             </div>

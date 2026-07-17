@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Route;
@@ -13,7 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::inertia('deactivated', 'auth/Deactivated')->name('deactivated');
 
-Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'store'])
+Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
     ->middleware(['guest'])
     ->name('password.email');
 

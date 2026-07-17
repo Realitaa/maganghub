@@ -52,7 +52,7 @@ const inputEmail = ref(props.email);
                 autocomplete="email"
                 v-model="inputEmail"
                 readonly
-                class="h-10 rounded-lg border-border/80 bg-muted/50 focus-visible:ring-0 cursor-not-allowed select-none"
+                class="h-10 cursor-not-allowed rounded-lg border-border/80 bg-muted/50 select-none focus-visible:ring-0"
             />
             <InputError :message="errors.email" />
         </div>
@@ -103,10 +103,7 @@ const inputEmail = ref(props.email);
             :disabled="processing"
             data-test="reset-password-button"
         >
-            <Spinner
-                v-if="processing"
-                class="mr-2 h-4 w-4 animate-spin"
-            />
+            <Spinner v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
             Atur Ulang Kata Sandi
         </Button>
     </Form>

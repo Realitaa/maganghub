@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
@@ -13,8 +14,7 @@ class ForgotPasswordController extends Controller
     /**
      * Send a reset link to the given user.
      *
-     * @param  Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
@@ -53,7 +53,7 @@ class ForgotPasswordController extends Controller
                 ['email' => $user->email]
             );
         } catch (\Exception $e) {
-            \Log::error('Failed to send reset link email: ' . $e->getMessage(), ['email' => $user->email]);
+            \Log::error('Failed to send reset link email: '.$e->getMessage(), ['email' => $user->email]);
             throw ValidationException::withMessages([
                 'email' => [__('passwords.smtp_error')],
             ]);
@@ -66,7 +66,7 @@ class ForgotPasswordController extends Controller
                 $maskedEmail = $this->maskEmail($user->email);
                 $message = __('passwords.masked_sent', ['email' => $maskedEmail]);
             }
-            
+
             return back()->with('status', $message);
         }
 
@@ -87,11 +87,11 @@ class ForgotPasswordController extends Controller
         $name = $parts[0];
         $domain = $parts[1];
         $len = strlen($name);
-        
+
         if ($len <= 2) {
-            return $name . '@' . $domain;
+            return $name.'@'.$domain;
         }
-        
-        return $name[0] . str_repeat('*', $len - 2) . $name[$len - 1] . '@' . $domain;
+
+        return $name[0].str_repeat('*', $len - 2).$name[$len - 1].'@'.$domain;
     }
 }

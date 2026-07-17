@@ -36,7 +36,11 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { store as userStore, update as userUpdate, resetPasswordToNim as userResetPassword } from '@/routes/users';
+import {
+    store as userStore,
+    update as userUpdate,
+    resetPasswordToNim as userResetPassword,
+} from '@/routes/users';
 import type { User } from '@/types';
 
 const props = defineProps<{
@@ -136,14 +140,25 @@ function submitForm() {
 }
 
 function resetPasswordToNim() {
-    if (!props.user?.id) return;
-    if (confirm('Apakah Anda yakin ingin mengatur ulang kata sandi mahasiswa ini ke NIM?')) {
-        router.post(userResetPassword.url(props.user.id), {}, {
-            onSuccess: () => {
-                emit('update:open', false);
-                emit('success');
+    if (!props.user?.id) {
+        return;
+    }
+
+    if (
+        confirm(
+            'Apakah Anda yakin ingin mengatur ulang kata sandi mahasiswa ini ke NIM?',
+        )
+    ) {
+        router.post(
+            userResetPassword.url(props.user.id),
+            {},
+            {
+                onSuccess: () => {
+                    emit('update:open', false);
+                    emit('success');
+                },
             },
-        });
+        );
     }
 }
 </script>
@@ -311,7 +326,9 @@ function resetPasswordToNim() {
 
                 <!-- Password input for Operator / Admin (always visible) -->
                 <div v-if="form.role !== 'student'" class="space-y-1.5">
-                    <Label for="form-password" :required="!form.id">Kata Sandi</Label>
+                    <Label for="form-password" :required="!form.id"
+                        >Kata Sandi</Label
+                    >
                     <PasswordInput
                         id="form-password"
                         v-model="form.password"
@@ -327,7 +344,7 @@ function resetPasswordToNim() {
                     <Button
                         type="button"
                         variant="outline"
-                        class="w-full justify-start text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+                        class="w-full justify-start border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         @click="resetPasswordToNim"
                     >
                         Atur Ulang Kata Sandi ke NIM
