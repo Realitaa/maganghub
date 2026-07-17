@@ -35,7 +35,7 @@ const showAvatar = computed(
             user.email
         }}</span>
         <span v-if="showEmail" class="text-xs text-muted-foreground"
-            >v0.2.0</span
+            >v0.3.0</span
         >
     </div>
 </template>
