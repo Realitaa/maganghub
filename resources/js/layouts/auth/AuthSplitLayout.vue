@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
-import { welcome } from '@/routes';
-
-const page = usePage();
-const name = page.props.name;
+import { Head } from '@inertiajs/vue3';
+import { FileText, Users, Activity, NotebookPen } from '@lucide/vue';
+import AppLogo from '@/components/AppLogo.vue';
 
 defineProps<{
     title?: string;
@@ -13,34 +10,316 @@ defineProps<{
 </script>
 
 <template>
+    <Head :title="title" />
+
     <div
-        class="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0"
+        class="grid min-h-screen grid-cols-1 bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary lg:grid-cols-2"
     >
+        <!-- Left Side: Dark green / Emerald branding and illustration (Hidden on Mobile) -->
         <div
-            class="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r"
+            class="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex dark:border-r dark:border-border/30 dark:bg-emerald-950/40"
         >
-            <div class="absolute inset-0 bg-zinc-900" />
-            <Link
-                :href="welcome()"
-                class="relative z-20 flex items-center text-lg font-medium"
-            >
-                <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-                {{ name }}
-            </Link>
-        </div>
-        <div class="lg:p-8">
+            <!-- Subtle background pattern overlay -->
+            <div class="pointer-events-none absolute inset-0 opacity-10">
+                <svg viewBox="0 0 100 100" class="h-full w-full fill-current">
+                    <circle cx="10" cy="10" r="30" />
+                    <circle cx="90" cy="90" r="40" />
+                    <line
+                        x1="0"
+                        y1="0"
+                        x2="100"
+                        y2="100"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    />
+                    <line
+                        x1="100"
+                        y1="0"
+                        x2="0"
+                        y2="100"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    />
+                </svg>
+            </div>
+
+            <!-- Middle Illustration -->
+            <div class="relative z-10 my-auto max-w-md">
+                <svg
+                    viewBox="0 0 400 300"
+                    class="mb-8 h-auto w-full drop-shadow-lg select-none"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <circle
+                        cx="200"
+                        cy="150"
+                        r="100"
+                        fill="white"
+                        fill-opacity="0.05"
+                        filter="blur(20px)"
+                    />
+                    <line
+                        x1="50"
+                        y1="230"
+                        x2="350"
+                        y2="230"
+                        stroke="white"
+                        stroke-opacity="0.2"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                    />
+                    <path
+                        d="M70 230 V160 L100 130 L130 160 V230 Z"
+                        fill="white"
+                        fill-opacity="0.08"
+                        stroke="white"
+                        stroke-opacity="0.15"
+                        stroke-width="1.5"
+                    />
+                    <path
+                        d="M130 230 V140 L160 110 L190 140 V230 Z"
+                        fill="white"
+                        fill-opacity="0.12"
+                        stroke="white"
+                        stroke-opacity="0.25"
+                        stroke-width="1.5"
+                    />
+                    <rect
+                        x="152"
+                        y="170"
+                        width="16"
+                        height="25"
+                        rx="2"
+                        fill="white"
+                        fill-opacity="0.2"
+                    />
+                    <circle
+                        cx="160"
+                        cy="135"
+                        r="5"
+                        fill="white"
+                        fill-opacity="0.3"
+                    />
+                    <rect
+                        x="230"
+                        y="80"
+                        width="70"
+                        height="90"
+                        rx="6"
+                        fill="white"
+                        fill-opacity="0.1"
+                        stroke="white"
+                        stroke-opacity="0.3"
+                        stroke-width="2"
+                        transform="rotate(5 265 125)"
+                    />
+                    <line
+                        x1="245"
+                        y1="105"
+                        x2="285"
+                        y2="105"
+                        stroke="white"
+                        stroke-opacity="0.4"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        transform="rotate(5 265 125)"
+                    />
+                    <line
+                        x1="245"
+                        y1="120"
+                        x2="275"
+                        y2="120"
+                        stroke="white"
+                        stroke-opacity="0.4"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        transform="rotate(5 265 125)"
+                    />
+                    <line
+                        x1="245"
+                        y1="135"
+                        x2="280"
+                        y2="135"
+                        stroke="white"
+                        stroke-opacity="0.4"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        transform="rotate(5 265 125)"
+                    />
+                    <circle
+                        cx="280"
+                        cy="150"
+                        r="8"
+                        fill="var(--color-emerald-400, #34d399)"
+                        fill-opacity="0.9"
+                        transform="rotate(5 265 125)"
+                    />
+                    <path
+                        d="M277 150 L279 152 L283 148"
+                        stroke="white"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        transform="rotate(5 265 125)"
+                    />
+                    <circle
+                        cx="290"
+                        cy="200"
+                        r="24"
+                        stroke="white"
+                        stroke-opacity="0.2"
+                        stroke-width="2"
+                        stroke-dasharray="6 4"
+                    />
+                    <circle
+                        cx="290"
+                        cy="200"
+                        r="14"
+                        fill="white"
+                        fill-opacity="0.05"
+                        stroke="white"
+                        stroke-opacity="0.15"
+                        stroke-width="2"
+                    />
+                    <circle
+                        cx="90"
+                        cy="90"
+                        r="6"
+                        fill="white"
+                        fill-opacity="0.4"
+                    />
+                    <circle
+                        cx="120"
+                        cy="70"
+                        r="8"
+                        fill="white"
+                        fill-opacity="0.6"
+                    />
+                    <circle
+                        cx="160"
+                        cy="80"
+                        r="5"
+                        fill="white"
+                        fill-opacity="0.4"
+                    />
+                    <line
+                        x1="96"
+                        y1="88"
+                        x2="114"
+                        y2="74"
+                        stroke="white"
+                        stroke-opacity="0.3"
+                        stroke-width="1.5"
+                    />
+                    <line
+                        x1="128"
+                        y1="72"
+                        x2="155"
+                        y2="78"
+                        stroke="white"
+                        stroke-opacity="0.3"
+                        stroke-width="1.5"
+                    />
+                </svg>
+
+                <h2 class="text-2xl font-bold tracking-tight text-white">
+                    Kelola Proses Magang Anda Secara Digital
+                </h2>
+                <p
+                    class="mt-3 text-sm leading-relaxed text-primary-foreground/85"
+                >
+                    Dari pembentukan kelompok hingga verifikasi proposal dan
+                    pengisian logbook harian, semua terintegrasi secara cepat,
+                    teratur, dan transparan dalam satu sistem akademik kampus.
+                </p>
+            </div>
+
+            <!-- Bottom Features Highlight Grid -->
             <div
-                class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]"
+                class="relative z-10 grid grid-cols-2 gap-4 border-t border-white/10 pt-8"
             >
-                <div class="flex flex-col space-y-2 text-center">
-                    <h1 class="text-xl font-medium tracking-tight" v-if="title">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white"
+                    >
+                        <FileText class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white"
+                        >Pengajuan Magang</span
+                    >
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white"
+                    >
+                        <Users class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white"
+                        >Kelola Kelompok</span
+                    >
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white"
+                    >
+                        <Activity class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white"
+                        >Monitoring Status</span
+                    >
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white"
+                    >
+                        <NotebookPen class="h-4.5 w-4.5" />
+                    </div>
+                    <span class="text-xs font-semibold text-white"
+                        >Logbook Digital</span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Form Card Outer Container -->
+        <div
+            class="flex min-h-screen flex-col items-center justify-between bg-background p-6 sm:p-10 lg:p-12"
+        >
+            <!-- Spacer for vertical center alignment -->
+            <div class="hidden h-6 lg:block"></div>
+
+            <!-- Login Container Card -->
+            <div class="my-auto w-full max-w-sm space-y-6">
+                <div
+                    class="flex flex-col items-center justify-center space-y-2"
+                >
+                    <!-- Desktop Brand Indicator -->
+                    <AppLogo />
+                    <h1
+                        class="mt-4 text-2xl font-bold tracking-tight text-foreground text-center"
+                        v-if="title"
+                    >
                         {{ title }}
                     </h1>
-                    <p class="text-sm text-muted-foreground" v-if="description">
+                    <p
+                        class="text-center text-sm leading-normal text-muted-foreground"
+                        v-if="description"
+                    >
                         {{ description }}
                     </p>
                 </div>
+
                 <slot />
+            </div>
+
+            <!-- Footer Text -->
+            <div class="mt-8 w-full border-t border-border/40 py-6 text-center">
+                <span
+                    class="text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                >
+                    MagangHub &mdash; Platform Pengelolaan Magang Mahasiswa
+                </span>
             </div>
         </div>
     </div>

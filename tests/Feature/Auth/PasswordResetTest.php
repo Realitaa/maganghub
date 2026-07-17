@@ -76,3 +76,53 @@ test('password cannot be reset with invalid token', function () {
 
     $response->assertSessionHasErrors('email');
 });
+
+test('reset password link can be requested by student using NIM if email exists', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121999',
+        'email' => 'student@example.com',
+    ]);
+
+    $response = $this->post(route('password.email'), ['email' => '10121999']);
+
+    $response->assertSessionHasNoErrors();
+    $response->assertSessionHas('status', __('passwords.masked_sent', ['email' => 's*****t@example.com']));
+    Notification::assertSentTo($user, ResetPassword::class);
+});
+
+test('reset password link cannot be requested by student using NIM if email is empty', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121999',
+        'email' => null,
+    ]);
+
+    $response = $this->post(route('password.email'), ['email' => '10121999']);
+
+    $response->assertSessionHasErrors('email');
+    $response->assertSessionHasErrors(['email' => __('passwords.email_empty')]);
+    Notification::assertNotSentTo($user, ResetPassword::class);
+});
+
+test('cannot update password via settings page if email is empty', function () {
+    $user = User::factory()->create([
+        'role' => 'student',
+        'nim' => '10121999',
+        'email' => null,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->put(route('user-password.update'), [
+            'current_password' => 'password',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+    $response->assertSessionHasErrors('email');
+    $response->assertSessionHasErrors(['email' => __('passwords.email_empty_for_password_change')]);
+});

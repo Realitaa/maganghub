@@ -140,6 +140,33 @@ class UserController extends Controller
     }
 
     /**
+     * Reset the student's password to their NIM.
+     */
+    public function resetPasswordToNim(User $user): RedirectResponse
+    {
+        Gate::authorize('update', $user);
+
+        if ($user->role !== 'student') {
+            throw ValidationException::withMessages([
+                'error' => 'Hanya pengguna dengan peran mahasiswa yang dapat diatur ulang kata sandinya ke NIM.',
+            ]);
+        }
+
+        if (empty($user->nim)) {
+            throw ValidationException::withMessages([
+                'error' => 'Mahasiswa tidak memiliki NIM untuk dijadikan kata sandi.',
+            ]);
+        }
+
+        $this->userService->resetPasswordToNim($user);
+
+        return Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Berhasil mengatur ulang kata sandi mahasiswa ke NIM.',
+        ])->back();
+    }
+
+    /**
      * Download the template for importing students.
      */
     public function downloadTemplate()

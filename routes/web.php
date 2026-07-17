@@ -13,6 +13,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::inertia('deactivated', 'auth/Deactivated')->name('deactivated');
 
+Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'store'])
+    ->middleware(['guest'])
+    ->name('password.email');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/users.php';
 require __DIR__.'/groups.php';

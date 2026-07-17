@@ -18,5 +18,10 @@ return [
     'throttled' => 'Please wait before retrying.',
     'token' => 'This password reset token is invalid.',
     'user' => "We can't find a user with that email address.",
-
+    'user_or_nim' => "We can't find a user with that email address or NIM.",
+    'email_empty' => 'Your account does not have a registered email. Please contact the Administrator to reset your password.',
+    'email_empty_for_password_change' => 'Your email is still empty. Please fill in your email first before updating your password.',
+    'masked_sent' => 'We have sent a password reset link to your registered email (:email).',
+    'updated' => 'Password updated successfully.',
+    'smtp_error' => 'Failed to send email. The email service is currently unavailable, please try again later.',
 ];

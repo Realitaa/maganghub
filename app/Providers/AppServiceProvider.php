@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Policies\InternshipTemplatePolicy;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +33,20 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Gate::define('manage-templates', [InternshipTemplatePolicy::class, 'manage']);
+
+        ResetPassword::toMailUsing(function ($notifiable, $token) {
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+
+            return (new MailMessage)
+                ->subject('Atur Ulang Kata Sandi Akun MagangHub')
+                ->view('emails.reset-password', [
+                    'url' => $url,
+                    'name' => $notifiable->name,
+                ]);
+        });
     }
 
     /**

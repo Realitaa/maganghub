@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\ValidationException;
 
 class SecurityController extends Controller
 {
@@ -29,12 +30,18 @@ class SecurityController extends Controller
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {
+        if (empty($request->user()->email)) {
+            throw ValidationException::withMessages([
+                'email' => [__('passwords.email_empty_for_password_change')],
+            ]);
+        }
+
         $request->user()->update([
             'password' => $request->password,
             'password_changed_at' => $request->password === $request->user()->nim ? null : now(),
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Password updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('passwords.updated')]);
 
         return back();
     }

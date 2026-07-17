@@ -137,7 +137,7 @@ describe('administrator', function () {
 
     // --- Create & Edit Actions ---
 
-    it('can create a student with a custom password', function () {
+    it('cannot create a student with a custom password, defaulting to NIM instead', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
         $this->actingAs($admin)
@@ -155,7 +155,7 @@ describe('administrator', function () {
 
         $user = User::where('email', 'bob@student.example.com')->first();
         expect($user)->not->toBeNull();
-        expect(Hash::check('custom-secret-password', $user->password))->toBeTrue();
+        expect(Hash::check('10121010', $user->password))->toBeTrue();
     });
 
     it('can create a student without a password defaulting to nim', function () {
@@ -262,6 +262,46 @@ describe('administrator', function () {
         expect($student->name)->toBe('Updated Name');
         expect($student->email)->toBe('updated@student.example.com');
         expect($student->password)->toBe($oldPassword);
+    });
+
+    it('cannot update student password using user form', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'nim' => '10121012',
+            'password' => Hash::make('original-password'),
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('users.update', $student->id), [
+                'name' => 'Updated Name',
+                'email' => 'updated@student.example.com',
+                'role' => 'student',
+                'nim' => '10121012',
+                'password' => 'some-new-password-attempt',
+            ])
+            ->assertRedirect();
+
+        $student->refresh();
+        expect(Hash::check('original-password', $student->password))->toBeTrue();
+    });
+
+    it('can reset student password to NIM using the button endpoint', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'nim' => '10121012',
+            'password' => Hash::make('custom-password'),
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('users.reset-password-to-nim', $student->id))
+            ->assertRedirect()
+            ->assertInertiaFlash('toast.message', 'Berhasil mengatur ulang kata sandi mahasiswa ke NIM.')
+            ->assertInertiaFlash('toast.type', 'success');
+
+        $student->refresh();
+        expect(Hash::check('10121012', $student->password))->toBeTrue();
     });
 
     it('can prevent editing email to an existing email', function () {

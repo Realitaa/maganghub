@@ -42,8 +42,8 @@ class UserService
     {
         $role = $data['role'];
 
-        // Handle password defaulting for student role if empty
-        if ($role === 'student' && empty($data['password'])) {
+        // Handle password defaulting for student role (always defaults to NIM)
+        if ($role === 'student') {
             $data['password'] = Hash::make($data['nim']);
         } else {
             $data['password'] = Hash::make($data['password']);
@@ -72,13 +72,29 @@ class UserService
             $data['student_class_id'] = $this->resolveStudentClassId($data['student_class_id']);
         }
 
-        if (! empty($data['password'])) {
+        // Students cannot update passwords from the user form
+        if ($role === 'student') {
+            unset($data['password']);
+        } elseif (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }
 
         $user->update($data);
+
+        return $user;
+    }
+
+    /**
+     * Reset student's password to their NIM.
+     */
+    public function resetPasswordToNim(User $user): User
+    {
+        $user->update([
+            'password' => Hash::make($user->nim),
+            'password_changed_at' => null,
+        ]);
 
         return $user;
     }

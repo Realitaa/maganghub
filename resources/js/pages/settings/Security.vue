@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, usePage, Link } from '@inertiajs/vue3';
+import { AlertTriangle } from '@lucide/vue';
+import { computed } from 'vue';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { edit as editProfile } from '@/routes/profile';
 import { edit } from '@/routes/security';
 
 type Props = {
@@ -13,6 +17,10 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+const isEmailEmpty = computed(() => !user.value?.email);
 
 defineOptions({
     layout: {
@@ -38,6 +46,18 @@ defineOptions({
             description="Pastikan akun Anda menggunakan kata sandi yang panjang dan acak agar tetap aman"
         />
 
+        <Alert v-if="isEmailEmpty" variant="warning" class="mb-6">
+            <AlertTriangle class="h-4 w-4" />
+            <div>
+                <AlertTitle>Email Masih Kosong</AlertTitle>
+                <AlertDescription>
+                    Anda harus mengisi alamat email terlebih dahulu di halaman
+                    <Link :href="editProfile().url" class="font-medium underline hover:text-primary">Pengaturan Profil</Link>
+                    sebelum dapat memperbarui kata sandi Anda.
+                </AlertDescription>
+            </div>
+        </Alert>
+
         <Form
             v-bind="SecurityController.update.form()"
             :options="{
@@ -60,6 +80,7 @@ defineOptions({
                     class="mt-1 block w-full"
                     autocomplete="current-password"
                     placeholder="Kata Sandi Saat Ini"
+                    :disabled="isEmailEmpty"
                 />
                 <InputError :message="errors.current_password" />
             </div>
@@ -73,6 +94,7 @@ defineOptions({
                     autocomplete="new-password"
                     placeholder="Kata Sandi Baru"
                     :passwordrules="props.passwordRules"
+                    :disabled="isEmailEmpty"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -88,13 +110,14 @@ defineOptions({
                     autocomplete="new-password"
                     placeholder="Konfirmasi Kata Sandi Baru"
                     :passwordrules="props.passwordRules"
+                    :disabled="isEmailEmpty"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <div class="flex items-center gap-4">
                 <Button
-                    :disabled="processing"
+                    :disabled="isEmailEmpty || processing"
                     data-test="update-password-button"
                 >
                     Simpan
