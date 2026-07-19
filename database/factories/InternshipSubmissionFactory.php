@@ -26,7 +26,7 @@ class InternshipSubmissionFactory extends Factory
             'division' => $this->faker->jobTitle(),
             'start_date' => now()->addMonth()->format('Y-m-d'),
             'end_date' => now()->addMonths(3)->format('Y-m-d'),
-            'supporting_document' => null,
+            'letter_path' => null,
             'status' => 'draft',
         ];
     }

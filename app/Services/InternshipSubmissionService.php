@@ -62,7 +62,6 @@ class InternshipSubmissionService
             $submission = InternshipSubmission::create(array_merge($validated, [
                 'group_id' => $group->id,
                 'status' => 'draft',
-                'supporting_document' => null,
             ]));
         }
 
@@ -140,7 +139,6 @@ class InternshipSubmissionService
             $submission = InternshipSubmission::create(array_merge($validated, [
                 'group_id' => $group->id,
                 'status' => 'submitted',
-                'supporting_document' => null,
             ]));
         }
 

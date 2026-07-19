@@ -64,70 +64,20 @@ class InternshipSubmissionController extends Controller
         }
     }
 
-    public function downloadLetter(Request $request, InternshipSubmission $submission)
+    public function downloadLetter(InternshipSubmission $submission)
     {
         Gate::authorize('downloadLetter', $submission);
 
-        $userId = $request->integer('user_id');
-
-        if ($userId) {
-            $membership = $submission->submissionMemberships()
-                ->where('user_id', $userId)
-                ->first();
-
-            if (! $membership) {
-                abort(403, 'Mahasiswa bukan merupakan anggota kelompok pengajuan ini.');
-            }
-
-            if (! $membership->letter_path || ! Storage::exists($membership->letter_path)) {
-                abort(404, 'Berkas surat permohonan magang mahasiswa tidak ditemukan.');
-            }
-
-            $user = User::findOrFail($userId);
-            $absolutePath = Storage::path($membership->letter_path);
-
-            $safeName = str_replace([' ', '/', '\\'], '_', $user->name);
-            $filename = 'surat_permohonan_magang_'.$safeName.'_'.($submission->group->code ?? $submission->id).'.docx';
-
-            return response()->download($absolutePath, $filename);
+        if (! $submission->letter_path || ! Storage::exists($submission->letter_path)) {
+            abort(404, 'Berkas surat permohonan magang tidak ditemukan.');
         }
 
-        // Bulk download all letters in a ZIP
-        $memberships = $submission->submissionMemberships()->with('user')->get();
-        if ($memberships->isEmpty()) {
-            abort(404, 'Tidak ada anggota kelompok.');
-        }
+        $absolutePath = Storage::path($submission->letter_path);
 
-        $zip = new \ZipArchive;
-        $zipPath = tempnam(sys_get_temp_dir(), 'zip_');
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            abort(500, 'Gagal membuat file ZIP.');
-        }
+        $safeCompanyName = str_replace([' ', '/', '\\'], '_', $submission->company_name);
+        $filename = 'surat_permohonan_magang_'.$safeCompanyName.'_'.($submission->group->code ?? $submission->id).'.docx';
 
-        $hasFiles = false;
-        foreach ($memberships as $membership) {
-            if ($membership->letter_path && Storage::exists($membership->letter_path)) {
-                $user = $membership->user;
-                $absolutePath = Storage::path($membership->letter_path);
-                $safeName = str_replace([' ', '/', '\\'], '_', $user->name);
-                $filename = 'surat_permohonan_magang_'.$safeName.'_'.($submission->group->code ?? $submission->id).'.docx';
-                $zip->addFile($absolutePath, $filename);
-                $hasFiles = true;
-            }
-        }
-
-        $zip->close();
-
-        if (! $hasFiles) {
-            if (file_exists($zipPath)) {
-                @unlink($zipPath);
-            }
-            abort(404, 'Tidak ada berkas surat permohonan magang yang ditemukan untuk kelompok ini.');
-        }
-
-        $zipName = 'surat_permohonan_magang_'.($submission->group->code ?? $submission->id).'.zip';
-
-        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
+        return response()->download($absolutePath, $filename);
     }
 
     /**

@@ -48,7 +48,7 @@ function setupFakeReadyTemplate(): string
     $tempFile = tempnam(sys_get_temp_dir(), 'test_docx_');
     $zip = new ZipArchive;
     $zip->open($tempFile, ZipArchive::CREATE);
-    $zip->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{name}} {{nim}} {{semester}} {{phone}} {{email}} {{number}} {{today}} {{company_name}} {{start_date}} {{end_date}} {{calculateDuration}} {{field_of_interest}} {{division ? Division : field_of_interest}}</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>');
+    $zip->addFromString('word/document.xml', '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{company_name}} {start_date}} {end_date}} {{today}}</w:t></w:r></w:p><w:tbl><w:tr><w:tc><w:p><w:r><w:t>No</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Nama</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>NIM</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Program Studi</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>1</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r></w:r></w:p></w:tc><w:tc><w:p><w:r></w:r></w:p></w:tc><w:tc><w:p><w:r></w:r></w:p></w:tc></w:tr></w:tbl><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>');
     $zip->close();
     $dummyDocxContent = file_get_contents($tempFile);
     unlink($tempFile);
@@ -191,18 +191,15 @@ describe('ready to print / siap magang workflow', function () {
         ['submission' => $submission, 'group' => $group, 'leader' => $leader, 'member' => $member] = makeReadySubmission();
 
         // Seed fake files
-        Storage::disk('local')->put('letters/letter1.pdf', 'content1');
-        Storage::disk('local')->put('letters/letter2.pdf', 'content2');
+        Storage::disk('local')->put('letters/letter.docx', 'content1');
         Storage::disk('local')->put('responses/reply.pdf', 'content3');
 
         $submission->update([
             'status' => 'loa_review',
             'company_response_path' => 'responses/reply.pdf',
+            'letter_path' => 'letters/letter.docx',
         ]);
         $group->update(['status' => 'loa_review']);
-
-        $submission->submissionMemberships()->where('user_id', $leader->id)->first()->update(['letter_path' => 'letters/letter1.pdf']);
-        $submission->submissionMemberships()->where('user_id', $member->id)->first()->update(['letter_path' => 'letters/letter2.pdf']);
 
         $this->actingAs($operator)
             ->post(route('review.submissions.company-decision', $submission->id), [
@@ -222,10 +219,8 @@ describe('ready to print / siap magang workflow', function () {
 
         // Document paths should be set to null and files deleted
         expect($submission->fresh()->company_response_path)->toBeNull();
-        expect($submission->submissionMemberships()->where('user_id', $leader->id)->first()->letter_path)->toBeNull();
-        expect($submission->submissionMemberships()->where('user_id', $member->id)->first()->letter_path)->toBeNull();
-        Storage::disk('local')->assertMissing('letters/letter1.pdf');
-        Storage::disk('local')->assertMissing('letters/letter2.pdf');
+        expect($submission->fresh()->letter_path)->toBeNull();
+        Storage::disk('local')->assertMissing('letters/letter.docx');
         Storage::disk('local')->assertMissing('responses/reply.pdf');
 
         // Memberships should NOT be deleted
@@ -324,46 +319,24 @@ describe('ready to print / siap magang workflow', function () {
         Notification::assertNotSentTo($member, InternshipRejectedNotification::class);
     });
 
-    it('allows operators to download individual student letters', function () {
+    it('allows operators to download consolidated letters', function () {
         $operator = User::factory()->create(['role' => 'operator']);
-        ['submission' => $submission, 'leader' => $leader] = makeReadySubmission();
+        ['submission' => $submission] = makeReadySubmission();
 
         setupFakeReadyTemplate();
 
         $submission->update([
             'status' => 'letter_published',
-        ]);
-        $membership = $submission->submissionMemberships()->where('user_id', $leader->id)->first();
-        $membership->update([
             'letter_path' => 'letters/permohonan_magang_test.docx',
         ]);
         Storage::put('letters/permohonan_magang_test.docx', 'dummy content');
 
         $response = $this->actingAs($operator)
-            ->get(route('groups.submissions.download-letter', [
-                'submission' => $submission->id,
-                'user_id' => $leader->id,
-            ]));
+            ->get(route('groups.submissions.download-letter', $submission->id));
 
         $response->assertSuccessful();
-        $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.str_replace(' ', '_', $leader->name).'_'.($submission->group->code ?? $submission->id).'.docx');
-    });
-
-    it('prevents downloading an individual letter for a non-member of the group', function () {
-        $operator = User::factory()->create(['role' => 'operator']);
-        ['submission' => $submission] = makeReadySubmission();
-        $nonMember = User::factory()->create(['role' => 'student']);
-
-        $submission->update([
-            'status' => 'letter_published',
-        ]);
-
-        $this->actingAs($operator)
-            ->get(route('groups.submissions.download-letter', [
-                'submission' => $submission->id,
-                'user_id' => $nonMember->id,
-            ]))
-            ->assertForbidden();
+        $safeCompanyName = str_replace([' ', '/', '\\'], '_', $submission->company_name);
+        $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.$safeCompanyName.'_'.($submission->group->code ?? $submission->id).'.docx');
     });
 
 });

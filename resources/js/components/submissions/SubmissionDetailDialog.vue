@@ -114,15 +114,7 @@ function handleDownloadLetter(subId: number) {
     window.open(downloadLetter.url({ submission: subId }), '_blank');
 }
 
-function handleDownloadIndividualLetter(subId: number, userId: number) {
-    window.open(
-        downloadLetter.url(
-            { submission: subId },
-            { query: { user_id: userId } },
-        ),
-        '_blank',
-    );
-}
+
 
 function handleMarkApplying(subId: number) {
     processing.value = true;
@@ -480,30 +472,7 @@ function submitReject() {
                                             </div>
                                         </div>
 
-                                        <!-- Print button (Only show in view mode and if approved) -->
-                                        <div
-                                            v-if="
-                                                mode === 'view' &&
-                                                submissionDetail.status !==
-                                                    'submitted'
-                                            "
-                                            class="flex shrink-0 items-center self-end md:self-center"
-                                        >
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                class="h-8 cursor-pointer gap-1.5 border-primary/20 bg-background font-medium text-primary transition-all hover:bg-primary/5 hover:text-primary"
-                                                @click="
-                                                    handleDownloadIndividualLetter(
-                                                        submissionDetail.id,
-                                                        membership.user.id,
-                                                    )
-                                                "
-                                            >
-                                                <Printer class="h-3.5 w-3.5" />
-                                                Cetak Surat
-                                            </Button>
-                                        </div>
+
                                     </div>
                                 </div>
                             </ScrollArea>
@@ -549,7 +518,7 @@ function submitReject() {
                             id="btn-print-letter"
                         >
                             <Printer class="mr-2 h-4 w-4" />
-                            Unduh Semua Surat sekaligus
+                            Unduh Surat Permohonan
                         </Button>
 
                         <div class="flex justify-end gap-2">

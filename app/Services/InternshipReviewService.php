@@ -91,16 +91,14 @@ class InternshipReviewService
             // Record timeline
             $this->timelineService->submissionApproved($lockedSubmission->group);
 
-            // Generate all individual letters
+            // Generate single letter for the submission
             try {
                 $generator = app(DocumentGeneratorService::class);
-                foreach ($lockedSubmission->submissionMemberships as $membership) {
-                    if (! $membership->letter_path) {
-                        $path = $generator->generateLetter($lockedSubmission, $membership->user_id);
-                        $membership->update([
-                            'letter_path' => $path,
-                        ]);
-                    }
+                if (! $lockedSubmission->letter_path) {
+                    $path = $generator->generateLetter($lockedSubmission);
+                    $lockedSubmission->update([
+                        'letter_path' => $path,
+                    ]);
                 }
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
@@ -193,12 +191,10 @@ class InternshipReviewService
 
                 $lockedSubmission->submissionMemberships()->update(['status' => 'rejected']);
 
-                // Delete member letters from storage and nullify db path
-                foreach ($lockedSubmission->submissionMemberships as $subMem) {
-                    if ($subMem->letter_path) {
-                        Storage::delete($subMem->letter_path);
-                        $subMem->update(['letter_path' => null]);
-                    }
+                // Delete consolidated letter from storage and nullify db path
+                if ($lockedSubmission->letter_path) {
+                    Storage::delete($lockedSubmission->letter_path);
+                    $lockedSubmission->update(['letter_path' => null]);
                 }
 
                 // Delete company response letter from storage and nullify db path

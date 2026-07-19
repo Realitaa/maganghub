@@ -15,7 +15,12 @@ class DocumentGeneratorService
      *
      * @throws RuntimeException
      */
-    public function generateLetter(InternshipSubmission $submission, ?int $userId = null): string
+    /**
+     * Generate the internship application letter from the local template.
+     *
+     * @throws RuntimeException
+     */
+    public function generateLetter(InternshipSubmission $submission): string
     {
         $templatePath = 'templates/letter_template.docx';
 
@@ -45,32 +50,8 @@ class DocumentGeneratorService
             throw new RuntimeException('Konten word/document.xml tidak ditemukan.');
         }
 
-        // Extract body content and section properties
-        if (! preg_match('/<w:body>(.*)(<w:sectPr[^>]*>.*<\/w:sectPr>)\s*<\/w:body>/s', $xmlContent, $matches)) {
-            $zip->close();
-            unlink($tempFile);
-            throw new RuntimeException('Gagal memproses struktur w:body berkas template.');
-        }
-
-        $repeatingContent = $matches[1];
-        $sectPr = $matches[2];
-
-        // Prepare placeholder data
-        $number = '00'.$submission->id.'/UN33.4/KM/'.now()->format('Y');
-        $today = $this->formatIndonesianDate(now());
-        $companyName = $submission->company_name ?? '';
-        $monthDuration = $this->calculateMonthDuration($submission->start_date, $submission->end_date);
-        $startDate = $this->formatIndonesianDate($submission->start_date);
-        $endDate = $this->formatIndonesianDate($submission->end_date);
-        $fieldOfInterest = $submission->field_of_interest ?? '';
-        $division = $submission->division ?? '';
-        $divisionOrInterest = ! empty($division) ? $division : $fieldOfInterest;
-
-        $query = $submission->submissionMemberships()->with('user');
-        if ($userId !== null) {
-            $query->where('user_id', $userId);
-        }
-        $memberships = $query->get();
+        // Fetch memberships
+        $memberships = $submission->submissionMemberships()->with('user')->get();
 
         if ($memberships->isEmpty()) {
             $zip->close();
@@ -78,42 +59,49 @@ class DocumentGeneratorService
             throw new RuntimeException('Tidak ada anggota kelompok yang ditemukan untuk pengajuan ini.');
         }
 
-        $pages = [];
+        // 1. Process table rows for students
+        $tblStart = strpos($xmlContent, '<w:tbl>');
+        if ($tblStart !== false) {
+            $headerStart = strpos($xmlContent, '<w:tr>', $tblStart);
+            $tblEnd = strpos($xmlContent, '</w:tbl>', $tblStart);
 
-        foreach ($memberships as $membership) {
-            $user = $membership->user;
-            if (! $user) {
-                continue;
+            if ($headerStart !== false && $tblEnd !== false && $headerStart < $tblEnd) {
+                $headerEnd = strpos($xmlContent, '</w:tr>', $headerStart);
+                if ($headerEnd !== false && $headerEnd < $tblEnd) {
+                    $headerEnd += strlen('</w:tr>');
+
+                    // Generate row XML for each member
+                    $rowsXml = '';
+                    $index = 1;
+                    foreach ($memberships as $membership) {
+                        $user = $membership->user;
+                        if (!$user) {
+                            continue;
+                        }
+                        $rowsXml .= $this->generateStudentRow($index, $user->name, $user->nim);
+                        $index++;
+                    }
+
+                    // Assemble the new XML table
+                    $prefix = substr($xmlContent, 0, $headerEnd);
+                    $suffix = substr($xmlContent, $tblEnd);
+                    $xmlContent = $prefix . $rowsXml . $suffix;
+                }
             }
-
-            $pageXml = $repeatingContent;
-
-            // Replace student placeholders
-            $pageXml = str_replace('{{name}}', htmlspecialchars($user->name ?? ''), $pageXml);
-            $pageXml = str_replace('{{nim}}', htmlspecialchars($user->nim ?? ''), $pageXml);
-            $pageXml = str_replace('{{semester}}', htmlspecialchars((string) ($user->semester ?? '')), $pageXml);
-            $pageXml = str_replace('{{phone}}', htmlspecialchars($user->phone ?? ''), $pageXml);
-            $pageXml = str_replace('{{email}}', htmlspecialchars($user->email ?? ''), $pageXml);
-
-            // Replace submission placeholders
-            $pageXml = str_replace('{{number}}', htmlspecialchars($number), $pageXml);
-            $pageXml = str_replace('{{today}}', htmlspecialchars($today), $pageXml);
-            $pageXml = str_replace('{{company_name}}', htmlspecialchars($companyName), $pageXml);
-            $pageXml = str_replace('{{start_date}}', htmlspecialchars($startDate), $pageXml);
-            $pageXml = str_replace('{{end_date}}', htmlspecialchars($endDate), $pageXml);
-            $pageXml = str_replace('{{calculateDuration}}', htmlspecialchars($monthDuration), $pageXml);
-            $pageXml = str_replace('{{field_of_interest}}', htmlspecialchars($fieldOfInterest), $pageXml);
-            $pageXml = str_replace('{{division}}', htmlspecialchars($divisionOrInterest), $pageXml);
-
-            $pages[] = $pageXml;
         }
 
-        // Join each page using an OpenXML page break
-        $pageBreak = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
-        $newBodyXml = '<w:body>'.implode($pageBreak, $pages).$sectPr.'</w:body>';
+        // 2. Replace body placeholders
+        $today = $this->formatIndonesianDate(now());
+        $companyName = $submission->company_name ?? '';
+        $startDate = $this->formatIndonesianDate($submission->start_date);
+        $endDate = $this->formatIndonesianDate($submission->end_date);
 
-        // Reconstruct the XML content
-        $xmlContent = preg_replace('/<w:body>.*<\/w:body>/s', $newBodyXml, $xmlContent);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{company_name}}', $companyName);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{start_date}}', $startDate);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{start_date}}', $startDate);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{end_date}}', $endDate);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{end_date}}', $endDate);
+        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{today}}', $today);
 
         // Save XML back to the ZIP
         $zip->addFromString('word/document.xml', $xmlContent);
@@ -133,6 +121,25 @@ class DocumentGeneratorService
 
         return $storagePath;
     }
+
+    /**
+     * Generate table row XML for a single student.
+     */
+    private function generateStudentRow(int $index, string $name, string $nim, string $programStudi = 'Ilmu Komputer'): string
+    {
+        $escapedIndex = htmlspecialchars((string)$index);
+        $escapedName = htmlspecialchars($name);
+        $escapedNim = htmlspecialchars($nim);
+        $escapedProdi = htmlspecialchars($programStudi);
+
+        return '<w:tr><w:trPr></w:trPr>' .
+            '<w:tc><w:tcPr><w:tcW w:w="788" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedIndex . '</w:t></w:r></w:p></w:tc>' .
+            '<w:tc><w:tcPr><w:tcW w:w="3800" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedName . '</w:t></w:r></w:p></w:tc>' .
+            '<w:tc><w:tcPr><w:tcW w:w="2300" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedNim . '</w:t></w:r></w:p></w:tc>' .
+            '<w:tc><w:tcPr><w:tcW w:w="2725" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedProdi . '</w:t></w:r></w:p></w:tc>' .
+            '</w:tr>';
+    }
+
 
     /**
      * Format a date into Indonesian format.
@@ -164,5 +171,23 @@ class DocumentGeneratorService
         $months = max(1, $months);
 
         return $months.' Bulan';
+    }
+
+    /**
+     * Replaces a placeholder in word document XML, robustly handling XML tag splits inside the placeholder.
+     */
+    private function replaceWordPlaceholder(string $xml, string $placeholder, string $replacement): string
+    {
+        $chars = str_split($placeholder);
+        $pattern = '';
+        foreach ($chars as $char) {
+            $quoted = preg_quote($char, '/');
+            if ($pattern === '') {
+                $pattern = $quoted;
+            } else {
+                $pattern .= '(?:<[^>]+>)*' . $quoted;
+            }
+        }
+        return preg_replace('/' . $pattern . '/s', htmlspecialchars($replacement), $xml);
     }
 }
