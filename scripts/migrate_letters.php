@@ -2,6 +2,7 @@
 
 use App\Models\InternshipSubmission;
 use App\Services\DocumentGeneratorService;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 require __DIR__.'/../vendor/autoload.php';
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 echo "Starting migration of internship letters...\n";
@@ -29,7 +30,7 @@ foreach ($submissions as $sub) {
         ->get();
 
     foreach ($memberships as $membership) {
-        if (!empty($membership->letter_path)) {
+        if (! empty($membership->letter_path)) {
             if (Storage::exists($membership->letter_path)) {
                 Storage::delete($membership->letter_path);
                 echo "  Deleted old individual letter: {$membership->letter_path}\n";
@@ -44,7 +45,7 @@ foreach ($submissions as $sub) {
             if ($submissionModel) {
                 $generator = app(DocumentGeneratorService::class);
                 $newPath = $generator->generateLetter($submissionModel);
-                
+
                 DB::table('internship_submissions')
                     ->where('id', $sub->id)
                     ->update(['letter_path' => $newPath]);
@@ -52,9 +53,9 @@ foreach ($submissions as $sub) {
                 echo "  Generated new consolidated letter: {$newPath}\n";
                 $count++;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo "  Error generating letter: {$e->getMessage()}\n";
-            Log::error("Failed to generate consolidated letter for submission ID {$sub->id}: " . $e->getMessage());
+            Log::error("Failed to generate consolidated letter for submission ID {$sub->id}: ".$e->getMessage());
         }
     } else {
         echo "  Warning: Template templates/letter_template.docx not found. Skipping generation.\n";

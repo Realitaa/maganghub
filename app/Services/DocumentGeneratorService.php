@@ -75,7 +75,7 @@ class DocumentGeneratorService
                     $index = 1;
                     foreach ($memberships as $membership) {
                         $user = $membership->user;
-                        if (!$user) {
+                        if (! $user) {
                             continue;
                         }
                         $rowsXml .= $this->generateStudentRow($index, $user->name, $user->nim);
@@ -85,7 +85,7 @@ class DocumentGeneratorService
                     // Assemble the new XML table
                     $prefix = substr($xmlContent, 0, $headerEnd);
                     $suffix = substr($xmlContent, $tblEnd);
-                    $xmlContent = $prefix . $rowsXml . $suffix;
+                    $xmlContent = $prefix.$rowsXml.$suffix;
                 }
             }
         }
@@ -127,19 +127,18 @@ class DocumentGeneratorService
      */
     private function generateStudentRow(int $index, string $name, string $nim, string $programStudi = 'Ilmu Komputer'): string
     {
-        $escapedIndex = htmlspecialchars((string)$index);
+        $escapedIndex = htmlspecialchars((string) $index);
         $escapedName = htmlspecialchars($name);
         $escapedNim = htmlspecialchars($nim);
         $escapedProdi = htmlspecialchars($programStudi);
 
-        return '<w:tr><w:trPr></w:trPr>' .
-            '<w:tc><w:tcPr><w:tcW w:w="788" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedIndex . '</w:t></w:r></w:p></w:tc>' .
-            '<w:tc><w:tcPr><w:tcW w:w="3800" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedName . '</w:t></w:r></w:p></w:tc>' .
-            '<w:tc><w:tcPr><w:tcW w:w="2300" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedNim . '</w:t></w:r></w:p></w:tc>' .
-            '<w:tc><w:tcPr><w:tcW w:w="2725" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>' . $escapedProdi . '</w:t></w:r></w:p></w:tc>' .
+        return '<w:tr><w:trPr></w:trPr>'.
+            '<w:tc><w:tcPr><w:tcW w:w="788" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>'.$escapedIndex.'</w:t></w:r></w:p></w:tc>'.
+            '<w:tc><w:tcPr><w:tcW w:w="3800" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>'.$escapedName.'</w:t></w:r></w:p></w:tc>'.
+            '<w:tc><w:tcPr><w:tcW w:w="2300" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>'.$escapedNim.'</w:t></w:r></w:p></w:tc>'.
+            '<w:tc><w:tcPr><w:tcW w:w="2725" w:type="dxa"/><w:tcBorders></w:tcBorders></w:tcPr><w:p><w:pPr><w:pStyle w:val="Normal"/><w:widowControl/><w:spacing w:lineRule="auto" w:line="240" w:before="0" w:after="140"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs=""/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:cs="" w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:kern w:val="0"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr><w:t>'.$escapedProdi.'</w:t></w:r></w:p></w:tc>'.
             '</w:tr>';
     }
-
 
     /**
      * Format a date into Indonesian format.
@@ -185,9 +184,10 @@ class DocumentGeneratorService
             if ($pattern === '') {
                 $pattern = $quoted;
             } else {
-                $pattern .= '(?:<[^>]+>)*' . $quoted;
+                $pattern .= '(?:<[^>]+>)*'.$quoted;
             }
         }
-        return preg_replace('/' . $pattern . '/s', htmlspecialchars($replacement), $xml);
+
+        return preg_replace('/'.$pattern.'/s', htmlspecialchars($replacement), $xml);
     }
 }

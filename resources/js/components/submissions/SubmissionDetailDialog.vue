@@ -114,8 +114,6 @@ function handleDownloadLetter(subId: number) {
     window.open(downloadLetter.url({ submission: subId }), '_blank');
 }
 
-
-
 function handleMarkApplying(subId: number) {
     processing.value = true;
     router.post(
@@ -471,8 +469,6 @@ function submitReject() {
                                                 </div>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </ScrollArea>
