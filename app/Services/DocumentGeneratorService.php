@@ -93,14 +93,22 @@ class DocumentGeneratorService
         // 2. Replace body placeholders
         $today = $this->formatIndonesianDate(now());
         $companyName = $submission->company_name ?? '';
+        $companyLeader = $submission->company_leader ?? '';
         $startDate = $this->formatIndonesianDate($submission->start_date);
         $endDate = $this->formatIndonesianDate($submission->end_date);
 
+        if (empty($companyLeader)) {
+            // Remove the entire paragraph <w:p> containing {{supervisor}} if empty to avoid leaving an empty line
+            $xmlContent = preg_replace('/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?\{\{\s*supervisor\s*\}\}.*?<\/w:p>/s', '', $xmlContent);
+            // Just in case they are split across XML tags, also clean up split versions
+            $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{supervisor}}', '');
+        } else {
+            $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{supervisor}}', $companyLeader);
+        }
+
         $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{company_name}}', $companyName);
         $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{start_date}}', $startDate);
-        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{start_date}}', $startDate);
         $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{end_date}}', $endDate);
-        $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{end_date}}', $endDate);
         $xmlContent = $this->replaceWordPlaceholder($xmlContent, '{{today}}', $today);
 
         // Save XML back to the ZIP

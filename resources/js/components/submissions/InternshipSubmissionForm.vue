@@ -18,6 +18,7 @@ import {
     Send,
     Briefcase,
     Laptop,
+    User,
 } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
 import GoogleMapLink from '@/components/GoogleMapLink.vue';
@@ -75,6 +76,7 @@ const submissionForm = useForm({
     company_name: props.group?.active_submission?.company_name ?? '',
     company_address: props.group?.active_submission?.company_address ?? '',
     company_contact: props.group?.active_submission?.company_contact ?? '',
+    company_leader: props.group?.active_submission?.company_leader ?? '',
     division: props.group?.active_submission?.division ?? '',
     field_of_interest: props.group?.active_submission?.field_of_interest ?? '',
     company_type: props.group?.active_submission?.company_type ?? '',
@@ -93,6 +95,7 @@ watch(
         submissionForm.company_name = newSub?.company_name ?? '';
         submissionForm.company_address = newSub?.company_address ?? '';
         submissionForm.company_contact = newSub?.company_contact ?? '';
+        submissionForm.company_leader = newSub?.company_leader ?? '';
         submissionForm.division = newSub?.division ?? '';
         submissionForm.field_of_interest = newSub?.field_of_interest ?? '';
         submissionForm.company_type = newSub?.company_type ?? '';
@@ -377,6 +380,42 @@ function submitSubmissionProposal() {
                         class="text-xs text-destructive"
                     >
                         {{ submissionForm.errors.division }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <Label
+                        for="company_leader"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        <User class="h-3.5 w-3.5" />
+                        Penanggung Jawab Magang (Opsional)
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <CircleQuestionMark
+                                    class="size-3.5 cursor-help"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Nama orang yang merupakan pimpinan atau orang yang bertanggung jawab memimpin dan mengawasi kegiatan magang kelompok kalian. 
+                                    <br />Tuliskan format lengkap "Gelar Kehormatan/Gelar Akademik/Sapaan Profesional Nama Lengkap Gelar".
+                                    <br />Contoh: Bapak Dedy Kiswanto, S.Kom., M.Kom., MTCRE.
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </Label>
+                    <Input
+                        id="company_leader"
+                        v-model="submissionForm.company_leader"
+                        placeholder="Contoh: Bapak Dedy Kiswanto, S.Kom., M.Kom., MTCRE."
+                        :disabled="!isSubmissionEditable"
+                    />
+                    <span
+                        v-if="submissionForm.errors.company_leader"
+                        class="text-xs text-destructive"
+                    >
+                        {{ submissionForm.errors.company_leader }}
                     </span>
                 </div>
             </div>

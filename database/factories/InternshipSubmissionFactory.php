@@ -23,6 +23,7 @@ class InternshipSubmissionFactory extends Factory
             'company_name' => $this->faker->company(),
             'company_address' => $this->faker->address(),
             'company_contact' => $this->faker->phoneNumber(),
+            'company_leader' => 'Bapak '.$this->faker->name(),
             'division' => $this->faker->jobTitle(),
             'start_date' => now()->addMonth()->format('Y-m-d'),
             'end_date' => now()->addMonths(3)->format('Y-m-d'),

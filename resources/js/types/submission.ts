@@ -21,6 +21,7 @@ export type SubmissionDetail = {
     company_name: string;
     company_address: string;
     company_contact: string;
+    company_leader?: string | null;
     division: string;
     field_of_interest: string;
     start_date: string;

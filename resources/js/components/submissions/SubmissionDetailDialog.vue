@@ -294,6 +294,17 @@ function submitReject() {
                                 <div>
                                     <Label
                                         class="text-[10px] text-muted-foreground"
+                                        >Penanggung Jawab Magang</Label
+                                    >
+                                    <p
+                                        class="mt-0.5 font-medium text-foreground"
+                                    >
+                                        {{ submissionDetail.company_leader || '-' }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label
+                                        class="text-[10px] text-muted-foreground"
                                         >Kontak Hubungan</Label
                                     >
                                     <p
