@@ -398,9 +398,13 @@ function submitSubmissionProposal() {
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>
-                                    Nama orang yang merupakan pimpinan atau orang yang bertanggung jawab memimpin dan mengawasi kegiatan magang kelompok kalian. 
-                                    <br />Tuliskan format lengkap "Gelar Kehormatan/Gelar Akademik/Sapaan Profesional Nama Lengkap Gelar".
-                                    <br />Contoh: Bapak Dedy Kiswanto, S.Kom., M.Kom., MTCRE.
+                                    Nama orang yang merupakan pimpinan atau
+                                    orang yang bertanggung jawab memimpin dan
+                                    mengawasi kegiatan magang kelompok kalian.
+                                    <br />Tuliskan format lengkap "Gelar
+                                    Kehormatan/Gelar Akademik/Sapaan Profesional
+                                    Nama Lengkap Gelar". <br />Contoh: Bapak
+                                    Dedy Kiswanto, S.Kom., M.Kom., MTCRE.
                                 </p>
                             </TooltipContent>
                         </Tooltip>

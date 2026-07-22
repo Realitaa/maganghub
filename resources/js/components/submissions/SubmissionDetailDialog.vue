@@ -299,7 +299,10 @@ function submitReject() {
                                     <p
                                         class="mt-0.5 font-medium text-foreground"
                                     >
-                                        {{ submissionDetail.company_leader || '-' }}
+                                        {{
+                                            submissionDetail.company_leader ||
+                                            '-'
+                                        }}
                                     </p>
                                 </div>
                                 <div>
