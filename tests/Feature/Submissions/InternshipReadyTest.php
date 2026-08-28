@@ -339,4 +339,69 @@ describe('ready to print / siap magang workflow', function () {
         $response->assertHeader('Content-Disposition', 'attachment; filename=surat_permohonan_magang_'.$safeCompanyName.'_'.($submission->group->code ?? $submission->id).'.docx');
     });
 
+    it('allows operators and group members to download company response letter', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $otherStudent = User::factory()->create(['role' => 'student']);
+
+        ['submission' => $submission, 'leader' => $leader, 'member' => $member, 'group' => $group] = makeReadySubmission();
+
+        $submission->update([
+            'status' => 'loa_review',
+            'company_response_path' => 'company_responses/surat_balasan_test.pdf',
+        ]);
+        Storage::put('company_responses/surat_balasan_test.pdf', 'dummy pdf content');
+
+        $safeCompanyName = str_replace([' ', '/', '\\'], '_', $submission->company_name);
+        $expectedFilename = 'surat_balasan_'.$safeCompanyName.'_'.$group->code.'.pdf';
+
+        // Operator can download
+        $this->actingAs($operator)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertSuccessful()
+            ->assertHeader('Content-Disposition', 'attachment; filename='.$expectedFilename);
+
+        // Admin can download
+        $this->actingAs($admin)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertSuccessful()
+            ->assertHeader('Content-Disposition', 'attachment; filename='.$expectedFilename);
+
+        // Leader can download
+        $this->actingAs($leader)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertSuccessful()
+            ->assertHeader('Content-Disposition', 'attachment; filename='.$expectedFilename);
+
+        // Member can download
+        $this->actingAs($member)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertSuccessful()
+            ->assertHeader('Content-Disposition', 'attachment; filename='.$expectedFilename);
+
+        // Other student forbidden
+        $this->actingAs($otherStudent)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertForbidden();
+
+        // Guest redirected to login
+        auth()->logout();
+        $this->get(route('groups.submissions.download-response', $submission->id))
+            ->assertRedirect(route('login'));
+    });
+
+    it('returns 404 when company response file does not exist on disk', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['submission' => $submission] = makeReadySubmission();
+
+        $submission->update([
+            'status' => 'loa_review',
+            'company_response_path' => 'company_responses/non_existent.pdf',
+        ]);
+
+        $this->actingAs($operator)
+            ->get(route('groups.submissions.download-response', $submission->id))
+            ->assertNotFound();
+    });
+
 });

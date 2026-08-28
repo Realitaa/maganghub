@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
+import { downloadResponse } from '@/routes/groups/submissions';
 import { index as readyIndex } from '@/routes/review/ready';
 import type { Submission } from '@/types';
 
@@ -415,7 +416,7 @@ function openDecision(sub: Submission) {
                                 </td>
                                 <td class="p-4">
                                     <a
-                                        :href="`/storage/${sub.company_response_path}`"
+                                        :href="downloadResponse.url({ submission: sub.id })"
                                         target="_blank"
                                         class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
                                     >

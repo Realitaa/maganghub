@@ -6,11 +6,12 @@ import {
     Upload,
     AlertCircle,
     Clock,
+    Download,
 } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { uploadResponse } from '@/routes/groups/submissions';
+import { uploadResponse, downloadResponse } from '@/routes/groups/submissions';
 
 import type { Group } from '@/types';
 
@@ -168,14 +169,24 @@ function handleResponseUpload(event: Event) {
                 <!-- Success if already uploaded -->
                 <div
                     v-if="group.active_submission?.company_response_path"
-                    class="flex items-center gap-2 rounded-lg border border-green-200/50 bg-green-100/50 p-3 text-sm text-green-800 dark:border-green-800/50 dark:bg-green-900/30 dark:text-green-200"
+                    class="flex items-center justify-between gap-2 rounded-lg border border-green-200/50 bg-green-100/50 p-3 text-sm text-green-800 dark:border-green-800/50 dark:bg-green-900/30 dark:text-green-200"
                 >
-                    <CheckCircle2
-                        class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
-                    />
-                    <span
-                        >Surat balasan perusahaan telah berhasil diunggah.</span
+                    <div class="flex items-center gap-2">
+                        <CheckCircle2
+                            class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
+                        />
+                        <span
+                            >Surat balasan perusahaan telah berhasil diunggah.</span
+                        >
+                    </div>
+                    <a
+                        :href="downloadResponse.url({ submission: group.active_submission.id })"
+                        target="_blank"
+                        class="inline-flex items-center gap-1 font-medium text-green-700 hover:underline dark:text-green-300"
                     >
+                        <Download class="h-3.5 w-3.5" />
+                        Unduh
+                    </a>
                 </div>
 
                 <div class="flex flex-wrap gap-3 pt-2">

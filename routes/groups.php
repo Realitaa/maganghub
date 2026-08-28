@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups/submissions', [InternshipSubmissionController::class, 'store'])->name('groups.submissions.store');
     Route::post('groups/submissions/submit', [InternshipSubmissionController::class, 'submit'])->name('groups.submissions.submit');
     Route::get('groups/submissions/{submission}/download-letter', [InternshipSubmissionController::class, 'downloadLetter'])->name('groups.submissions.download-letter');
+    Route::get('groups/submissions/{submission}/download-response', [InternshipSubmissionController::class, 'downloadResponse'])->name('groups.submissions.download-response');
     Route::post('groups/submissions/{submission}/upload-response', [InternshipSubmissionController::class, 'uploadResponse'])->name('groups.submissions.upload-response');
 
     Route::prefix('groups/join-requests')->name('groups.join-requests.')->group(function () {

@@ -80,6 +80,25 @@ class InternshipSubmissionController extends Controller
     }
 
     /**
+     * Download the company response letter.
+     */
+    public function downloadResponse(InternshipSubmission $submission)
+    {
+        Gate::authorize('downloadResponse', $submission);
+
+        if (! $submission->company_response_path || ! Storage::exists($submission->company_response_path)) {
+            abort(404, 'Berkas surat balasan perusahaan tidak ditemukan.');
+        }
+
+        $absolutePath = Storage::path($submission->company_response_path);
+        $extension = pathinfo($submission->company_response_path, PATHINFO_EXTENSION);
+        $safeCompanyName = str_replace([' ', '/', '\\'], '_', $submission->company_name);
+        $filename = 'surat_balasan_'.$safeCompanyName.'_'.($submission->group->code ?? $submission->id).($extension ? '.'.$extension : '');
+
+        return response()->download($absolutePath, $filename);
+    }
+
+    /**
      * Upload the company response letter.
      */
     public function uploadResponse(UploadResponseLetterRequest $request, InternshipSubmission $submission): RedirectResponse

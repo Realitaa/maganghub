@@ -54,4 +54,19 @@ class InternshipSubmissionPolicy
     {
         return $submission->group && $submission->group->leader_id === $user->id;
     }
+
+    /**
+     * Determine whether the user can download the company response.
+     */
+    public function downloadResponse(User $user, InternshipSubmission $submission): bool
+    {
+        if (in_array($user->role, ['operator', 'administrator'])) {
+            return true;
+        }
+
+        return $submission->group && (
+            $submission->group->leader_id === $user->id ||
+            $submission->group->memberships()->where('user_id', $user->id)->exists()
+        );
+    }
 }
