@@ -416,7 +416,11 @@ function openDecision(sub: Submission) {
                                 </td>
                                 <td class="p-4">
                                     <a
-                                        :href="downloadResponse.url({ submission: sub.id })"
+                                        :href="
+                                            downloadResponse.url({
+                                                submission: sub.id,
+                                            })
+                                        "
                                         target="_blank"
                                         class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
                                     >

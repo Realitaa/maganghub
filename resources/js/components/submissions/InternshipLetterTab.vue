@@ -176,11 +176,16 @@ function handleResponseUpload(event: Event) {
                             class="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
                         />
                         <span
-                            >Surat balasan perusahaan telah berhasil diunggah.</span
+                            >Surat balasan perusahaan telah berhasil
+                            diunggah.</span
                         >
                     </div>
                     <a
-                        :href="downloadResponse.url({ submission: group.active_submission.id })"
+                        :href="
+                            downloadResponse.url({
+                                submission: group.active_submission.id,
+                            })
+                        "
                         target="_blank"
                         class="inline-flex items-center gap-1 font-medium text-green-700 hover:underline dark:text-green-300"
                     >
