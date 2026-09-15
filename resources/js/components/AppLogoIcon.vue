@@ -18,6 +18,7 @@ defineProps<{
         <img
             src="/assets/images/Lambang_Universitas_Negeri_Medan.png"
             alt="Logo Universitas Negeri Medan"
+            fetchpriority="high"
         />
     </div>
 </template>

@@ -206,7 +206,9 @@ const faqs = [
 </script>
 
 <template>
-    <Head title="MagangHub - Platform Pengelolaan Magang Mahasiswa" />
+    <Head title="MagangHub - Platform Pengelolaan Magang Mahasiswa">
+        <link rel="preload" href="/assets/images/akreditasi-unimed.webp" as="image" type="image/webp" fetchpriority="high">
+    </Head>
 
     <ScrollArea class="h-screen w-screen">
         <div
@@ -418,6 +420,7 @@ const faqs = [
                                             src="/assets/images/akreditasi-unimed.webp"
                                             alt="Gedung Fakultas Matematika dan Ilmu Pengetahuan Alam"
                                             class="h-auto w-full object-cover object-top transition-transform duration-500 hover:scale-[1.01]"
+                                            fetchpriority="high"
                                         />
                                     </div>
                                 </div>

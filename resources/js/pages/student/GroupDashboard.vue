@@ -163,7 +163,10 @@ const isSubmissionEditable = computed(() => {
 </script>
 
 <template>
-    <Head title="Beranda" />
+    <Head title="Beranda">
+        <link rel="preload" :href="group.banner_url ?? '/assets/images/default-company-background.png'" as="image"
+            type="image/webp" fetchpriority="high">
+    </Head>
 
     <div class="flex-1">
         <!-- ───── IN GROUP STATE ───── -->
@@ -184,6 +187,7 @@ const isSubmissionEditable = computed(() => {
                     :class="{
                         'blur-sm brightness-75': isBannerHovered && isLeader,
                     }"
+                    fetchpriority="high"
                 />
                 <!-- Gradient overlay always present for text readability -->
                 <div
