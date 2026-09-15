@@ -109,7 +109,6 @@ class InternshipSubmissionService
             'company_name.required' => 'Nama perusahaan wajib diisi.',
             'company_address.required' => 'Alamat perusahaan wajib diisi.',
             'company_contact.required' => 'Kontak perusahaan wajib diisi.',
-            'company_leader.required' => 'Penanggung jawab magang wajib diisi.',
             'field_of_interest.required' => 'Bidang yang diminati wajib diisi.',
             'company_type.required' => 'Tipe perusahaan wajib diisi.',
             'company_type.in' => 'Tipe perusahaan harus salah satu dari: Multinasional, Nasional, atau Startup Teknologi.',

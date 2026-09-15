@@ -194,29 +194,6 @@ describe('internship submission', function () {
             ]);
     });
 
-    it('requires company_leader when submitting proposal', function () {
-        ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
-
-        $this->actingAs($leader)
-            ->post(route('groups.submissions.submit'), [
-                'company_name' => 'PT Nusantara',
-                'company_address' => 'Sudirman 12',
-                'company_contact' => '021-12345',
-                'company_leader' => '', // Empty
-                'field_of_interest' => 'Web Dev',
-                'company_type' => 'Startup Teknologi',
-                'working_model' => 'WFA',
-                'division' => 'Web',
-                'start_date' => '2026-07-01',
-                'end_date' => '2026-10-01',
-            ])
-            ->assertRedirect()
-            ->assertInertiaFlash('toast', [
-                'type' => 'error',
-                'message' => 'Penanggung jawab magang wajib diisi.',
-            ]);
-    });
-
     it('requires field_of_interest when submitting proposal', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupForSubmission('forming');
 
