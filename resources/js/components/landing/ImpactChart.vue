@@ -10,9 +10,15 @@ interface CompanyLevel {
     sliced?: boolean;
 }
 
-const props = defineProps<{
-    statistics: CompanyStatistics;
-}>();
+const props = withDefaults(
+    defineProps<{
+        statistics: CompanyStatistics;
+        showHavenotInLegend?: boolean;
+    }>(),
+    {
+        showHavenotInLegend: false,
+    },
+);
 
 // Theme detection
 const isDark = ref(false);
@@ -136,19 +142,23 @@ const chartDetails = computed(() => {
         {
             name: 'Belum Magang',
             y: props.statistics.havenot,
-            color: isDark.value ? '#27272a' : '#e4e4e7', // neutral zinc color
+            color: isDark.value ? '#3f3f46' : '#e4e4e7', // neutral zinc color
             sliced: false, // never slice havenot
-            showInLegend: false, // don't show in legend
+            showInLegend: props.showHavenotInLegend,
             dataLabels: {
-                enabled: false, // don't show percentage labels for havenot
+                enabled: props.showHavenotInLegend,
+                format: '{point.percentage:.1f}%',
             },
             states: {
                 hover: {
-                    enabled: false, // disable hover states completely
-                    halo: null,
+                    enabled: true,
+                    brightness: 0.01,
+                    halo: {
+                        size: 0,
+                    },
                 },
             },
-            cursor: 'default', // no hover pointer reaction
+            cursor: props.showHavenotInLegend ? 'pointer' : 'default',
         },
     ];
 
@@ -184,8 +194,8 @@ const chartOptions = computed(() => {
         },
         tooltip: {
             formatter: function (this: any) {
-                // Completely skip tooltip for havenot
-                if (this.point.name === 'Belum Magang') {
+                // Completely skip tooltip for havenot if not shown in legend
+                if (this.point.name === 'Belum Magang' && !props.showHavenotInLegend) {
                     return false;
                 }
 

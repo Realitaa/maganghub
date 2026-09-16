@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,7 +12,7 @@ class HomeController extends Controller
     /**
      * Display the dashboard for the authenticated user.
      */
-    public function index(): Response
+    public function index(): Response|RedirectResponse
     {
         /** @var User $user */
         $user = auth()->user();
@@ -45,6 +46,6 @@ class HomeController extends Controller
             ]);
         }
 
-        return Inertia::render('Dashboard');
+        return redirect()->route('dashboard');
     }
 }

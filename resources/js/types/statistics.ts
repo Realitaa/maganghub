@@ -4,3 +4,32 @@ export type CompanyStatistics = {
     startup: number;
     havenot: number;
 };
+
+export type PublicStatisticsData = {
+    total_students: number;
+    total_groups: number;
+    total_companies: number;
+    pie_chart: CompanyStatistics;
+    updated_at: string;
+};
+
+export type DashboardSummary = {
+    total_students: number;
+    total_groups: number;
+    pending_submissions: number;
+    total_companies: number;
+};
+
+export type GroupStatusDistributionItem = {
+    status: string;
+    name: string;
+    y: number;
+    color: string;
+};
+
+export type DashboardOperational = {
+    pending_submissions: number;
+    waiting_preparations: number;
+    group_status_distribution: GroupStatusDistributionItem[];
+    total_groups: number;
+};
