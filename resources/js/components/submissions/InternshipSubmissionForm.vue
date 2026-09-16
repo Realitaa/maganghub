@@ -59,15 +59,26 @@ import {
     store as submissionStore,
     submit as submissionSubmit,
 } from '@/routes/groups/submissions';
+import { updateSubmission as adminUpdateSubmissionRoute } from '@/routes/internships/groups';
 import type { Group } from '@/types';
 
-const props = defineProps<{
-    group: Group;
-    isLeader: boolean;
-    isSubmissionEditable: boolean;
-    groupStatusLabel: string;
-    statusDescription: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        group: Group;
+        mode?: 'student' | 'admin';
+        isLeader?: boolean;
+        isSubmissionEditable?: boolean;
+        groupStatusLabel?: string;
+        statusDescription?: string;
+    }>(),
+    {
+        mode: 'student',
+        isLeader: false,
+        isSubmissionEditable: true,
+        groupStatusLabel: '',
+        statusDescription: '',
+    },
+);
 
 const showSubmitConfirm = ref(false);
 const isProcessing = ref(false);
@@ -136,13 +147,22 @@ const endDateValue = computed({
     },
 });
 
-const minStartDate = computed(() => today(getLocalTimeZone()));
+const editable = computed(() => {
+    if (props.mode === 'admin') return true;
+    return props.isSubmissionEditable;
+});
+
+const minStartDate = computed(() => {
+    if (props.mode === 'admin') return undefined;
+    return today(getLocalTimeZone());
+});
 
 const minEndDate = computed(() => {
     if (startDateValue.value) {
         return startDateValue.value.add({ days: 1 });
     }
 
+    if (props.mode === 'admin') return undefined;
     return today(getLocalTimeZone()).add({ days: 1 });
 });
 
@@ -186,43 +206,55 @@ function submitSubmissionProposal() {
         },
     });
 }
+
+function saveAdminSubmission() {
+    isProcessing.value = true;
+    submissionForm.post(adminUpdateSubmissionRoute.url({ group: props.group.code }), {
+        preserveScroll: true,
+        onFinish: () => {
+            isProcessing.value = false;
+        },
+    });
+}
 </script>
 
 <template>
     <div class="space-y-6">
-        <!-- Status Banner -->
-        <Alert
-            v-if="
-                group.status !== 'forming' &&
-                group.status !== 'company_rejected'
-            "
-            variant="primary"
-        >
-            <AlertCircle />
-            <AlertTitle>
-                Status Pengajuan Magang: {{ groupStatusLabel }}
-            </AlertTitle>
-            <AlertDescription>
-                {{ statusDescription }}
-            </AlertDescription>
-        </Alert>
-        <Alert v-else variant="warning">
-            <AlertCircle />
-            <AlertTitle v-if="isLeader">
-                Persiapan Pengajuan Magang
-            </AlertTitle>
-            <AlertTitle v-else> Menunggu Pengajuan Ketua Kelompok </AlertTitle>
-            <AlertDescription v-if="isLeader">
-                Isi data instansi/perusahaan tujuan magang di bawah ini. Setelah
-                diajukan, data dan keanggotaan akan
-                <strong>dikunci</strong>.
-            </AlertDescription>
-            <AlertDescription v-else>
-                Draf data pengajuan sedang diisi oleh ketua kelompok ({{
-                    group.leader.name
-                }}).
-            </AlertDescription>
-        </Alert>
+        <!-- Status Banner (Student Mode) -->
+        <template v-if="mode === 'student'">
+            <Alert
+                v-if="
+                    group.status !== 'forming' &&
+                    group.status !== 'company_rejected'
+                "
+                variant="primary"
+            >
+                <AlertCircle />
+                <AlertTitle>
+                    Status Pengajuan Magang: {{ groupStatusLabel }}
+                </AlertTitle>
+                <AlertDescription>
+                    {{ statusDescription }}
+                </AlertDescription>
+            </Alert>
+            <Alert v-else variant="warning">
+                <AlertCircle />
+                <AlertTitle v-if="isLeader">
+                    Persiapan Pengajuan Magang
+                </AlertTitle>
+                <AlertTitle v-else> Menunggu Pengajuan Ketua Kelompok </AlertTitle>
+                <AlertDescription v-if="isLeader">
+                    Isi data instansi/perusahaan tujuan magang di bawah ini. Setelah
+                    diajukan, data dan keanggotaan akan
+                    <strong>dikunci</strong>.
+                </AlertDescription>
+                <AlertDescription v-else>
+                    Draf data pengajuan sedang diisi oleh ketua kelompok ({{
+                        group.leader.name
+                    }}).
+                </AlertDescription>
+            </Alert>
+        </template>
 
         <!-- Form -->
         <form @submit.prevent class="space-y-6">
@@ -240,7 +272,7 @@ function submitSubmissionProposal() {
                         id="company_name"
                         v-model="submissionForm.company_name"
                         placeholder="Contoh: PT Teknologi Nusantara"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     />
                     <span
                         v-if="submissionForm.errors.company_name"
@@ -263,7 +295,7 @@ function submitSubmissionProposal() {
                         id="field_of_interest"
                         v-model="submissionForm.field_of_interest"
                         placeholder="Contoh: Web Developer, UI/UX"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     />
                     <span
                         v-if="submissionForm.errors.field_of_interest"
@@ -284,7 +316,7 @@ function submitSubmissionProposal() {
                     </Label>
                     <Select
                         v-model="submissionForm.company_type"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     >
                         <SelectTrigger id="company_type" class="w-full">
                             <SelectValue placeholder="Pilih Tipe Perusahaan" />
@@ -340,7 +372,7 @@ function submitSubmissionProposal() {
                     </Label>
                     <Select
                         v-model="submissionForm.working_model"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     >
                         <SelectTrigger id="working_model" class="w-full">
                             <SelectValue placeholder="Pilih Model Pengerjaan" />
@@ -373,7 +405,7 @@ function submitSubmissionProposal() {
                         id="division"
                         v-model="submissionForm.division"
                         placeholder="Contoh: Frontend, Backend"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     />
                     <span
                         v-if="submissionForm.errors.division"
@@ -413,7 +445,7 @@ function submitSubmissionProposal() {
                         id="company_leader"
                         v-model="submissionForm.company_leader"
                         placeholder="Contoh: Bapak Dedy Kiswanto, S.Kom., M.Kom., MTCRE."
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     />
                     <span
                         v-if="submissionForm.errors.company_leader"
@@ -438,7 +470,7 @@ function submitSubmissionProposal() {
                         id="company_contact"
                         v-model="submissionForm.company_contact"
                         placeholder="Contoh: hr@company.com / 021-xxxxxx"
-                        :disabled="!isSubmissionEditable"
+                        :disabled="!editable"
                     />
                     <span
                         v-if="submissionForm.errors.company_contact"
@@ -470,7 +502,7 @@ function submitSubmissionProposal() {
                                             'text-muted-foreground',
                                     )
                                 "
-                                :disabled="!isSubmissionEditable"
+                                :disabled="!editable"
                             >
                                 <Calendar
                                     class="mr-2 h-4 w-4 text-muted-foreground"
@@ -528,7 +560,7 @@ function submitSubmissionProposal() {
                                             'text-muted-foreground',
                                     )
                                 "
-                                :disabled="!isSubmissionEditable"
+                                :disabled="!editable"
                             >
                                 <Calendar
                                     class="mr-2 h-4 w-4 text-muted-foreground"
@@ -580,7 +612,7 @@ function submitSubmissionProposal() {
                     placeholder="Contoh: Jl. Jenderal Sudirman No. 12, Jakarta Selatan"
                     rows="3"
                     class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    :disabled="!isSubmissionEditable"
+                    :disabled="!editable"
                 ></textarea>
                 <span
                     v-if="submissionForm.errors.company_address"
@@ -602,8 +634,9 @@ function submitSubmissionProposal() {
                 :text="`Lihat ${submissionForm.company_address} di Google Maps`"
             />
 
+            <!-- Student Actions -->
             <div
-                v-if="isSubmissionEditable"
+                v-if="mode === 'student' && editable"
                 class="flex justify-end gap-3 border-t border-border pt-4"
             >
                 <Button
@@ -628,6 +661,27 @@ function submitSubmissionProposal() {
                 >
                     <Send class="mr-2 h-4 w-4" />
                     Ajukan Magang
+                </Button>
+            </div>
+
+            <!-- Admin Actions -->
+            <div
+                v-else-if="mode === 'admin'"
+                class="flex justify-end gap-3 border-t border-border pt-4"
+            >
+                <Button
+                    type="button"
+                    @click="saveAdminSubmission"
+                    :disabled="isProcessing"
+                    id="btn-save-admin-submission"
+                    class="cursor-pointer"
+                >
+                    <Spinner
+                        v-if="isProcessing"
+                        class="mr-2 h-4 w-4 animate-spin"
+                    />
+                    <Save v-else class="mr-2 h-4 w-4" />
+                    Simpan Perubahan Informasi Magang
                 </Button>
             </div>
         </form>

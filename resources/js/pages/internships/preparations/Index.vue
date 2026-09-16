@@ -128,7 +128,6 @@ function openDecision(sub: Submission) {
                             <Printer class="h-4 w-4" />
                             <span>Siap Cetak Surat</span>
                             <Badge
-                                variant="secondary"
                                 class="h-5 min-w-5 rounded-full px-1.5 font-mono text-xs"
                             >
                                 {{ readyToPrint.length }}
@@ -142,7 +141,6 @@ function openDecision(sub: Submission) {
                             <Clock class="h-4 w-4" />
                             <span>Menunggu Balasan</span>
                             <Badge
-                                variant="secondary"
                                 class="h-5 min-w-5 rounded-full px-1.5 font-mono text-xs"
                             >
                                 {{ waitingResponse.length }}
@@ -156,7 +154,6 @@ function openDecision(sub: Submission) {
                             <FileSearch class="h-4 w-4" />
                             <span>Review Balasan / LoA</span>
                             <Badge
-                                variant="secondary"
                                 class="h-5 min-w-5 rounded-full px-1.5 font-mono text-xs"
                             >
                                 {{ receivedResponse.length }}

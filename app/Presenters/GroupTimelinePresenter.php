@@ -79,6 +79,17 @@ class GroupTimelinePresenter
 
                 return $message;
 
+            case GroupTimelineType::StatusUpdated:
+                $statusLabel = $timeline->metadata['status_label'] ?? $timeline->metadata['status'] ?? 'Status Baru';
+                $actor = $timeline->metadata['actor'] ?? 'Admin';
+                $reason = $timeline->metadata['reason'] ?? null;
+                $message = "Status kelompok telah diubah menjadi '{$statusLabel}' oleh {$actor}.";
+                if (! empty($reason)) {
+                    $message .= "\n\nAlasan/Catatan:\n{$reason}";
+                }
+
+                return $message;
+
             default:
                 return '';
         }

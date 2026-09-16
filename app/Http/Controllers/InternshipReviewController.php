@@ -7,6 +7,8 @@ use App\Http\Requests\Submissions\RejectSubmissionRequest;
 use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\User;
+use App\Notifications\GroupDisbandedNotification;
+use App\Notifications\GroupStatusUpdatedNotification;
 use App\Notifications\KickedFromGroupNotification;
 use App\Services\GroupTimelineService;
 use App\Services\InternshipReviewService;
@@ -446,5 +448,159 @@ class InternshipReviewController extends Controller
             'type' => 'success',
             'message' => 'Berkas LoA / surat balasan berhasil ditimpa.',
         ])->back()->with('success', 'Berkas LoA / surat balasan berhasil ditimpa.');
+    }
+
+    /**
+     * Update the internship submission details by admin.
+     */
+    public function adminUpdateSubmission(Request $request, InternshipGroup $group): RedirectResponse
+    {
+        Gate::authorize('viewAny', InternshipSubmission::class);
+
+        $validated = $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'company_address' => ['required', 'string'],
+            'company_contact' => ['required', 'string', 'max:255'],
+            'company_leader' => ['nullable', 'string', 'max:255'],
+            'division' => ['nullable', 'string', 'max:255'],
+            'field_of_interest' => ['required', 'string', 'max:255'],
+            'company_type' => ['required', 'string', 'in:Multinasional,Nasional,Startup Teknologi'],
+            'working_model' => ['required', 'string', 'in:WFO,WFA,Hybrid'],
+            'start_date' => ['required', 'date', 'date_format:Y-m-d'],
+            'end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:start_date'],
+        ]);
+
+        $submission = $group->activeSubmission;
+
+        if ($submission) {
+            $submission->update($validated);
+        } else {
+            $submission = $group->submissions()->create(array_merge($validated, [
+                'status' => $group->status === 'forming' ? 'draft' : 'submitted',
+            ]));
+        }
+
+        return Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Informasi kelompok magang berhasil diperbarui.',
+        ])->back()->with('success', 'Informasi kelompok magang berhasil diperbarui.');
+    }
+
+    /**
+     * Update group status by admin (with timeline recording and notification).
+     */
+    public function adminUpdateStatus(Request $request, InternshipGroup $group): RedirectResponse
+    {
+        Gate::authorize('viewAny', InternshipSubmission::class);
+
+        $validStatuses = [
+            'forming',
+            'submitted',
+            'letter_published',
+            'applying',
+            'loa_review',
+            'accepted',
+            'partially_accepted',
+            'rejected',
+            'internship_started',
+            'completed',
+        ];
+
+        $request->validate([
+            'status' => ['required', 'string', 'in:'.implode(',', $validStatuses)],
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $statusLabels = [
+            'forming' => 'Membentuk Kelompok',
+            'submitted' => 'Pengajuan Dikirim',
+            'letter_published' => 'Surat Terbit',
+            'applying' => 'Menunggu Balasan Perusahaan',
+            'loa_review' => 'Review Balasan Perusahaan',
+            'accepted' => 'Diterima',
+            'partially_accepted' => 'Diterima Sebagian',
+            'rejected' => 'Ditolak Perusahaan',
+            'internship_started' => 'Sedang Magang',
+            'completed' => 'Selesai Magang',
+        ];
+
+        $newStatus = $request->string('status')->value();
+        $reason = $request->filled('reason') ? $request->string('reason')->value() : null;
+        $statusLabel = $statusLabels[$newStatus] ?? $newStatus;
+        $actorName = auth()->user()->name;
+
+        $group->update(['status' => $newStatus]);
+
+        // Sync submission status if active submission exists
+        if ($submission = $group->activeSubmission) {
+            if (in_array($newStatus, ['submitted', 'accepted', 'partially_accepted', 'rejected'])) {
+                $submission->update(['status' => $newStatus]);
+            }
+        }
+
+        // Record timeline event
+        $this->timelineService->statusUpdated($group, $newStatus, $statusLabel, $actorName, $reason);
+
+        // Send notification to all group members
+        $groupName = $group->activeSubmission?->company_name ?: ($group->leader?->name ?? 'Kelompok');
+        $memberships = $group->memberships()->with('user')->get();
+        foreach ($memberships as $membership) {
+            if ($membership->user) {
+                $membership->user->notify(new GroupStatusUpdatedNotification(
+                    $groupName,
+                    $newStatus,
+                    $statusLabel,
+                    $actorName,
+                    $reason
+                ));
+            }
+        }
+
+        return Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Status kelompok berhasil diubah menjadi '{$statusLabel}'.",
+        ])->back()->with('success', "Status kelompok berhasil diubah menjadi '{$statusLabel}'.");
+    }
+
+    /**
+     * Disband an internship group by admin (with notifications).
+     */
+    public function adminDisbandGroup(Request $request, InternshipGroup $group): RedirectResponse
+    {
+        Gate::authorize('viewAny', InternshipSubmission::class);
+
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $reason = $request->filled('reason') ? $request->string('reason')->value() : null;
+        $actorName = auth()->user()->name;
+        $groupName = $group->activeSubmission?->company_name ?: ($group->leader?->name ?? 'Kelompok');
+
+        // Collect all users to notify (members and leader)
+        $memberships = $group->memberships()->with('user')->get();
+        $usersToNotify = collect();
+
+        foreach ($memberships as $membership) {
+            if ($membership->user) {
+                $usersToNotify->push($membership->user);
+            }
+        }
+
+        if ($group->leader && ! $usersToNotify->contains('id', $group->leader_id)) {
+            $usersToNotify->push($group->leader);
+        }
+
+        foreach ($usersToNotify as $user) {
+            $user->notify(new GroupDisbandedNotification(
+                $groupName,
+                $actorName,
+                $reason
+            ));
+        }
+
+        $group->delete();
+
+        return to_route('internships.groups.index')->with('success', "Kelompok magang {$groupName} berhasil dibubarkan.");
     }
 }

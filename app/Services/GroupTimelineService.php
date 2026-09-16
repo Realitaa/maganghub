@@ -109,4 +109,21 @@ class GroupTimelineService
             ],
         ]);
     }
+
+    /**
+     * Record group status updated by admin/operator.
+     */
+    public function statusUpdated(InternshipGroup $group, string $newStatus, string $statusLabel, string $actor, ?string $reason = null): GroupTimeline
+    {
+        return GroupTimeline::create([
+            'group_id' => $group->id,
+            'type' => GroupTimelineType::StatusUpdated,
+            'metadata' => [
+                'status' => $newStatus,
+                'status_label' => $statusLabel,
+                'actor' => $actor,
+                'reason' => $reason,
+            ],
+        ]);
+    }
 }

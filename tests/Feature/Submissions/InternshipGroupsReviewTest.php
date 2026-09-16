@@ -5,6 +5,8 @@ use App\Models\GroupTimeline;
 use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\User;
+use App\Notifications\GroupDisbandedNotification;
+use App\Notifications\GroupStatusUpdatedNotification;
 use App\Notifications\KickedFromGroupNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -268,5 +270,180 @@ describe('kelompok magang detail and admin management actions', function () {
         $submission->refresh();
         expect($submission->company_response_path)->not->toBeNull();
         Storage::disk('local')->assertExists($submission->company_response_path);
+    });
+
+    it('prevents kicking the group leader and keeps group integrity', function () {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $leader = User::factory()->create(['role' => 'student']);
+        $member = User::factory()->create(['role' => 'student']);
+
+        $group = InternshipGroup::factory()->create(['leader_id' => $leader->id, 'status' => 'forming']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $member->id]);
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.kick', $group->code), [
+                'user_id' => $leader->id,
+                'reason' => 'Mencoba mengeluarkan ketua.',
+            ])
+            ->assertRedirect();
+
+        // Leader is still in group and remains leader
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $leader->id)->exists())->toBeTrue();
+        expect($group->fresh()->leader_id)->toBe($leader->id);
+        Notification::assertNothingSent();
+    });
+
+    it('validates file upload constraints when replacing letter and response', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $group = makeGroupWithSubmission('accepted', 'PT Maju', '2026-07-01', '2026-09-01');
+
+        // Invalid file format (e.g. .exe)
+        $invalidFile = UploadedFile::fake()->create('malicious.exe', 500, 'application/x-msdownload');
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.replace-letter', $group->code), [
+                'file' => $invalidFile,
+            ])
+            ->assertSessionHasErrors('file');
+
+        // Oversized file (> 10MB)
+        $oversizedFile = UploadedFile::fake()->create('huge.pdf', 15000, 'application/pdf');
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.replace-response', $group->code), [
+                'file' => $oversizedFile,
+            ])
+            ->assertSessionHasErrors('file');
+    });
+
+    it('allows admin to update internship submission data with validation', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $group = makeGroupWithSubmission('submitted', 'PT Lama', '2026-07-01', '2026-09-01');
+
+        // Missing required fields validation
+        $this->actingAs($admin)
+            ->post(route('internships.groups.update-submission', $group->code), [])
+            ->assertSessionHasErrors([
+                'company_name',
+                'company_address',
+                'company_contact',
+                'field_of_interest',
+                'company_type',
+                'working_model',
+                'start_date',
+                'end_date',
+            ]);
+
+        // Valid submission update
+        $this->actingAs($admin)
+            ->post(route('internships.groups.update-submission', $group->code), [
+                'company_name' => 'PT Solusi Terbuka Nusantara',
+                'company_address' => 'Gedung Cyber 2 Tower Lt. 15, Jakarta Selatan',
+                'company_contact' => 'hr@solusiterbuka.id',
+                'company_leader' => 'Bapak Ir. Budi Santoso, M.Kom.',
+                'division' => 'Software Engineering',
+                'field_of_interest' => 'Fullstack Web Development',
+                'company_type' => 'Startup Teknologi',
+                'working_model' => 'Hybrid',
+                'start_date' => '2026-08-01',
+                'end_date' => '2026-11-01',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $submission = $group->fresh()->activeSubmission;
+        expect($submission->company_name)->toBe('PT Solusi Terbuka Nusantara');
+        expect($submission->company_address)->toBe('Gedung Cyber 2 Tower Lt. 15, Jakarta Selatan');
+        expect($submission->company_contact)->toBe('hr@solusiterbuka.id');
+        expect($submission->company_leader)->toBe('Bapak Ir. Budi Santoso, M.Kom.');
+        expect($submission->division)->toBe('Software Engineering');
+        expect($submission->field_of_interest)->toBe('Fullstack Web Development');
+        expect($submission->company_type)->toBe('Startup Teknologi');
+        expect($submission->working_model)->toBe('Hybrid');
+        expect($submission->start_date->format('Y-m-d'))->toBe('2026-08-01');
+        expect($submission->end_date->format('Y-m-d'))->toBe('2026-11-01');
+    });
+
+    it('allows admin to update group status, dispatches notification to members, and records timeline', function () {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $leader = User::factory()->create(['role' => 'student']);
+        $member = User::factory()->create(['role' => 'student']);
+
+        $group = InternshipGroup::factory()->create(['leader_id' => $leader->id, 'status' => 'forming']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $member->id]);
+
+        $submission = InternshipSubmission::factory()->create([
+            'group_id' => $group->id,
+            'company_name' => 'PT Inovasi Digital',
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.update-status', $group->code), [
+                'status' => 'accepted',
+                'reason' => 'Percepatan penerimaan magang dari pihak kampus.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        expect($group->fresh()->status)->toBe('accepted');
+        expect($submission->fresh()->status)->toBe('accepted');
+
+        // Timeline event recorded
+        $timeline = GroupTimeline::where('group_id', $group->id)->where('type', 'STATUS_UPDATED')->first();
+        expect($timeline)->not->toBeNull();
+        expect($timeline->metadata['status'])->toBe('accepted');
+        expect($timeline->metadata['reason'])->toBe('Percepatan penerimaan magang dari pihak kampus.');
+
+        // Notification dispatched to members
+        Notification::assertSentTo($leader, GroupStatusUpdatedNotification::class, function ($n) {
+            return $n->newStatus === 'accepted' && str_contains($n->reason, 'Percepatan penerimaan');
+        });
+        Notification::assertSentTo($member, GroupStatusUpdatedNotification::class, function ($n) {
+            return $n->newStatus === 'accepted';
+        });
+    });
+
+    it('allows admin to disband a group, notifies members, and removes group and related data', function () {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $leader = User::factory()->create(['role' => 'student']);
+        $member = User::factory()->create(['role' => 'student']);
+
+        $group = InternshipGroup::factory()->create(['leader_id' => $leader->id, 'status' => 'submitted']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $member->id]);
+
+        $submission = InternshipSubmission::factory()->create([
+            'group_id' => $group->id,
+            'company_name' => 'PT Bubar Jaya',
+        ]);
+
+        $groupId = $group->id;
+
+        $this->actingAs($admin)
+            ->delete(route('internships.groups.disband', $group->code), [
+                'reason' => 'Kelompok dibubarkan karena mahasiswa mengajukan magang mandiri.',
+            ])
+            ->assertRedirect(route('internships.groups.index'))
+            ->assertSessionHas('success');
+
+        // Notification sent to all members
+        Notification::assertSentTo($leader, GroupDisbandedNotification::class, function ($n) {
+            return str_contains($n->reason, 'magang mandiri');
+        });
+        Notification::assertSentTo($member, GroupDisbandedNotification::class);
+
+        // Group, memberships, and submissions deleted
+        expect(InternshipGroup::find($groupId))->toBeNull();
+        expect(GroupMembership::where('group_id', $groupId)->count())->toBe(0);
+        expect(InternshipSubmission::where('group_id', $groupId)->count())->toBe(0);
     });
 });

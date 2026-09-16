@@ -23,6 +23,9 @@ Route::middleware(['auth', 'verified'])->prefix('internships')->group(function (
     Route::post('groups/{group:code}/change-leader', [InternshipReviewController::class, 'adminChangeLeader'])->name('internships.groups.change-leader');
     Route::post('groups/{group:code}/submissions/replace-letter', [InternshipReviewController::class, 'adminReplaceLetter'])->name('internships.groups.replace-letter');
     Route::post('groups/{group:code}/submissions/replace-response', [InternshipReviewController::class, 'adminReplaceResponse'])->name('internships.groups.replace-response');
+    Route::post('groups/{group:code}/submissions/update', [InternshipReviewController::class, 'adminUpdateSubmission'])->name('internships.groups.update-submission');
+    Route::post('groups/{group:code}/status', [InternshipReviewController::class, 'adminUpdateStatus'])->name('internships.groups.update-status');
+    Route::delete('groups/{group:code}/disband', [InternshipReviewController::class, 'adminDisbandGroup'])->name('internships.groups.disband');
 
     // 4. Kelola Template
     Route::get('templates', [InternshipTemplateController::class, 'index'])->name('internships.templates.index');

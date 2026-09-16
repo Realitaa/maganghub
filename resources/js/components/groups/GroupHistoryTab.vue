@@ -123,6 +123,13 @@ const getTimelineMeta = (type: string) => {
                 cardClass:
                     'border-l-4 border-l-purple-500 border-y-border border-r-border bg-card hover:bg-accent/5',
             };
+        case 'STATUS_UPDATED':
+            return {
+                icon: Sparkles,
+                colorClass: 'bg-indigo-500 text-white dark:bg-indigo-600',
+                cardClass:
+                    'border-l-4 border-l-indigo-500 border-y-border border-r-border bg-card hover:bg-accent/5',
+            };
         default:
             return {
                 icon: Clock,

@@ -18,11 +18,14 @@ import {
     ExternalLink,
     FileText,
     AlertCircle,
+    AlertTriangle,
+    Building2,
 } from '@lucide/vue';
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui';
 import { ref, computed } from 'vue';
 import GroupHistoryTab from '@/components/groups/GroupHistoryTab.vue';
 import GroupStatusDialog from '@/components/groups/GroupStatusDialog.vue';
+import InternshipSubmissionForm from '@/components/submissions/InternshipSubmissionForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +52,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
@@ -70,6 +81,8 @@ import {
     changeLeader as changeLeaderRoute,
     replaceLetter as replaceLetterRoute,
     replaceResponse as replaceResponseRoute,
+    updateStatus as updateStatusRoute,
+    disband as disbandGroupRoute,
 } from '@/routes/internships/groups';
 import { index as usersIndex } from '@/routes/users';
 import type { Group, User } from '@/types';
@@ -97,7 +110,7 @@ const { formatDate, formatDateTime } = useIdTimeFormat();
 
 // ─── Navigation State ─────────────────────────────────────────────────────────
 
-const activeTab = ref<'members' | 'documents' | 'history'>('members');
+const activeTab = ref<'details' | 'documents' | 'history'>('details');
 const showStatusModal = ref(false);
 
 function goBack() {
@@ -333,6 +346,58 @@ function navigateToUserManagement(nim?: string | null) {
     if (!nim) return;
     router.visit(usersIndex.url({ query: { search: nim } }));
 }
+
+// ─── Danger Zone: Admin Change Status ─────────────────────────────────────────
+
+const showAdminStatusDialog = ref(false);
+const adminStatusForm = useForm({
+    status: props.group.status,
+    reason: '',
+});
+
+function openAdminStatusModal() {
+    adminStatusForm.status = props.group.status;
+    adminStatusForm.reason = '';
+    adminStatusForm.clearErrors();
+    showAdminStatusDialog.value = true;
+}
+
+function submitAdminStatus() {
+    adminStatusForm.post(
+        updateStatusRoute.url({ group: props.group.code }),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                showAdminStatusDialog.value = false;
+                adminStatusForm.reset();
+            },
+        },
+    );
+}
+
+// ─── Danger Zone: Admin Disband Group ─────────────────────────────────────────
+
+const showDisbandDialog = ref(false);
+const disbandForm = useForm({
+    reason: '',
+});
+
+function openDisbandModal() {
+    disbandForm.reason = '';
+    disbandForm.clearErrors();
+    showDisbandDialog.value = true;
+}
+
+function submitDisbandGroup() {
+    disbandForm.delete(
+        disbandGroupRoute.url({ group: props.group.code }),
+        {
+            onSuccess: () => {
+                showDisbandDialog.value = false;
+            },
+        },
+    );
+}
 </script>
 
 <template>
@@ -439,13 +504,13 @@ function navigateToUserManagement(nim?: string | null) {
                         <TabsList
                             class="flex h-auto w-max min-w-full gap-0 rounded-none bg-transparent p-0 pb-2.5 md:pb-0"
                         >
-                            <!-- Tab 1: Anggota Kelompok -->
+                            <!-- Tab 1: Detail Kelompok -->
                             <TabsTrigger
-                                value="members"
+                                value="details"
                                 class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
                             >
-                                <Users class="h-4 w-4" />
-                                <span>Anggota Kelompok</span>
+                                <FileText class="h-4 w-4" />
+                                <span>Detail Kelompok</span>
                                 <Badge
                                     class="h-5 min-w-5 rounded-full px-1.5 font-mono text-xs"
                                 >
@@ -476,8 +541,8 @@ function navigateToUserManagement(nim?: string | null) {
             </div>
 
             <div class="p-4 pt-6 md:p-8">
-                <!-- ─── TAB CONTENT 1: ANGGOTA KELOMPOK ─── -->
-                <TabsContent value="members" class="space-y-4">
+                <!-- ─── TAB CONTENT 1: DETAIL KELOMPOK ─── -->
+                <TabsContent value="details" class="space-y-6">
                     <Card class="border border-border/80 shadow-xs">
                         <CardHeader class="pb-3">
                             <CardTitle class="text-base font-semibold text-foreground">
@@ -638,7 +703,13 @@ function navigateToUserManagement(nim?: string | null) {
                                                         />
                                                     </DropdownMenuItem>
 
-                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuSeparator
+                                                        v-if="
+                                                            membership.user
+                                                                ?.id !==
+                                                            group.leader_id
+                                                        "
+                                                    />
 
                                                     <!-- 2. Angkat Menjadi Ketua -->
                                                     <DropdownMenuItem
@@ -660,8 +731,13 @@ function navigateToUserManagement(nim?: string | null) {
                                                         <span>Angkat Jadi Ketua</span>
                                                     </DropdownMenuItem>
 
-                                                    <!-- 3. Tendang Anggota -->
+                                                    <!-- 3. Tendang Anggota (Hanya Anggota Biasa) -->
                                                     <DropdownMenuItem
+                                                        v-if="
+                                                            membership.user
+                                                                ?.id !==
+                                                            group.leader_id
+                                                        "
                                                         class="cursor-pointer text-destructive focus:text-destructive"
                                                         @click="
                                                             openKickModal(
@@ -680,6 +756,72 @@ function navigateToUserManagement(nim?: string | null) {
                                     </TableRow>
                                 </TableBody>
                             </Table>
+                        </CardContent>
+                    </Card>
+
+                    <!-- ─── 2. INFORMASI LENGKAP KELOMPOK MAGANG ─── -->
+                    <Card class="border border-border/80 shadow-xs">
+                        <CardHeader class="pb-3">
+                            <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                                <Building2 class="h-4 w-4 text-primary" />
+                                Informasi Lengkap Kelompok Magang
+                            </CardTitle>
+                            <CardDescription class="text-xs">
+                                Perbarui informasi instansi, divisi, bidang, model kerja, serta periode pelaksanaan magang kelompok ini.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <InternshipSubmissionForm :group="group" mode="admin" />
+                        </CardContent>
+                    </Card>
+
+                    <!-- ─── 3. DANGER ZONE ─── -->
+                    <Card class="border border-border/80 shadow-xs">
+                        <CardHeader class="pb-3">
+                            <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                                <AlertTriangle class="h-4 w-4 text-amber-500" />
+                                Danger Zone
+                            </CardTitle>
+                            <CardDescription class="text-xs">
+                                Tindakan di bawah ini dapat mengubah alur kritis kelompok magang. Harap berhati-hati sebelum melakukan perubahan status atau membubarkan kelompok.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <!-- Ubah Status Kelompok -->
+                            <div class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="space-y-1">
+                                    <h4 class="text-sm font-semibold text-foreground">Ubah Status Kelompok</h4>
+                                    <p class="text-xs text-muted-foreground">
+                                        Paksa perubahan status tahapan magang kelompok ini ke alur lain. Perubahan ini akan mengirim notifikasi ke seluruh anggota kelompok dan mencatat riwayat aktivitas.
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    class="shrink-0 cursor-pointer"
+                                    @click="openAdminStatusModal"
+                                    id="btn-open-change-group-status"
+                                >
+                                    Ubah Status
+                                </Button>
+                            </div>
+
+                            <!-- Bubarkan Kelompok -->
+                            <div class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="space-y-1">
+                                    <h4 class="text-sm font-semibold text-foreground">Bubarkan Kelompok</h4>
+                                    <p class="text-xs text-muted-foreground">
+                                        Membubarkan kelompok ini secara permanen. Seluruh anggota akan menerima notifikasi dan data keanggotaan serta pengajuan akan dihapus.
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="destructive"
+                                    class="shrink-0 cursor-pointer"
+                                    @click="openDisbandModal"
+                                    id="btn-open-disband-group"
+                                >
+                                    Bubarkan Kelompok
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -1021,6 +1163,125 @@ function navigateToUserManagement(nim?: string | null) {
                         Ya, Angkat Menjadi Ketua
                     </Button>
                 </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- ─── Admin Change Status Dialog ─── -->
+        <Dialog v-model:open="showAdminStatusDialog">
+            <DialogContent class="sm:max-w-[480px]">
+                <DialogHeader>
+                    <DialogTitle>Ubah Status Kelompok Magang</DialogTitle>
+                    <DialogDescription>
+                        Pilih status tahapan baru untuk kelompok ini. Seluruh anggota kelompok akan menerima notifikasi atas perubahan ini.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <form @submit.prevent="submitAdminStatus" class="space-y-4 py-2">
+                    <div class="space-y-1.5">
+                        <Label for="admin_select_status">Status Baru</Label>
+                        <Select v-model="adminStatusForm.status">
+                            <SelectTrigger id="admin_select_status" class="w-full">
+                                <SelectValue placeholder="Pilih status baru" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="forming">Membentuk Kelompok</SelectItem>
+                                    <SelectItem value="submitted">Pengajuan Dikirim</SelectItem>
+                                    <SelectItem value="letter_published">Surat Terbit</SelectItem>
+                                    <SelectItem value="applying">Menunggu Balasan Perusahaan</SelectItem>
+                                    <SelectItem value="loa_review">Review Balasan Perusahaan</SelectItem>
+                                    <SelectItem value="accepted">Diterima</SelectItem>
+                                    <SelectItem value="partially_accepted">Diterima Sebagian</SelectItem>
+                                    <SelectItem value="rejected">Ditolak Perusahaan</SelectItem>
+                                    <SelectItem value="internship_started">Sedang Magang</SelectItem>
+                                    <SelectItem value="completed">Selesai Magang</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <span v-if="adminStatusForm.errors.status" class="text-xs text-destructive">
+                            {{ adminStatusForm.errors.status }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <Label for="admin_status_reason">Alasan / Catatan Perubahan (Opsional)</Label>
+                        <Textarea
+                            id="admin_status_reason"
+                            v-model="adminStatusForm.reason"
+                            placeholder="Contoh: Diterima percepatan magang berdasarkan arahan ketua prodi..."
+                            rows="3"
+                        />
+                        <span v-if="adminStatusForm.errors.reason" class="text-xs text-destructive">
+                            {{ adminStatusForm.errors.reason }}
+                        </span>
+                    </div>
+
+                    <DialogFooter class="pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            @click="showAdminStatusDialog = false"
+                            :disabled="adminStatusForm.processing"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            :disabled="adminStatusForm.processing"
+                            id="btn-confirm-admin-status"
+                        >
+                            <Spinner v-if="adminStatusForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                            Simpan Perubahan Status
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+
+        <!-- ─── Admin Disband Group Dialog ─── -->
+        <Dialog v-model:open="showDisbandDialog">
+            <DialogContent class="sm:max-w-[480px]">
+                <DialogHeader>
+                    <DialogTitle class="text-destructive">Bubarkan Kelompok Magang</DialogTitle>
+                    <DialogDescription>
+                        Apakah Anda yakin ingin membubarkan kelompok magang ini? Tindakan ini akan menghapus keanggotaan dan seluruh data pengajuan kelompok secara permanen.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <form @submit.prevent="submitDisbandGroup" class="space-y-4 py-2">
+                    <div class="space-y-1.5">
+                        <Label for="disband_reason">Alasan Pembubaran (Opsional)</Label>
+                        <Textarea
+                            id="disband_reason"
+                            v-model="disbandForm.reason"
+                            placeholder="Contoh: Kelompok dibubarkan atas permintaan anggota kelompok..."
+                            rows="3"
+                        />
+                        <span v-if="disbandForm.errors.reason" class="text-xs text-destructive">
+                            {{ disbandForm.errors.reason }}
+                        </span>
+                    </div>
+
+                    <DialogFooter class="pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            @click="showDisbandDialog = false"
+                            :disabled="disbandForm.processing"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="destructive"
+                            :disabled="disbandForm.processing"
+                            id="btn-confirm-disband-group"
+                        >
+                            <Spinner v-if="disbandForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                            Ya, Bubarkan Kelompok
+                        </Button>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     </div>
