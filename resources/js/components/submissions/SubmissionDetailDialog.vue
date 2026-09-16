@@ -29,12 +29,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import { downloadLetter } from '@/routes/groups/submissions';
-import { markApplying } from '@/routes/review/submissions';
+import { markApplying } from '@/routes/internships/submissions';
 import {
     show as showSubmission,
     approve as approveSubmission,
     reject as rejectSubmission,
-} from '@/routes/review/submissions';
+} from '@/routes/internships/submissions';
 import type { Submission } from '@/types';
 
 interface Props {

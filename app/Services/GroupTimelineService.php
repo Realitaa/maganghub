@@ -79,4 +79,34 @@ class GroupTimelineService
             'metadata' => null,
         ]);
     }
+
+    /**
+     * Record leader changed.
+     */
+    public function leaderChanged(InternshipGroup $group, string $newLeaderName, string $oldLeaderName): GroupTimeline
+    {
+        return GroupTimeline::create([
+            'group_id' => $group->id,
+            'type' => GroupTimelineType::LeaderChanged,
+            'metadata' => [
+                'new_leader_name' => $newLeaderName,
+                'old_leader_name' => $oldLeaderName,
+            ],
+        ]);
+    }
+
+    /**
+     * Record member kicked by admin.
+     */
+    public function memberKicked(InternshipGroup $group, string $memberName, string $reason): GroupTimeline
+    {
+        return GroupTimeline::create([
+            'group_id' => $group->id,
+            'type' => GroupTimelineType::MemberKicked,
+            'metadata' => [
+                'member_name' => $memberName,
+                'reason' => $reason,
+            ],
+        ]);
+    }
 }

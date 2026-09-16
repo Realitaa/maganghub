@@ -23,7 +23,7 @@ import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
 import {
     index as templateIndex,
     store as templateStore,
-} from '@/routes/review/templates';
+} from '@/routes/internships/templates';
 import type { TemplateStatus } from '@/types';
 
 // Define layout breadcrumbs

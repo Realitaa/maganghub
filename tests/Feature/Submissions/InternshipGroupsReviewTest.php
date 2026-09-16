@@ -1,10 +1,15 @@
 <?php
 
 use App\Models\GroupMembership;
+use App\Models\GroupTimeline;
 use App\Models\InternshipGroup;
 use App\Models\InternshipSubmission;
 use App\Models\User;
+use App\Notifications\KickedFromGroupNotification;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function makeGroupWithSubmission(string $status, string $company, string $startDate, string $endDate, ?string $code = null): InternshipGroup
@@ -32,22 +37,22 @@ function makeGroupWithSubmission(string $status, string $company, string $startD
 
 describe('kelompok magang dashboard authorization', function () {
     it('redirects guest to login', function () {
-        $this->get(route('review.groups.index'))->assertRedirect(route('login'));
+        $this->get(route('internships.groups.index'))->assertRedirect(route('login'));
     });
 
     it('prevents students from accessing the dashboard', function () {
         $student = User::factory()->create(['role' => 'student']);
-        $this->actingAs($student)->get(route('review.groups.index'))->assertForbidden();
+        $this->actingAs($student)->get(route('internships.groups.index'))->assertForbidden();
     });
 
     it('allows operators to access the dashboard', function () {
         $operator = User::factory()->create(['role' => 'operator']);
-        $this->actingAs($operator)->get(route('review.groups.index'))->assertOk();
+        $this->actingAs($operator)->get(route('internships.groups.index'))->assertOk();
     });
 
     it('allows administrators to access the dashboard', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
-        $this->actingAs($admin)->get(route('review.groups.index'))->assertOk();
+        $this->actingAs($admin)->get(route('internships.groups.index'))->assertOk();
     });
 });
 
@@ -60,7 +65,7 @@ describe('kelompok magang dashboard features', function () {
         Carbon::setTestNow();
     });
 
-    it('displays groups with correct computed status and sorting order', function () {
+    it('displays all groups with correct computed status and sorting order', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
 
         // Group 1: Selesai Magang (startDate & endDate in past)
@@ -73,10 +78,10 @@ describe('kelompok magang dashboard features', function () {
         $groupMelaksanakan = makeGroupWithSubmission('internship_started', 'Company Present', '2026-06-01', '2026-08-01', 'G-PRES');
 
         $this->actingAs($admin)
-            ->get(route('review.groups.index'))
+            ->get(route('internships.groups.index'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 3)
                 // Sorting order: Segera Magang (1), Melaksanakan Magang (2), Selesai Magang (3)
                 ->where('groups.0.id', $groupSegera->id)
@@ -96,20 +101,20 @@ describe('kelompok magang dashboard features', function () {
 
         // Search by company
         $this->actingAs($admin)
-            ->get(route('review.groups.index', ['search' => 'UniqueCompanyA']))
+            ->get(route('internships.groups.index', ['search' => 'UniqueCompanyA']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 1)
                 ->where('groups.0.id', $group1->id)
             );
 
         // Search by group code
         $this->actingAs($admin)
-            ->get(route('review.groups.index', ['search' => 'G-CODEB']))
+            ->get(route('internships.groups.index', ['search' => 'G-CODEB']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 1)
                 ->where('groups.0.id', $group2->id)
             );
@@ -117,10 +122,10 @@ describe('kelompok magang dashboard features', function () {
         // Search by leader name
         $leaderName = $group1->leader->name;
         $this->actingAs($admin)
-            ->get(route('review.groups.index', ['search' => $leaderName]))
+            ->get(route('internships.groups.index', ['search' => $leaderName]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 1)
                 ->where('groups.0.id', $group1->id)
             );
@@ -134,22 +139,134 @@ describe('kelompok magang dashboard features', function () {
 
         // Filter by 'segera_magang'
         $this->actingAs($admin)
-            ->get(route('review.groups.index', ['status' => 'segera_magang']))
+            ->get(route('internships.groups.index', ['status' => 'segera_magang']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 1)
                 ->where('groups.0.id', $groupSegera->id)
             );
 
         // Filter by 'melaksanakan_magang'
         $this->actingAs($admin)
-            ->get(route('review.groups.index', ['status' => 'melaksanakan_magang']))
+            ->get(route('internships.groups.index', ['status' => 'melaksanakan_magang']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/groups/Index')
+                ->component('internships/groups/Index')
                 ->has('groups', 1)
                 ->where('groups.0.id', $groupMelaksanakan->id)
             );
+    });
+});
+
+describe('kelompok magang detail and admin management actions', function () {
+    beforeEach(function () {
+        Storage::fake();
+    });
+
+    it('renders detail page for admin by code and by id', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $group = makeGroupWithSubmission('accepted', 'PT Inovasi', '2026-07-01', '2026-09-01', 'G-DETAIL');
+
+        // Access via code
+        $this->actingAs($admin)
+            ->get(route('internships.groups.show', $group->code))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('internships/groups/Show')
+                ->where('group.id', $group->id)
+                ->where('group.code', $group->code)
+            );
+
+        // Access via numeric id
+        $this->actingAs($admin)
+            ->get('/internships/groups/' . $group->id)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('internships/groups/Show')
+                ->where('group.id', $group->id)
+                ->where('group.code', $group->code)
+            );
+    });
+
+    it('allows admin to kick a member with reason and notifies user and group timeline', function () {
+        Notification::fake();
+
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $leader = User::factory()->create(['role' => 'student']);
+        $member = User::factory()->create(['role' => 'student']);
+
+        $group = InternshipGroup::factory()->create(['leader_id' => $leader->id, 'status' => 'forming']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $member->id]);
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.kick', $group->code), [
+                'user_id' => $member->id,
+                'reason' => 'Mengundurkan diri karena magang mandiri.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        expect(GroupMembership::where('group_id', $group->id)->where('user_id', $member->id)->exists())->toBeFalse();
+
+        // Check notification to kicked user
+        Notification::assertSentTo($member, KickedFromGroupNotification::class, function ($n) {
+            return str_contains($n->reason, 'magang mandiri');
+        });
+
+        // Check timeline event
+        expect(GroupTimeline::where('group_id', $group->id)->where('type', 'MEMBER_KICKED')->exists())->toBeTrue();
+    });
+
+    it('allows admin to change group leader and records timeline event', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $leader = User::factory()->create(['role' => 'student']);
+        $member = User::factory()->create(['role' => 'student']);
+
+        $group = InternshipGroup::factory()->create(['leader_id' => $leader->id, 'status' => 'forming']);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $leader->id]);
+        GroupMembership::factory()->create(['group_id' => $group->id, 'user_id' => $member->id]);
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.change-leader', $group->code), [
+                'new_leader_id' => $member->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        expect($group->fresh()->leader_id)->toBe($member->id);
+        expect(GroupTimeline::where('group_id', $group->id)->where('type', 'LEADER_CHANGED')->exists())->toBeTrue();
+    });
+
+    it('allows admin to replace application letter and response file', function () {
+        $admin = User::factory()->create(['role' => 'administrator']);
+        $group = makeGroupWithSubmission('accepted', 'PT Maju', '2026-07-01', '2026-09-01');
+
+        $letterFile = UploadedFile::fake()->create('surat_permohonan.pdf', 500, 'application/pdf');
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.replace-letter', $group->code), [
+                'file' => $letterFile,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $submission = $group->activeSubmission()->first();
+        expect($submission->letter_path)->not->toBeNull();
+        Storage::disk('local')->assertExists($submission->letter_path);
+
+        $responseFile = UploadedFile::fake()->create('surat_balasan.pdf', 400, 'application/pdf');
+
+        $this->actingAs($admin)
+            ->post(route('internships.groups.replace-response', $group->code), [
+                'file' => $responseFile,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $submission->refresh();
+        expect($submission->company_response_path)->not->toBeNull();
+        Storage::disk('local')->assertExists($submission->company_response_path);
     });
 });

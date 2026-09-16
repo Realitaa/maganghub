@@ -110,4 +110,19 @@ class InternshipGroup extends Model
     {
         return $this->hasMany(GroupTimeline::class, 'group_id');
     }
+
+    /**
+     * Retrieve the model for a bound value (supports resolving by code or id).
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if ($field) {
+            return $this->where($field, $value)->first()
+                ?? (is_numeric($value) ? $this->where('id', $value)->first() : null);
+        }
+
+        return is_numeric($value)
+            ? $this->where('id', $value)->first()
+            : $this->where('code', $value)->first();
+    }
 }

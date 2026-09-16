@@ -63,6 +63,22 @@ class GroupTimelinePresenter
 
                 return $message;
 
+            case GroupTimelineType::LeaderChanged:
+                $newLeader = $timeline->metadata['new_leader_name'] ?? 'Ketua Baru';
+                $oldLeader = $timeline->metadata['old_leader_name'] ?? 'Ketua Sebelumnya';
+
+                return "Perubahan Ketua Kelompok: {$newLeader} telah diangkat sebagai ketua kelompok baru menggantikan {$oldLeader}.";
+
+            case GroupTimelineType::MemberKicked:
+                $memberName = $timeline->metadata['member_name'] ?? 'Anggota';
+                $reason = $timeline->metadata['reason'] ?? null;
+                $message = "{$memberName} telah dikeluarkan dari kelompok oleh admin.";
+                if (! empty($reason)) {
+                    $message .= "\n\nAlasan:\n{$reason}";
+                }
+
+                return $message;
+
             default:
                 return '';
         }

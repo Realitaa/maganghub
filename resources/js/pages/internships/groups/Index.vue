@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Search, Users, Building2, Calendar, Briefcase } from '@lucide/vue';
+import { Search, Briefcase, Building2, Calendar, ArrowRight } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -26,21 +27,21 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { index as groupsIndex } from '@/routes/review/groups';
+import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
+import { index as groupsIndex, show as groupShow } from '@/routes/internships/groups';
+import type { Group } from '@/types';
 
 // Define layout breadcrumbs
 defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Kelompok Magang',
+                title: 'Manajemen Magang',
                 href: groupsIndex.url(),
             },
         ],
     },
 });
-
-import type { Group } from '@/types';
 
 // Props
 const props = defineProps<{
@@ -51,9 +52,11 @@ const props = defineProps<{
     };
 }>();
 
+const { formatDate } = useIdTimeFormat();
+
 // State
-const searchQuery = ref(props.filters.search || '');
-const selectedStatus = ref(props.filters.status || 'all');
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref(props.filters?.status || 'all');
 
 // Debounce helper
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
@@ -71,10 +74,7 @@ const applyFilters = () => {
         groupsIndex.url(),
         {
             search: searchQuery.value || undefined,
-            status:
-                selectedStatus.value === 'all'
-                    ? undefined
-                    : selectedStatus.value,
+            status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
         },
         {
             preserveState: true,
@@ -94,41 +94,54 @@ watch(selectedStatus, () => {
     applyFilters();
 });
 
-// Format date helper
-function formatDate(dateStr?: string) {
-    if (!dateStr) {
-        return '-';
-    }
-
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
+// Navigate to detail preserving current filters in URL
+function goToDetail(group: Group) {
+    const params = new URLSearchParams();
+    if (searchQuery.value) params.set('search', searchQuery.value);
+    if (selectedStatus.value && selectedStatus.value !== 'all') params.set('status', selectedStatus.value);
+    const qs = params.toString();
+    const url = groupShow.url({ group: group.code }) + (qs ? `?${qs}` : '');
+    router.visit(url);
 }
 
 // Status helpers
-function getStatusLabel(status?: string) {
-    switch (status) {
-        case 'segera_magang':
-            return 'Segera Magang';
-        case 'melaksanakan_magang':
-            return 'Melaksanakan Magang';
-        case 'selesai_magang':
-            return 'Selesai Magang';
-        default:
-            return '-';
-    }
+function getStatusLabel(status?: string): string {
+    const labels: Record<string, string> = {
+        forming: 'Pembentukan',
+        submitted: 'Diajukan',
+        letter_published: 'Surat Terbit',
+        applying: 'Mengajukan',
+        loa_review: 'Review LoA',
+        accepted: 'Diterima',
+        partially_accepted: 'Diterima Sebagian',
+        rejected: 'Ditolak',
+        internship_started: 'Sedang Magang',
+        completed: 'Selesai Magang',
+        segera_magang: 'Segera Magang',
+        melaksanakan_magang: 'Melaksanakan Magang',
+        selesai_magang: 'Selesai Magang',
+    };
+
+    return labels[status ?? ''] ?? status ?? '-';
 }
 
-function getStatusClass(status?: string) {
+function getStatusClass(status?: string): string {
     switch (status) {
-        case 'segera_magang':
+        case 'forming':
             return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200/50';
+        case 'submitted':
+        case 'applying':
+        case 'loa_review':
+            return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200/50';
+        case 'letter_published':
+        case 'accepted':
+        case 'internship_started':
+        case 'completed':
         case 'melaksanakan_magang':
-            return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200/50';
         case 'selesai_magang':
-            return 'bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200/50';
+            return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200/50';
+        case 'rejected':
+            return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200/50';
         default:
             return 'bg-muted text-muted-foreground border-border';
     }
@@ -136,7 +149,7 @@ function getStatusClass(status?: string) {
 </script>
 
 <template>
-    <Head title="Kelompok Magang" />
+    <Head title="Manajemen Magang" />
 
     <div class="flex-1 space-y-8 p-4 pt-6 md:p-8">
         <div>
@@ -144,11 +157,10 @@ function getStatusClass(status?: string) {
                 class="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground"
             >
                 <Briefcase class="h-6 w-6 text-primary" />
-                Kelompok Magang
+                Manajemen Magang
             </h1>
             <p class="mt-1 text-sm text-muted-foreground">
-                Daftar seluruh kelompok magang yang telah menyelesaikan tahap
-                administrasi, dikelompokkan berdasarkan waktu pelaksanaan.
+                Daftar seluruh kelompok magang dari berbagai tahap dan status pelaksanaan.
             </p>
         </div>
 
@@ -161,13 +173,10 @@ function getStatusClass(status?: string) {
                         <CardTitle
                             class="flex items-center gap-2 text-base font-semibold text-foreground"
                         >
-                            <Users class="h-4 w-4 text-primary" />
-                            Status Pelaksanaan Magang
+                            Daftar Kelompok Magang
                         </CardTitle>
                         <CardDescription class="text-xs">
-                            Pantau kelompok yang akan segera melaksanakan,
-                            sedang melaksanakan, atau telah menyelesaikan
-                            program magang.
+                            Pantau dan kelola seluruh kelompok magang mahasiswa.
                         </CardDescription>
                     </div>
                     <div
@@ -180,29 +189,28 @@ function getStatusClass(status?: string) {
                             />
                             <Input
                                 v-model="searchQuery"
-                                placeholder="Cari kode, ketua, perusahaan..."
-                                class="h-9 pl-9"
+                                placeholder="Cari ketua, NIM, perusahaan..."
+                                class="h-9 pl-9 text-xs"
                             />
                         </div>
                         <!-- Status Filter -->
                         <div class="w-full sm:w-48">
                             <Select v-model="selectedStatus">
-                                <SelectTrigger class="h-9">
-                                    <SelectValue placeholder="Pilih Status" />
+                                <SelectTrigger class="h-9 text-xs">
+                                    <SelectValue placeholder="Semua Status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all"
-                                        >Semua Status</SelectItem
-                                    >
-                                    <SelectItem value="segera_magang"
-                                        >Segera Magang</SelectItem
-                                    >
-                                    <SelectItem value="melaksanakan_magang"
-                                        >Melaksanakan Magang</SelectItem
-                                    >
-                                    <SelectItem value="selesai_magang"
-                                        >Selesai Magang</SelectItem
-                                    >
+                                    <SelectItem value="all">Semua Status</SelectItem>
+                                    <SelectItem value="forming">Pembentukan</SelectItem>
+                                    <SelectItem value="submitted">Diajukan</SelectItem>
+                                    <SelectItem value="letter_published">Surat Terbit</SelectItem>
+                                    <SelectItem value="applying">Mengajukan</SelectItem>
+                                    <SelectItem value="loa_review">Review LoA</SelectItem>
+                                    <SelectItem value="accepted">Diterima</SelectItem>
+                                    <SelectItem value="partially_accepted">Diterima Sebagian</SelectItem>
+                                    <SelectItem value="rejected">Ditolak</SelectItem>
+                                    <SelectItem value="internship_started">Sedang Magang</SelectItem>
+                                    <SelectItem value="completed">Selesai Magang</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -214,7 +222,7 @@ function getStatusClass(status?: string) {
                     v-if="groups.length === 0"
                     class="flex flex-col items-center justify-center p-12 text-center text-muted-foreground"
                 >
-                    <Users class="mb-3 h-10 w-10 text-primary opacity-30" />
+                    <Briefcase class="mb-3 h-10 w-10 text-primary opacity-30" />
                     <h3 class="text-sm font-semibold text-foreground">
                         Tidak ada kelompok ditemukan
                     </h3>
@@ -227,29 +235,30 @@ function getStatusClass(status?: string) {
                         <TableHeader>
                             <TableRow class="bg-muted/40 hover:bg-muted/40">
                                 <TableHead
-                                    class="w-[120px] font-semibold text-muted-foreground"
-                                    >Kode Kelompok</TableHead
+                                    class="font-semibold text-muted-foreground"
                                 >
+                                    Ketua Kelompok
+                                </TableHead>
                                 <TableHead
                                     class="font-semibold text-muted-foreground"
-                                    >Ketua</TableHead
                                 >
+                                    Instansi / Perusahaan
+                                </TableHead>
                                 <TableHead
                                     class="font-semibold text-muted-foreground"
-                                    >Anggota Kelompok</TableHead
                                 >
+                                    Periode Pelaksanaan
+                                </TableHead>
                                 <TableHead
-                                    class="font-semibold text-muted-foreground"
-                                    >Instansi / Perusahaan</TableHead
+                                    class="text-center font-semibold text-muted-foreground"
                                 >
+                                    Status Magang
+                                </TableHead>
                                 <TableHead
-                                    class="font-semibold text-muted-foreground"
-                                    >Periode Pelaksanaan</TableHead
+                                    class="w-[140px] text-right font-semibold text-muted-foreground"
                                 >
-                                <TableHead
-                                    class="w-[180px] text-center font-semibold text-muted-foreground"
-                                    >Status Magang</TableHead
-                                >
+                                    Aksi
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -258,11 +267,6 @@ function getStatusClass(status?: string) {
                                 :key="group.id"
                                 class="transition-colors hover:bg-muted/10"
                             >
-                                <TableCell
-                                    class="py-4 font-mono text-xs font-bold text-foreground"
-                                >
-                                    {{ group.code }}
-                                </TableCell>
                                 <TableCell class="py-4">
                                     <div
                                         class="text-xs font-semibold text-foreground"
@@ -275,42 +279,10 @@ function getStatusClass(status?: string) {
                                         {{ group.leader?.nim || '-' }}
                                     </div>
                                 </TableCell>
-                                <TableCell class="py-4">
-                                    <div class="space-y-1">
-                                        <div
-                                            v-for="membership in group.memberships"
-                                            :key="membership.id"
-                                            class="flex items-center gap-1.5 text-[11px] text-foreground"
-                                        >
-                                            <span
-                                                class="h-1.5 w-1.5 rounded-full bg-muted-foreground/50"
-                                            ></span>
-                                            <span>{{
-                                                membership.user?.name || '-'
-                                            }}</span>
-                                            <span
-                                                class="text-[9px] text-muted-foreground"
-                                                >({{
-                                                    membership.user?.nim || '-'
-                                                }})</span
-                                            >
-                                            <Badge
-                                                v-if="
-                                                    membership.user?.id ===
-                                                    group.leader_id
-                                                "
-                                                variant="outline"
-                                                class="ml-1 border-muted-foreground/30 px-1 py-0 text-[8px] font-normal text-muted-foreground"
-                                            >
-                                                Ketua
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </TableCell>
                                 <TableCell
                                     class="py-4 font-medium text-foreground"
                                 >
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-1.5 text-xs">
                                         <Building2
                                             class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
@@ -330,7 +302,7 @@ function getStatusClass(status?: string) {
                                         <Calendar
                                             class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
-                                        <span>
+                                        <span v-if="group.active_submission?.start_date || group.activeSubmission?.start_date">
                                             {{
                                                 formatDate(
                                                     group.active_submission
@@ -341,8 +313,7 @@ function getStatusClass(status?: string) {
                                             }}
                                             <span
                                                 class="mx-1 text-muted-foreground/50"
-                                                >s/d</span
-                                            >
+                                            >s/d</span>
                                             {{
                                                 formatDate(
                                                     group.active_submission
@@ -352,23 +323,36 @@ function getStatusClass(status?: string) {
                                                 )
                                             }}
                                         </span>
+                                        <span v-else>-</span>
                                     </div>
                                 </TableCell>
                                 <TableCell class="py-4 text-center">
                                     <Badge
                                         :class="
                                             getStatusClass(
-                                                group.computed_status,
+                                                group.status,
                                             )
                                         "
                                         class="border px-2.5 py-1 text-[10px] font-medium shadow-2xs transition-all"
                                     >
                                         {{
                                             getStatusLabel(
-                                                group.computed_status,
+                                                group.status,
                                             )
                                         }}
                                     </Badge>
+                                </TableCell>
+                                <TableCell class="py-4 text-right">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        class="h-8 cursor-pointer gap-1.5 font-medium text-xs"
+                                        @click="goToDetail(group)"
+                                        :id="`btn-detail-group-${group.id}`"
+                                    >
+                                        Detail Kelompok
+                                        <ArrowRight class="h-3 w-3" />
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         </TableBody>

@@ -21,4 +21,4 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
 require __DIR__.'/settings.php';
 require __DIR__.'/users.php';
 require __DIR__.'/groups.php';
-require __DIR__.'/internship-submissions.php';
+require __DIR__.'/internships.php';

@@ -14,7 +14,9 @@ class KickedFromGroupNotification extends Notification
      */
     public function __construct(
         public string $groupName,
-        public string $leaderName
+        public string $leaderName,
+        public ?string $reason = null,
+        public string $actor = 'ketua kelompok'
     ) {}
 
     /**
@@ -34,10 +36,16 @@ class KickedFromGroupNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $message = "Anda telah dikeluarkan dari Kelompok Magang {$this->groupName} oleh {$this->actor} {$this->leaderName}.";
+        if ($this->reason) {
+            $message .= " Alasan: {$this->reason}";
+        }
+
         return [
             'group_name' => $this->groupName,
             'leader_name' => $this->leaderName,
-            'message' => "Anda telah dikeluarkan dari Kelompok Magang {$this->groupName} oleh ketua kelompok {$this->leaderName}.",
+            'reason' => $this->reason,
+            'message' => $message,
         ];
     }
 }

@@ -13,21 +13,20 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
-import { index as submissionsIndex } from '@/routes/review/submissions';
+import { index as submissionsIndex } from '@/routes/internships/submissions';
+import type { SubmissionListItem } from '@/types';
 
 // Define layout breadcrumbs
 defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Review Pengajuan',
+                title: 'Pengajuan Magang',
                 href: submissionsIndex.url(),
             },
         ],
     },
 });
-
-import type { SubmissionListItem } from '@/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -50,7 +49,7 @@ function openDetail(id: number) {
 </script>
 
 <template>
-    <Head title="Review Pengajuan Magang" />
+    <Head title="Pengajuan Magang" />
 
     <div class="flex-1 space-y-6 p-4 pt-6 md:p-8">
         <div
@@ -58,7 +57,7 @@ function openDetail(id: number) {
         >
             <div>
                 <h1 class="text-2xl font-bold tracking-tight">
-                    Review Pengajuan Magang
+                    Pengajuan Magang
                 </h1>
                 <p class="text-sm text-muted-foreground">
                     Tinjau dan proses permohonan izin magang dari kelompok
@@ -121,8 +120,17 @@ function openDetail(id: number) {
                                 :key="sub.id"
                                 class="transition-colors hover:bg-muted/10"
                             >
-                                <td class="p-4 font-medium text-foreground">
-                                    {{ sub.leader_name }}
+                                <td class="p-4">
+                                    <div
+                                        class="text-xs font-semibold text-foreground"
+                                    >
+                                        {{ sub.leader_name }}
+                                    </div>
+                                    <div
+                                        class="text-[10px] text-muted-foreground"
+                                    >
+                                        {{ sub.leader_nim || '-' }}
+                                    </div>
                                 </td>
                                 <td class="p-4">
                                     {{ sub.company_name }}

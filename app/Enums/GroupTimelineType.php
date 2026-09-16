@@ -12,4 +12,6 @@ enum GroupTimelineType: string
     case AdministrationCompleted = 'ADMINISTRATION_COMPLETED';
     case CompanyRejected = 'COMPANY_REJECTED';
     case CompanyPartiallyAccepted = 'COMPANY_PARTIALLY_ACCEPTED';
+    case LeaderChanged = 'LEADER_CHANGED';
+    case MemberKicked = 'MEMBER_KICKED';
 }

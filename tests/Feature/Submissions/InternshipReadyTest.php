@@ -67,32 +67,32 @@ describe('ready for internship authorization', function () {
     it('redirects guest to login for all ready routes', function () {
         ['submission' => $submission] = makeReadySubmission();
 
-        $this->get(route('review.ready.index'))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.mark-applying', $submission->id))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.company-decision', $submission->id))->assertRedirect(route('login'));
+        $this->get(route('internships.preparations.index'))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.mark-applying', $submission->id))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.company-decision', $submission->id))->assertRedirect(route('login'));
     });
 
     it('prevents students from accessing ready routes', function () {
         $student = User::factory()->create(['role' => 'student']);
         ['submission' => $submission] = makeReadySubmission();
 
-        $this->actingAs($student)->get(route('review.ready.index'))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.mark-applying', $submission->id))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.company-decision', $submission->id))->assertForbidden();
+        $this->actingAs($student)->get(route('internships.preparations.index'))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.mark-applying', $submission->id))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.company-decision', $submission->id))->assertForbidden();
     });
 
     it('allows operators to access ready routes', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeReadySubmission();
 
-        $this->actingAs($operator)->get(route('review.ready.index'))->assertOk();
+        $this->actingAs($operator)->get(route('internships.preparations.index'))->assertOk();
     });
 
     it('allows administrators to access ready routes', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
         ['submission' => $submission] = makeReadySubmission();
 
-        $this->actingAs($admin)->get(route('review.ready.index'))->assertOk();
+        $this->actingAs($admin)->get(route('internships.preparations.index'))->assertOk();
     });
 
 });
@@ -115,10 +115,10 @@ describe('ready to print / siap magang workflow', function () {
         $sub3->group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
-            ->get(route('review.ready.index'))
+            ->get(route('internships.preparations.index'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/Ready')
+                ->component('internships/preparations/Index')
                 ->has('readyToPrint', 1)
                 ->where('readyToPrint.0.id', $sub1->id)
                 ->has('waitingResponse', 1)
@@ -136,7 +136,7 @@ describe('ready to print / siap magang workflow', function () {
         $group->update(['status' => 'letter_published']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.mark-applying', $submission->id))
+            ->post(route('internships.submissions.mark-applying', $submission->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'success',
@@ -152,7 +152,7 @@ describe('ready to print / siap magang workflow', function () {
         ['submission' => $submission] = makeReadySubmission();
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.mark-applying', $submission->id))
+            ->post(route('internships.submissions.mark-applying', $submission->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',
@@ -168,7 +168,7 @@ describe('ready to print / siap magang workflow', function () {
         $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.company-decision', $submission->id), [
+            ->post(route('internships.submissions.company-decision', $submission->id), [
                 'decision' => 'all_accepted',
             ])
             ->assertRedirect()
@@ -202,7 +202,7 @@ describe('ready to print / siap magang workflow', function () {
         $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.company-decision', $submission->id), [
+            ->post(route('internships.submissions.company-decision', $submission->id), [
                 'decision' => 'all_rejected',
             ])
             ->assertRedirect()
@@ -236,7 +236,7 @@ describe('ready to print / siap magang workflow', function () {
         $group->update(['status' => 'loa_review']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.company-decision', $submission->id), [
+            ->post(route('internships.submissions.company-decision', $submission->id), [
                 'decision' => 'partially_accepted',
                 'member_decisions' => [
                     ['user_id' => $leader->id, 'status' => 'accepted'],
@@ -277,7 +277,7 @@ describe('ready to print / siap magang workflow', function () {
 
         // Attempt without specifying new leader - should fail validation
         $this->actingAs($operator)
-            ->post(route('review.submissions.company-decision', $submission->id), [
+            ->post(route('internships.submissions.company-decision', $submission->id), [
                 'decision' => 'partially_accepted',
                 'member_decisions' => [
                     ['user_id' => $leader->id, 'status' => 'rejected', 'rejection_note' => 'Posisi tidak sesuai'],
@@ -292,7 +292,7 @@ describe('ready to print / siap magang workflow', function () {
 
         // Submit with valid new leader selection
         $this->actingAs($operator)
-            ->post(route('review.submissions.company-decision', $submission->id), [
+            ->post(route('internships.submissions.company-decision', $submission->id), [
                 'decision' => 'partially_accepted',
                 'member_decisions' => [
                     ['user_id' => $leader->id, 'status' => 'rejected', 'rejection_note' => 'Posisi tidak sesuai'],

@@ -11,6 +11,7 @@ export type SubmissionListItem = {
     id: number;
     company_name: string;
     leader_name: string;
+    leader_nim?: string | null;
     members_count: number;
     submitted_at: string;
     status: string;

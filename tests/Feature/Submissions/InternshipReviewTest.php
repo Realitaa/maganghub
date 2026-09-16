@@ -65,44 +65,44 @@ describe('review submission authorization', function () {
     it('redirects guest to login for all review routes', function () {
         ['submission' => $submission] = makeSubmittedSubmission();
 
-        $this->get(route('review.submissions.index'))->assertRedirect(route('login'));
-        $this->get(route('review.submissions.show', $submission->id))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.approve', $submission->id))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.reject', $submission->id))->assertRedirect(route('login'));
-        $this->get(route('review.ready.index'))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.mark-applying', $submission->id))->assertRedirect(route('login'));
-        $this->post(route('review.submissions.company-decision', $submission->id))->assertRedirect(route('login'));
+        $this->get(route('internships.submissions.index'))->assertRedirect(route('login'));
+        $this->get(route('internships.submissions.show', $submission->id))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.approve', $submission->id))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.reject', $submission->id))->assertRedirect(route('login'));
+        $this->get(route('internships.preparations.index'))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.mark-applying', $submission->id))->assertRedirect(route('login'));
+        $this->post(route('internships.submissions.company-decision', $submission->id))->assertRedirect(route('login'));
     });
 
     it('prevents students from accessing review routes', function () {
         $student = User::factory()->create(['role' => 'student']);
         ['submission' => $submission] = makeSubmittedSubmission();
 
-        $this->actingAs($student)->get(route('review.submissions.index'))->assertForbidden();
-        $this->actingAs($student)->get(route('review.submissions.show', $submission->id))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.approve', $submission->id))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.reject', $submission->id))->assertForbidden();
-        $this->actingAs($student)->get(route('review.ready.index'))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.mark-applying', $submission->id))->assertForbidden();
-        $this->actingAs($student)->post(route('review.submissions.company-decision', $submission->id))->assertForbidden();
+        $this->actingAs($student)->get(route('internships.submissions.index'))->assertForbidden();
+        $this->actingAs($student)->get(route('internships.submissions.show', $submission->id))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.approve', $submission->id))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.reject', $submission->id))->assertForbidden();
+        $this->actingAs($student)->get(route('internships.preparations.index'))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.mark-applying', $submission->id))->assertForbidden();
+        $this->actingAs($student)->post(route('internships.submissions.company-decision', $submission->id))->assertForbidden();
     });
 
     it('allows operators to access review routes', function () {
         $operator = User::factory()->create(['role' => 'operator']);
         ['submission' => $submission] = makeSubmittedSubmission();
 
-        $this->actingAs($operator)->get(route('review.submissions.index'))->assertOk();
-        $this->actingAs($operator)->get(route('review.submissions.show', $submission->id))->assertOk();
-        $this->actingAs($operator)->get(route('review.ready.index'))->assertOk();
+        $this->actingAs($operator)->get(route('internships.submissions.index'))->assertOk();
+        $this->actingAs($operator)->get(route('internships.submissions.show', $submission->id))->assertOk();
+        $this->actingAs($operator)->get(route('internships.preparations.index'))->assertOk();
     });
 
     it('allows administrators to access review routes', function () {
         $admin = User::factory()->create(['role' => 'administrator']);
         ['submission' => $submission] = makeSubmittedSubmission();
 
-        $this->actingAs($admin)->get(route('review.submissions.index'))->assertOk();
-        $this->actingAs($admin)->get(route('review.submissions.show', $submission->id))->assertOk();
-        $this->actingAs($admin)->get(route('review.ready.index'))->assertOk();
+        $this->actingAs($admin)->get(route('internships.submissions.index'))->assertOk();
+        $this->actingAs($admin)->get(route('internships.submissions.show', $submission->id))->assertOk();
+        $this->actingAs($admin)->get(route('internships.preparations.index'))->assertOk();
     });
 
 });
@@ -130,10 +130,10 @@ describe('review submission index list', function () {
         ]);
 
         $this->actingAs($operator)
-            ->get(route('review.submissions.index'))
+            ->get(route('internships.submissions.index'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('review/submissions/Index')
+                ->component('internships/submissions/Index')
                 ->has('submissions', 1)
                 ->where('submissions.0.id', $activeSub->id)
                 ->where('submissions.0.company_name', 'PT Solusi Bersama')
@@ -149,7 +149,7 @@ describe('review submission detail', function () {
         ['submission' => $submission, 'leader' => $leader, 'member' => $member] = makeSubmittedSubmission();
 
         $response = $this->actingAs($operator)
-            ->get(route('review.submissions.show', $submission->id))
+            ->get(route('internships.submissions.show', $submission->id))
             ->assertOk();
 
         $data = $response->json('data');
@@ -170,7 +170,7 @@ describe('reject submission', function () {
         ['submission' => $submission, 'group' => $group, 'leader' => $leader] = makeSubmittedSubmission();
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.reject', $submission->id), [
+            ->post(route('internships.submissions.reject', $submission->id), [
                 'notes' => 'Alasan penolakan: Berkas kurang lengkap.',
             ])
             ->assertRedirect()
@@ -200,7 +200,7 @@ describe('reject submission', function () {
         ['submission' => $submission] = makeSubmittedSubmission();
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.reject', $submission->id), [
+            ->post(route('internships.submissions.reject', $submission->id), [
                 'notes' => '',
             ])
             ->assertRedirect()
@@ -220,7 +220,7 @@ describe('approve submission', function () {
         ['submission' => $submission, 'group' => $group] = makeSubmittedSubmission();
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.approve', $submission->id))
+            ->post(route('internships.submissions.approve', $submission->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'success',
@@ -242,7 +242,7 @@ describe('edge cases and race conditions', function () {
         $submission->update(['status' => 'rejected']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.reject', $submission->id), [
+            ->post(route('internships.submissions.reject', $submission->id), [
                 'notes' => 'Tolak lagi',
             ])
             ->assertRedirect()
@@ -259,7 +259,7 @@ describe('edge cases and race conditions', function () {
         $submission->update(['status' => 'letter_published']);
 
         $this->actingAs($operator)
-            ->post(route('review.submissions.approve', $submission->id))
+            ->post(route('internships.submissions.approve', $submission->id))
             ->assertRedirect()
             ->assertInertiaFlash('toast', [
                 'type' => 'error',

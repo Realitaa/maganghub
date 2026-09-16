@@ -15,7 +15,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { companyDecision } from '@/routes/review/submissions';
+import { companyDecision } from '@/routes/internships/submissions';
 import type { Submission } from '@/types';
 
 const props = defineProps<{

@@ -26,10 +26,10 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { dashboard, home, welcome } from '@/routes';
-import { index as groupsIndex } from '@/routes/review/groups';
-import { index as readyIndex } from '@/routes/review/ready';
-import { index as submissionsIndex } from '@/routes/review/submissions';
-import { index as templateIndex } from '@/routes/review/templates';
+import { index as groupsIndex } from '@/routes/internships/groups';
+import { index as preparationsIndex } from '@/routes/internships/preparations';
+import { index as submissionsIndex } from '@/routes/internships/submissions';
+import { index as templateIndex } from '@/routes/internships/templates';
 import { index as userIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 
@@ -67,12 +67,12 @@ const mainNavItems = computed<NavItem[]>(() => {
                 icon: ClipboardList,
             },
             {
-                title: 'Siap Magang',
-                href: readyIndex(),
+                title: 'Persiapan Magang',
+                href: preparationsIndex(),
                 icon: CheckCircle2,
             },
             {
-                title: 'Kelompok Magang',
+                title: 'Manajemen Magang',
                 href: groupsIndex(),
                 icon: Briefcase,
             },
