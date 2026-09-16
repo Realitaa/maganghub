@@ -195,7 +195,7 @@ function cancelJoinRequest(requestId: number) {
                             <Link
                                 v-for="group in groups"
                                 :key="group.id"
-                                :href="show(group.id)"
+                                :href="show(group.code)"
                                 class="flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-md"
                             >
                                 <div class="relative h-28 w-full bg-muted">

@@ -294,7 +294,7 @@ function submitReject() {
                                 <div>
                                     <Label
                                         class="text-[10px] text-muted-foreground"
-                                        >Penanggung Jawab Magang</Label
+                                        >Pimpinan Perusahaan (Opsional)</Label
                                     >
                                     <p
                                         class="mt-0.5 font-medium text-foreground"

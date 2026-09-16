@@ -293,7 +293,7 @@ describe('Student Dashboard', function () {
         ['submission' => $submission, 'leader' => $leader] = makeSubmittedSubmissionForLetter();
 
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $submission->group_id))
+            ->get(route('student.groups.show', $submission->group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/GroupDashboard')
@@ -309,7 +309,7 @@ describe('Student Dashboard', function () {
         $this->actingAs($operator)->post(route('review.submissions.approve', $submission->id))->assertRedirect();
 
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $submission->group_id))
+            ->get(route('student.groups.show', $submission->group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/GroupDashboard')
@@ -326,7 +326,7 @@ describe('Student Dashboard', function () {
 
         // Check leader view
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $submission->group_id))
+            ->get(route('student.groups.show', $submission->group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/GroupDashboard')
@@ -336,7 +336,7 @@ describe('Student Dashboard', function () {
 
         // Check member view
         $this->actingAs($member)
-            ->get(route('student.groups.show', $submission->group_id))
+            ->get(route('student.groups.show', $submission->group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/GroupDashboard')

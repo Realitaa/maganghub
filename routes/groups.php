@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('groups/{group}/kick', [InternshipGroupController::class, 'kick'])->name('groups.kick');
     Route::delete('groups/{group}', [InternshipGroupController::class, 'destroy'])->name('groups.destroy');
 
-    Route::get('groups/{group}', [StudentGroupController::class, 'show'])->name('student.groups.show');
+    Route::get('groups/{group:code}', [StudentGroupController::class, 'show'])->name('student.groups.show');
 
     Route::post('groups/submissions', [InternshipSubmissionController::class, 'store'])->name('groups.submissions.store');
     Route::post('groups/submissions/submit', [InternshipSubmissionController::class, 'submit'])->name('groups.submissions.submit');

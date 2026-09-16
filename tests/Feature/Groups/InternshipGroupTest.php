@@ -87,7 +87,7 @@ describe('dashboard', function () {
         ['group' => $group, 'leader' => $leader] = makeGroupWithMember();
 
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $group->id))
+            ->get(route('student.groups.show', $group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('student/GroupDashboard')
@@ -102,7 +102,7 @@ describe('dashboard', function () {
 
         // Leader sees requests
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $group->id))
+            ->get(route('student.groups.show', $group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 1)
@@ -110,7 +110,7 @@ describe('dashboard', function () {
 
         // Member does NOT see requests
         $this->actingAs($member)
-            ->get(route('student.groups.show', $group->id))
+            ->get(route('student.groups.show', $group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 0)
@@ -161,7 +161,7 @@ describe('dashboard', function () {
         GroupMembership::factory()->create(['group_id' => $otherGroup->id, 'user_id' => $staleStudent->id]);
 
         $this->actingAs($leader)
-            ->get(route('student.groups.show', $group->id))
+            ->get(route('student.groups.show', $group))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('group.join_requests', 2)

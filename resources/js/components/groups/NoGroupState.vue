@@ -156,7 +156,7 @@ function cancelJoinRequest(requestId: number) {
 
 <template>
     <div
-        class="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-background px-4 py-0! lg:min-h-(--container-height)"
+        class="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-background px-4 pt-8 pb-12 sm:pt-10 md:py-0 lg:min-h-(--container-height)"
         :style="{ '--container-height': containerHeight }"
     >
         <div class="mx-auto w-full max-w-7xl">
@@ -295,11 +295,8 @@ function cancelJoinRequest(requestId: number) {
                         </template>
                     </div>
 
-                    <!-- Divider Line -->
-                    <hr class="my-6 border-border/60" />
-
-                    <!-- Help/Tip Section -->
-                    <div class="text-sm font-light text-muted-foreground">
+                    <!-- Help/Tip Section (Before Divider) -->
+                    <div class="text-xs font-light text-muted-foreground sm:text-sm">
                         <template v-if="isLocked">
                             <span
                                 class="flex items-center justify-center gap-1.5 text-amber-600 lg:justify-start dark:text-amber-400"
@@ -329,6 +326,9 @@ function cancelJoinRequest(requestId: number) {
                             </div>
                         </template>
                     </div>
+
+                    <!-- Divider Line -->
+                    <hr class="my-6 border-border/60" />
                 </div>
 
                 <!-- RIGHT COLUMN: Visuals / Illustrations / Status (Col-span 5 on large screens) -->

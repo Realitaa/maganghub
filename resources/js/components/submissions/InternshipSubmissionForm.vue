@@ -389,7 +389,7 @@ function submitSubmissionProposal() {
                         class="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
                     >
                         <User class="h-3.5 w-3.5" />
-                        Penanggung Jawab Magang (Opsional)
+                        Pimpinan Perusahaan (Opsional)
                         <Tooltip>
                             <TooltipTrigger>
                                 <CircleQuestionMark
