@@ -26,7 +26,7 @@ import {
     huawei,
     goto,
 } from '@/components/landing/icons';
-import ImpactChart from '@/components/landing/ImpactChart.vue';
+import StudentInternshipStatusChart from '@/components/dashboard/StudentInternshipStatusChart.vue';
 import LogoLoop from '@/components/landing/LogoLoop.vue';
 import {
     Accordion,
@@ -40,7 +40,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import WorkflowStepper from '@/components/WorkflowStepper.vue';
 import { dashboard, home, login } from '@/routes';
-import type { CompanyStatistics } from '@/types';
+import type { CompanyStatistics, StudentInternshipStatusItem } from '@/types';
 
 // state
 const hoveredStep = ref(6);
@@ -116,12 +116,10 @@ const props = defineProps<{
         total_students: number;
         total_groups: number;
         total_companies: number;
-        pie_chart: CompanyStatistics;
+        student_internship_status: StudentInternshipStatusItem[];
+        pie_chart?: CompanyStatistics;
     };
 }>();
-
-// Statistics data for Impact section
-const landingStats = computed(() => props.statistics.pie_chart);
 
 const features = [
     {
@@ -607,20 +605,23 @@ const faqs = [
                             </div>
                         </div>
 
-                        <!-- Right: Donut Chart -->
+                        <!-- Right: Pie Chart -->
                         <div
                             class="mx-auto flex w-full max-w-md flex-col items-center justify-center rounded-2xl border border-border/60 bg-background p-4 shadow-sm dark:bg-zinc-950"
                         >
                             <h3
                                 class="mb-2 text-center text-sm font-bold tracking-wide text-muted-foreground uppercase"
                             >
-                                Status Mahasiswa terhadap Program Magang
+                                Status Mahasiswa Magang
                             </h3>
 
                             <div
                                 class="relative flex w-full items-center justify-center"
                             >
-                                <ImpactChart :statistics="landingStats" />
+                                <StudentInternshipStatusChart
+                                    :items="props.statistics.student_internship_status"
+                                    :total-students="props.statistics.total_students"
+                                />
                             </div>
                         </div>
                     </div>

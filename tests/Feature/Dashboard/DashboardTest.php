@@ -204,8 +204,9 @@ test('opening dashboard re-generates and updates public chart cache for 6 hours'
     expect(Cache::has(LandingStatisticsService::CACHE_KEY))->toBeTrue();
     $cached = Cache::get(LandingStatisticsService::CACHE_KEY);
 
-    expect($cached)->toHaveKeys(['total_students', 'total_groups', 'total_companies', 'pie_chart', 'updated_at']);
+    expect($cached)->toHaveKeys(['total_students', 'total_groups', 'total_companies', 'student_internship_status', 'pie_chart', 'updated_at']);
     expect($cached['pie_chart'])->toHaveKeys(['multinational', 'national', 'startup', 'havenot']);
+    expect($cached['student_internship_status'])->toHaveCount(3);
 
     // Verify updated_at is a valid recent timestamp
     $updatedAt = Carbon::parse($cached['updated_at']);
@@ -219,6 +220,11 @@ test('landing page reads statistics from the 6-hour cache', function () {
         'total_students' => 99,
         'total_groups' => 20,
         'total_companies' => 15,
+        'student_internship_status' => [
+            ['status' => 'belum_magang', 'name' => 'Belum Magang', 'y' => 50, 'color' => '#ef4444'],
+            ['status' => 'sedang_mengajukan', 'name' => 'Sedang Mengajukan', 'y' => 25, 'color' => '#eab308'],
+            ['status' => 'akan_melaksanakan', 'name' => 'Akan/Melaksanakan Magang', 'y' => 24, 'color' => '#10b981'],
+        ],
         'pie_chart' => [
             'multinational' => 10,
             'national' => 20,
@@ -238,6 +244,9 @@ test('landing page reads statistics from the 6-hour cache', function () {
         ->where('statistics.total_students', 99)
         ->where('statistics.total_groups', 20)
         ->where('statistics.total_companies', 15)
+        ->where('statistics.student_internship_status.0.y', 50)
+        ->where('statistics.student_internship_status.1.y', 25)
+        ->where('statistics.student_internship_status.2.y', 24)
         ->where('statistics.pie_chart.multinational', 10)
         ->where('statistics.pie_chart.national', 20)
         ->where('statistics.pie_chart.startup', 15)

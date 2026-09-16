@@ -9,6 +9,7 @@ export type PublicStatisticsData = {
     total_students: number;
     total_groups: number;
     total_companies: number;
+    student_internship_status: StudentInternshipStatusItem[];
     pie_chart: CompanyStatistics;
     updated_at: string;
 };

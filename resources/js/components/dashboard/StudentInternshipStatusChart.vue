@@ -1,12 +1,40 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import HighchartsChart from '@/components/ui/highcharts/HighchartsChart.vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import BaseChart from '@/components/ui/chart/BaseChart.vue';
 import type { StudentInternshipStatusItem } from '@/types';
+import type { ChartData, ChartOptions } from 'chart.js';
 
 const props = defineProps<{
     items: StudentInternshipStatusItem[];
     totalStudents?: number;
 }>();
+
+const isDark = ref(false);
+
+const checkTheme = () => {
+    if (typeof document !== 'undefined') {
+        isDark.value = document.documentElement.classList.contains('dark');
+    }
+};
+
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+    checkTheme();
+    if (typeof document !== 'undefined') {
+        observer = new MutationObserver(checkTheme);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+    }
+});
+
+onUnmounted(() => {
+    if (observer) {
+        observer.disconnect();
+    }
+});
 
 const hasData = computed(() => {
     return (
@@ -16,75 +44,115 @@ const hasData = computed(() => {
     );
 });
 
-const chartOptions = computed(() => {
+const chartData = computed<ChartData<'pie'>>(() => {
+    const labels = props.items.map((item) => item.name);
+    const data = props.items.map((item) => item.y);
+    const backgroundColor = props.items.map((item) => item.color);
+
+    // Find the index of "Akan/Melaksanakan Magang" to explode/highlight it
+    const offset = props.items.map((item) =>
+        item.status === 'akan_melaksanakan' ||
+        item.name.toLowerCase().includes('akan')
+            ? 16
+            : 0,
+    );
+
     return {
-        chart: {
-            type: 'pie',
-            height: 340,
-            spacingTop: 10,
-            spacingBottom: 10,
-            spacingLeft: 0,
-            spacingRight: 0,
-        },
-        title: {
-            text: '',
-        },
-        credits: {
-            enabled: false,
-        },
-        tooltip: {
-            formatter: function (this: any) {
-                return (
-                    '<span style="color:' +
-                    this.point.color +
-                    '">\u25CF</span> <b>' +
-                    this.point.name +
-                    '</b>: <b>' +
-                    this.point.y +
-                    '</b> mahasiswa (' +
-                    this.point.percentage.toFixed(1) +
-                    '%)'
-                );
+        labels,
+        datasets: [
+            {
+                data,
+                backgroundColor,
+                borderColor: isDark.value ? '#18181b' : '#ffffff',
+                borderWidth: 2,
+                // Highlight / exploded slice for Akan/Melaksanakan Magang
+                offset,
+                hoverOffset: 20,
             },
+        ],
+    };
+});
+
+const chartOptions = computed<ChartOptions<'pie'>>(() => {
+    const textColor = isDark.value ? '#ededec' : '#1b1b18';
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: 16,
         },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                showInLegend: true,
-                slicedOffset: 8,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.percentage:.1f}%',
-                    distance: 12,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    color: textColor,
+                    padding: 12,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 11,
+                        weight: 500,
+                    },
+                    generateLabels: (chart) => {
+                        const data = chart.data;
+                        if (!data.labels || !data.datasets.length) return [];
+                        const dataset = data.datasets[0];
+                        return data.labels.map((label, i) => {
+                            const val = (dataset.data[i] as number) || 0;
+                            return {
+                                text: `${label} (${val})`,
+                                fillStyle: (
+                                    dataset.backgroundColor as string[]
+                                )[i],
+                                strokeStyle: (
+                                    dataset.backgroundColor as string[]
+                                )[i],
+                                lineWidth: 0,
+                                hidden: !chart.getDataVisibility(i),
+                                index: i,
+                                pointStyle: 'circle',
+                            };
+                        });
+                    },
+                },
+            },
+            tooltip: {
+                backgroundColor: isDark.value ? '#18181b' : '#ffffff',
+                titleColor: isDark.value ? '#ffffff' : '#09090b',
+                bodyColor: isDark.value ? '#e4e4e7' : '#27272a',
+                borderColor: isDark.value ? '#27272a' : '#e4e4e7',
+                borderWidth: 1,
+                padding: 10,
+                boxPadding: 4,
+                usePointStyle: true,
+                callbacks: {
+                    label: (context) => {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = (
+                            context.dataset.data as number[]
+                        ).reduce((a, b) => a + b, 0);
+                        const pct =
+                            total > 0
+                                ? ((value / total) * 100).toFixed(1)
+                                : '0.0';
+                        return ` ${label}: ${value} mahasiswa (${pct}%)`;
+                    },
                 },
             },
         },
-        legend: {
-            enabled: true,
-            layout: 'horizontal',
-            align: 'center',
-            verticalAlign: 'bottom',
-            itemMarginTop: 4,
-            itemMarginBottom: 4,
-            labelFormatter: function (this: any) {
-                return `${this.name} (${this.y})`;
-            },
-        },
-        series: [
-            {
-                name: 'Status Mahasiswa Magang',
-                colorByPoint: true,
-                data: props.items,
-            },
-        ],
     };
 });
 </script>
 
 <template>
     <div class="flex min-h-[340px] w-full items-center justify-center">
-        <HighchartsChart v-if="hasData" :options="chartOptions" />
+        <div v-if="hasData" class="h-[340px] w-full">
+            <BaseChart type="pie" :data="chartData" :options="chartOptions" />
+        </div>
         <div
             v-else
             class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"

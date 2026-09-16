@@ -257,13 +257,13 @@ const formattedUpdatedAt = computed(() => {
             </Card>
         </div>
 
-        <!-- 4. Baris Terakhir: Status Mahasiswa terhadap Program Magang & Status Mahasiswa Magang -->
+        <!-- 4. Baris Terakhir: Status Mahasiswa Magang & Status Mahasiswa terhadap Program Magang -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <!-- Kartu 1: Status Mahasiswa terhadap Program Magang -->
+            <!-- Kartu 1: Status Mahasiswa Magang (Ditampilkan di Landing Page) -->
             <Card class="flex flex-col justify-between">
                 <CardHeader>
                     <CardTitle class="text-lg font-semibold">
-                        Status Mahasiswa terhadap Program Magang
+                        Status Mahasiswa Magang
                     </CardTitle>
                     <CardDescription>
                         Ditampilkan di halaman utama pada bagian
@@ -272,10 +272,12 @@ const formattedUpdatedAt = computed(() => {
                 </CardHeader>
                 <CardContent class="flex flex-1 flex-col justify-between">
                     <div class="flex w-full items-center justify-center">
-                        <ImpactChart
-                            :statistics="publicChart.pie_chart"
-                            :show-havenot-in-legend="true"
-                            :show-numeric-legend="true"
+                        <StudentInternshipStatusChart
+                            :items="
+                                publicChart.student_internship_status ||
+                                operational.student_internship_status
+                            "
+                            :total-students="summary.total_students"
                         />
                     </div>
                     <div
@@ -289,22 +291,23 @@ const formattedUpdatedAt = computed(() => {
                 </CardContent>
             </Card>
 
-            <!-- Kartu 2: Status Mahasiswa Magang -->
+            <!-- Kartu 2: Status Mahasiswa terhadap Program Magang -->
             <Card class="flex flex-col justify-between">
                 <CardHeader>
                     <CardTitle class="text-lg font-semibold">
-                        Status Mahasiswa Magang
+                        Status Mahasiswa terhadap Program Magang
                     </CardTitle>
                     <CardDescription>
-                        Distribusi tahapan mahasiswa: belum magang, sedang
-                        mengajukan, hingga konfirmasi magang.
+                        Distribusi mahasiswa berdasarkan tipe instansi atau
+                        perusahaan tempat magang.
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="flex flex-1 flex-col justify-between">
                     <div class="flex w-full items-center justify-center">
-                        <StudentInternshipStatusChart
-                            :items="operational.student_internship_status"
-                            :total-students="summary.total_students"
+                        <ImpactChart
+                            :statistics="publicChart.pie_chart"
+                            :show-havenot-in-legend="true"
+                            :show-numeric-legend="true"
                         />
                     </div>
                     <div

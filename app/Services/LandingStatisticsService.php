@@ -14,6 +14,12 @@ class LandingStatisticsService
 
     public const CACHE_TTL_HOURS = 6;
 
+    public function __construct(
+        protected ?AdminDashboardService $adminDashboardService = null
+    ) {
+        $this->adminDashboardService = $this->adminDashboardService ?? app(AdminDashboardService::class);
+    }
+
     /**
      * Get the landing page statistics.
      * Caches the result for 6 hours.
@@ -77,10 +83,13 @@ class LandingStatisticsService
         // Prevent negative havenot just in case of data inconsistencies
         $havenot = max(0, $totalStudents - $totalAccepted);
 
+        $studentInternshipStatus = $this->adminDashboardService->getStudentInternshipStatus();
+
         return [
             'total_students' => $totalStudents,
             'total_groups' => $totalGroups,
             'total_companies' => $totalCompanies,
+            'student_internship_status' => $studentInternshipStatus,
             'pie_chart' => [
                 'multinational' => $multinational,
                 'national' => $national,

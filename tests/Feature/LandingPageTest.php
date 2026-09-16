@@ -23,6 +23,7 @@ class LandingPageTest extends TestCase
             ->has('statistics.total_students')
             ->has('statistics.total_groups')
             ->has('statistics.total_companies')
+            ->has('statistics.student_internship_status')
             ->has('statistics.pie_chart')
         );
     }
@@ -36,6 +37,11 @@ class LandingPageTest extends TestCase
                 'total_students' => 10,
                 'total_groups' => 2,
                 'total_companies' => 2,
+                'student_internship_status' => [
+                    ['status' => 'belum_magang', 'name' => 'Belum Magang', 'y' => 7, 'color' => '#ef4444'],
+                    ['status' => 'sedang_mengajukan', 'name' => 'Sedang Mengajukan', 'y' => 1, 'color' => '#eab308'],
+                    ['status' => 'akan_melaksanakan', 'name' => 'Akan/Melaksanakan Magang', 'y' => 2, 'color' => '#10b981'],
+                ],
                 'pie_chart' => [
                     'multinational' => 2,
                     'national' => 1,
@@ -116,6 +122,12 @@ class LandingPageTest extends TestCase
             ->where('statistics.pie_chart.national', 2)
             ->where('statistics.pie_chart.startup', 0)
             ->where('statistics.pie_chart.havenot', 5)
+            ->where('statistics.student_internship_status.0.status', 'belum_magang')
+            ->where('statistics.student_internship_status.0.y', 5)
+            ->where('statistics.student_internship_status.1.status', 'sedang_mengajukan')
+            ->where('statistics.student_internship_status.1.y', 0)
+            ->where('statistics.student_internship_status.2.status', 'akan_melaksanakan')
+            ->where('statistics.student_internship_status.2.y', 5)
         );
     }
 }
