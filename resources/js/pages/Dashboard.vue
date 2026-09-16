@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     Users,
     Briefcase,
@@ -10,6 +10,7 @@ import {
 } from '@lucide/vue';
 import { computed } from 'vue';
 import GroupStatusChart from '@/components/dashboard/GroupStatusChart.vue';
+import StudentInternshipStatusChart from '@/components/dashboard/StudentInternshipStatusChart.vue';
 import ImpactChart from '@/components/landing/ImpactChart.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +47,9 @@ const props = defineProps<{
     publicChart: PublicStatisticsData;
 }>();
 
+const page = usePage();
+const userName = computed(() => page.props.auth?.user?.name ?? 'Admin');
+
 const { formatDateTime } = useIdTimeFormat();
 
 const formattedUpdatedAt = computed(() => {
@@ -63,7 +67,7 @@ const formattedUpdatedAt = computed(() => {
             <h1
                 class="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
             >
-                Selamat datang, Admin 👋
+                Selamat datang, {{ userName }} 👋
             </h1>
             <p class="mt-1 text-sm text-muted-foreground">
                 Berikut ringkasan aktivitas MagangHub saat ini.
@@ -253,56 +257,66 @@ const formattedUpdatedAt = computed(() => {
             </Card>
         </div>
 
-        <!-- 4. Public Statistics — 1 Kartu Full Width -->
-        <Card class="w-full">
-            <CardHeader>
-                <CardTitle class="text-lg font-semibold">
-                    Status Mahasiswa terhadap Program Magang
-                </CardTitle>
-                <CardDescription>
-                    Statistik historis mahasiswa terhadap program magang yang
-                    ditampilkan di halaman utama.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div
-                    class="grid grid-cols-1 items-center gap-8 lg:grid-cols-12"
-                >
-                    <!-- Left: 3D exploded donut/pie chart -->
-                    <div
-                        class="flex w-full items-center justify-center lg:col-span-7 xl:col-span-8"
-                    >
+        <!-- 4. Baris Terakhir: Status Mahasiswa terhadap Program Magang & Status Mahasiswa Magang -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Kartu 1: Status Mahasiswa terhadap Program Magang -->
+            <Card class="flex flex-col justify-between">
+                <CardHeader>
+                    <CardTitle class="text-lg font-semibold">
+                        Status Mahasiswa terhadap Program Magang
+                    </CardTitle>
+                    <CardDescription>
+                        Ditampilkan di halaman utama pada bagian
+                        &ldquo;Mengapa Magang Penting?&rdquo;
+                    </CardDescription>
+                </CardHeader>
+                <CardContent class="flex flex-1 flex-col justify-between">
+                    <div class="flex w-full items-center justify-center">
                         <ImpactChart
                             :statistics="publicChart.pie_chart"
                             :show-havenot-in-legend="true"
+                            :show-numeric-legend="true"
                         />
                     </div>
-
-                    <!-- Right: Info Text Panel -->
                     <div
-                        class="flex flex-col justify-center rounded-xl border border-border/60 bg-muted/40 p-6 lg:col-span-5 xl:col-span-4"
+                        class="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground"
                     >
-                        <p
-                            class="text-base font-medium leading-relaxed text-foreground"
-                        >
-                            Ditampilkan di halaman utama pada bagian
-                            &ldquo;Mengapa Magang Penting?&rdquo;
-                        </p>
-                        <div class="mt-6 border-t border-border/60 pt-4">
-                            <p
-                                class="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
-                            >
-                                Terakhir diperbarui:
-                            </p>
-                            <p
-                                class="mt-1 text-sm font-semibold text-foreground"
-                            >
-                                {{ formattedUpdatedAt }}
-                            </p>
-                        </div>
+                        <span>Terakhir diperbarui:</span>
+                        <span class="font-medium text-foreground">
+                            {{ formattedUpdatedAt }}
+                        </span>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+
+            <!-- Kartu 2: Status Mahasiswa Magang -->
+            <Card class="flex flex-col justify-between">
+                <CardHeader>
+                    <CardTitle class="text-lg font-semibold">
+                        Status Mahasiswa Magang
+                    </CardTitle>
+                    <CardDescription>
+                        Distribusi tahapan mahasiswa: belum magang, sedang
+                        mengajukan, hingga konfirmasi magang.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent class="flex flex-1 flex-col justify-between">
+                    <div class="flex w-full items-center justify-center">
+                        <StudentInternshipStatusChart
+                            :items="operational.student_internship_status"
+                            :total-students="summary.total_students"
+                        />
+                    </div>
+                    <div
+                        class="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground"
+                    >
+                        <span>Total Mahasiswa:</span>
+                        <span class="font-medium text-foreground">
+                            {{ summary.total_students }} mahasiswa
+                        </span>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>

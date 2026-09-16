@@ -14,9 +14,11 @@ const props = withDefaults(
     defineProps<{
         statistics: CompanyStatistics;
         showHavenotInLegend?: boolean;
+        showNumericLegend?: boolean;
     }>(),
     {
         showHavenotInLegend: false,
+        showNumericLegend: false,
     },
 );
 
@@ -253,6 +255,12 @@ const chartOptions = computed(() => {
             verticalAlign: 'bottom',
             itemMarginTop: 5,
             itemMarginBottom: 5,
+            labelFormatter: function (this: any) {
+                if (props.showNumericLegend || props.showHavenotInLegend) {
+                    return `${this.name} (${this.y})`;
+                }
+                return this.name;
+            },
         },
         series: [
             {

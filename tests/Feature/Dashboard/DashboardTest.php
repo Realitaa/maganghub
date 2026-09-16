@@ -244,3 +244,51 @@ test('landing page reads statistics from the 6-hour cache', function () {
         ->where('statistics.pie_chart.havenot', 54)
     );
 });
+
+test('student internship status categorizes students into 3 progress buckets', function () {
+    Cache::flush();
+
+    $admin = User::factory()->create(['role' => 'administrator']);
+    $students = User::factory()->count(10)->create(['role' => 'student']);
+
+    // Group 1: accepted -> 3 students (Akan/Melaksanakan Magang)
+    $group1 = InternshipGroup::factory()->create(['leader_id' => $students[0]->id, 'status' => 'accepted']);
+    foreach ($students->take(3) as $s) {
+        $group1->memberships()->create(['user_id' => $s->id, 'status' => 'active', 'role' => 'member']);
+    }
+
+    // Group 2: applying -> 2 students (Sedang Mengajukan)
+    $group2 = InternshipGroup::factory()->create(['leader_id' => $students[3]->id, 'status' => 'applying']);
+    foreach ($students->skip(3)->take(2) as $s) {
+        $group2->memberships()->create(['user_id' => $s->id, 'status' => 'active', 'role' => 'member']);
+    }
+
+    // Group 3: forming -> 2 students (Belum Magang)
+    $group3 = InternshipGroup::factory()->create(['leader_id' => $students[5]->id, 'status' => 'forming']);
+    foreach ($students->skip(5)->take(2) as $s) {
+        $group3->memberships()->create(['user_id' => $s->id, 'status' => 'active', 'role' => 'member']);
+    }
+
+    // Remaining 3 students have no group (Belum Magang)
+    // Total Belum Magang = 2 + 3 = 5
+
+    $this->actingAs($admin);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->has('operational.student_internship_status', 3)
+        ->where('operational.student_internship_status.0.status', 'belum_magang')
+        ->where('operational.student_internship_status.0.name', 'Belum Magang')
+        ->where('operational.student_internship_status.0.y', 5)
+        ->where('operational.student_internship_status.0.color', '#ef4444')
+        ->where('operational.student_internship_status.1.status', 'sedang_mengajukan')
+        ->where('operational.student_internship_status.1.name', 'Sedang Mengajukan')
+        ->where('operational.student_internship_status.1.y', 2)
+        ->where('operational.student_internship_status.1.color', '#eab308')
+        ->where('operational.student_internship_status.2.status', 'akan_melaksanakan')
+        ->where('operational.student_internship_status.2.name', 'Akan/Melaksanakan Magang')
+        ->where('operational.student_internship_status.2.y', 3)
+        ->where('operational.student_internship_status.2.color', '#10b981')
+    );
+});

@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import HighchartsChart from '@/components/ui/highcharts/HighchartsChart.vue';
-import type { GroupStatusDistributionItem } from '@/types';
+import type { StudentInternshipStatusItem } from '@/types';
 
 const props = defineProps<{
-    items: GroupStatusDistributionItem[];
-    totalGroups?: number;
+    items: StudentInternshipStatusItem[];
+    totalStudents?: number;
 }>();
 
 const hasData = computed(() => {
-    return props.items && props.items.length > 0 && (props.totalGroups ?? 0) > 0;
+    return (
+        props.items &&
+        props.items.length > 0 &&
+        props.items.some((item) => item.y > 0)
+    );
 });
 
 const chartOptions = computed(() => {
     return {
         chart: {
             type: 'pie',
-            height: 320,
+            height: 340,
             spacingTop: 10,
             spacingBottom: 10,
             spacingLeft: 0,
@@ -37,7 +41,7 @@ const chartOptions = computed(() => {
                     this.point.name +
                     '</b>: <b>' +
                     this.point.y +
-                    '</b> kelompok (' +
+                    '</b> mahasiswa (' +
                     this.point.percentage.toFixed(1) +
                     '%)'
                 );
@@ -45,7 +49,6 @@ const chartOptions = computed(() => {
         },
         plotOptions: {
             pie: {
-                innerSize: '58%',
                 allowPointSelect: true,
                 cursor: 'pointer',
                 showInLegend: true,
@@ -70,7 +73,7 @@ const chartOptions = computed(() => {
         },
         series: [
             {
-                name: 'Status Kelompok',
+                name: 'Status Mahasiswa Magang',
                 colorByPoint: true,
                 data: props.items,
             },
@@ -80,7 +83,7 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-    <div class="flex min-h-[320px] w-full items-center justify-center">
+    <div class="flex min-h-[340px] w-full items-center justify-center">
         <HighchartsChart v-if="hasData" :options="chartOptions" />
         <div
             v-else
@@ -89,12 +92,12 @@ const chartOptions = computed(() => {
             <div
                 class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted"
             >
-                <span class="text-xl">📊</span>
+                <span class="text-xl">🎓</span>
             </div>
-            <p class="text-sm font-medium">Belum ada kelompok magang</p>
+            <p class="text-sm font-medium">Belum ada data mahasiswa</p>
             <p class="mt-1 text-xs text-muted-foreground">
-                Data distribusi status akan muncul ketika kelompok magang mulai
-                dibuat.
+                Data status mahasiswa magang akan muncul ketika mahasiswa mulai
+                terdaftar di sistem.
             </p>
         </div>
     </div>

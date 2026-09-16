@@ -27,9 +27,17 @@ export type GroupStatusDistributionItem = {
     color: string;
 };
 
+export type StudentInternshipStatusItem = {
+    status: string;
+    name: string;
+    y: number;
+    color: string;
+};
+
 export type DashboardOperational = {
     pending_submissions: number;
     waiting_preparations: number;
     group_status_distribution: GroupStatusDistributionItem[];
+    student_internship_status: StudentInternshipStatusItem[];
     total_groups: number;
 };
