@@ -182,7 +182,7 @@ describe('kelompok magang detail and admin management actions', function () {
 
         // Access via numeric id
         $this->actingAs($admin)
-            ->get('/internships/groups/' . $group->id)
+            ->get('/internships/groups/'.$group->id)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('internships/groups/Show')

@@ -12,8 +12,9 @@ import {
     Check,
     ArrowRight,
 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
+import StudentInternshipStatusChart from '@/components/dashboard/StudentInternshipStatusChart.vue';
 import CountUp from '@/components/landing/CountUp.vue';
 import {
     google,
@@ -26,7 +27,6 @@ import {
     huawei,
     goto,
 } from '@/components/landing/icons';
-import StudentInternshipStatusChart from '@/components/dashboard/StudentInternshipStatusChart.vue';
 import LogoLoop from '@/components/landing/LogoLoop.vue';
 import {
     Accordion,
@@ -205,7 +205,13 @@ const faqs = [
 
 <template>
     <Head title="MagangHub - Platform Pengelolaan Magang Mahasiswa">
-        <link rel="preload" href="/assets/images/akreditasi-unimed.webp" as="image" type="image/webp" fetchpriority="high">
+        <link
+            rel="preload"
+            href="/assets/images/akreditasi-unimed.webp"
+            as="image"
+            type="image/webp"
+            fetchpriority="high"
+        />
     </Head>
 
     <ScrollArea class="h-screen w-screen">
@@ -619,8 +625,13 @@ const faqs = [
                                 class="relative flex w-full items-center justify-center"
                             >
                                 <StudentInternshipStatusChart
-                                    :items="props.statistics.student_internship_status"
-                                    :total-students="props.statistics.total_students"
+                                    :items="
+                                        props.statistics
+                                            .student_internship_status
+                                    "
+                                    :total-students="
+                                        props.statistics.total_students
+                                    "
                                 />
                             </div>
                         </div>

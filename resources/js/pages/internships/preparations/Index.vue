@@ -64,24 +64,36 @@ const selectedSubmission = ref<Submission | null>(null);
 // ─── Computed Filters ─────────────────────────────────────────────────────────
 
 function matchesSearch(sub: Submission, query: string): boolean {
-    if (!query.trim()) return true;
+    if (!query.trim()) {
+        return true;
+    }
+
     const q = query.toLowerCase();
     const company = sub.company_name?.toLowerCase() || '';
     const leaderName = sub.group?.leader?.name?.toLowerCase() || '';
     const leaderNim = sub.group?.leader?.nim?.toLowerCase() || '';
-    return company.includes(q) || leaderName.includes(q) || leaderNim.includes(q);
+
+    return (
+        company.includes(q) || leaderName.includes(q) || leaderNim.includes(q)
+    );
 }
 
 const filteredPrint = computed(() => {
-    return props.readyToPrint.filter((sub) => matchesSearch(sub, searchQuery.value));
+    return props.readyToPrint.filter((sub) =>
+        matchesSearch(sub, searchQuery.value),
+    );
 });
 
 const filteredWaiting = computed(() => {
-    return props.waitingResponse.filter((sub) => matchesSearch(sub, searchQuery.value));
+    return props.waitingResponse.filter((sub) =>
+        matchesSearch(sub, searchQuery.value),
+    );
 });
 
 const filteredReceived = computed(() => {
-    return props.receivedResponse.filter((sub) => matchesSearch(sub, searchQuery.value));
+    return props.receivedResponse.filter((sub) =>
+        matchesSearch(sub, searchQuery.value),
+    );
 });
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
@@ -115,7 +127,7 @@ function openDecision(sub: Submission) {
         <!-- ─── Tab Workflow ─── -->
         <TabsRoot v-model="activeTab" class="w-full space-y-6">
             <div
-                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/60"
+                class="flex flex-col gap-4 border-b border-border/60 sm:flex-row sm:items-center sm:justify-between"
             >
                 <ScrollArea class="w-full sm:w-auto">
                     <TabsList
@@ -123,7 +135,7 @@ function openDecision(sub: Submission) {
                     >
                         <TabsTrigger
                             value="print"
-                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:shadow-none"
+                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-none"
                         >
                             <Printer class="h-4 w-4" />
                             <span>Siap Cetak Surat</span>
@@ -136,7 +148,7 @@ function openDecision(sub: Submission) {
 
                         <TabsTrigger
                             value="waiting"
-                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:shadow-none"
+                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-none"
                         >
                             <Clock class="h-4 w-4" />
                             <span>Menunggu Balasan</span>
@@ -149,7 +161,7 @@ function openDecision(sub: Submission) {
 
                         <TabsTrigger
                             value="received"
-                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:shadow-none"
+                            class="relative flex shrink-0 cursor-pointer items-center gap-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-none"
                         >
                             <FileSearch class="h-4 w-4" />
                             <span>Review Balasan / LoA</span>
@@ -163,7 +175,7 @@ function openDecision(sub: Submission) {
                 </ScrollArea>
 
                 <!-- Unified Search Input -->
-                <div class="relative w-full sm:w-72 pb-3 sm:pb-0">
+                <div class="relative w-full pb-3 sm:w-72 sm:pb-0">
                     <Search
                         class="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground"
                     />
@@ -179,12 +191,16 @@ function openDecision(sub: Submission) {
             <TabsContent value="print">
                 <Card class="border-border/80 shadow-xs">
                     <CardHeader class="pb-3">
-                        <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                        <CardTitle
+                            class="flex items-center gap-2 text-base font-semibold text-foreground"
+                        >
                             <Printer class="h-4 w-4 text-primary" />
                             Kelompok Siap Cetak Surat
                         </CardTitle>
                         <CardDescription class="text-xs">
-                            Kelompok yang telah disetujui pengajuannya. Siap cetak surat pengantar resmi dan ditandai sedang mengajukan.
+                            Kelompok yang telah disetujui pengajuannya. Siap
+                            cetak surat pengantar resmi dan ditandai sedang
+                            mengajukan.
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="p-0">
@@ -198,7 +214,9 @@ function openDecision(sub: Submission) {
                             </p>
                         </div>
                         <div v-else class="overflow-x-auto">
-                            <table class="w-full border-collapse text-left text-xs">
+                            <table
+                                class="w-full border-collapse text-left text-xs"
+                            >
                                 <thead>
                                     <tr
                                         class="border-b border-border/60 bg-muted/40 text-[10px] font-semibold text-muted-foreground uppercase"
@@ -217,14 +235,22 @@ function openDecision(sub: Submission) {
                                         class="transition-colors hover:bg-muted/10"
                                     >
                                         <td class="p-4">
-                                            <div class="text-xs font-semibold text-foreground">
+                                            <div
+                                                class="text-xs font-semibold text-foreground"
+                                            >
                                                 {{ sub.group.leader.name }}
                                             </div>
-                                            <div class="text-[10px] text-muted-foreground">
-                                                {{ sub.group.leader.nim || '-' }}
+                                            <div
+                                                class="text-[10px] text-muted-foreground"
+                                            >
+                                                {{
+                                                    sub.group.leader.nim || '-'
+                                                }}
                                             </div>
                                         </td>
-                                        <td class="p-4 font-medium text-foreground">
+                                        <td
+                                            class="p-4 font-medium text-foreground"
+                                        >
                                             {{ sub.company_name }}
                                         </td>
                                         <td class="p-4 text-center">
@@ -232,7 +258,10 @@ function openDecision(sub: Submission) {
                                                 variant="secondary"
                                                 class="px-2 py-0.5 font-mono text-[10px]"
                                             >
-                                                {{ sub.group.memberships_count }} Orang
+                                                {{
+                                                    sub.group.memberships_count
+                                                }}
+                                                Orang
                                             </Badge>
                                         </td>
                                         <td class="p-4 text-muted-foreground">
@@ -261,12 +290,15 @@ function openDecision(sub: Submission) {
             <TabsContent value="waiting">
                 <Card class="border-border/80 shadow-xs">
                     <CardHeader class="pb-3">
-                        <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                        <CardTitle
+                            class="flex items-center gap-2 text-base font-semibold text-foreground"
+                        >
                             <Clock class="h-4 w-4 text-yellow-500" />
                             Kelompok Menunggu Balasan Perusahaan
                         </CardTitle>
                         <CardDescription class="text-xs">
-                            Kelompok yang sedang memproses berkas ke perusahaan tujuan. Menunggu mahasiswa mengunggah surat balasan.
+                            Kelompok yang sedang memproses berkas ke perusahaan
+                            tujuan. Menunggu mahasiswa mengunggah surat balasan.
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="p-0">
@@ -274,13 +306,17 @@ function openDecision(sub: Submission) {
                             v-if="filteredWaiting.length === 0"
                             class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
                         >
-                            <Clock class="mb-2 h-8 w-8 text-yellow-500 opacity-50" />
+                            <Clock
+                                class="mb-2 h-8 w-8 text-yellow-500 opacity-50"
+                            />
                             <p class="text-xs font-medium">
                                 Tidak ada kelompok yang sedang menunggu balasan.
                             </p>
                         </div>
                         <div v-else class="overflow-x-auto">
-                            <table class="w-full border-collapse text-left text-xs">
+                            <table
+                                class="w-full border-collapse text-left text-xs"
+                            >
                                 <thead>
                                     <tr
                                         class="border-b border-border/60 bg-muted/40 text-[10px] font-semibold text-muted-foreground uppercase"
@@ -299,14 +335,22 @@ function openDecision(sub: Submission) {
                                         class="transition-colors hover:bg-muted/10"
                                     >
                                         <td class="p-4">
-                                            <div class="text-xs font-semibold text-foreground">
+                                            <div
+                                                class="text-xs font-semibold text-foreground"
+                                            >
                                                 {{ sub.group.leader.name }}
                                             </div>
-                                            <div class="text-[10px] text-muted-foreground">
-                                                {{ sub.group.leader.nim || '-' }}
+                                            <div
+                                                class="text-[10px] text-muted-foreground"
+                                            >
+                                                {{
+                                                    sub.group.leader.nim || '-'
+                                                }}
                                             </div>
                                         </td>
-                                        <td class="p-4 font-medium text-foreground">
+                                        <td
+                                            class="p-4 font-medium text-foreground"
+                                        >
                                             {{ sub.company_name }}
                                         </td>
                                         <td class="p-4 text-center">
@@ -314,7 +358,10 @@ function openDecision(sub: Submission) {
                                                 variant="secondary"
                                                 class="px-2 py-0.5 font-mono text-[10px]"
                                             >
-                                                {{ sub.group.memberships_count }} Orang
+                                                {{
+                                                    sub.group.memberships_count
+                                                }}
+                                                Orang
                                             </Badge>
                                         </td>
                                         <td class="p-4 text-muted-foreground">
@@ -343,12 +390,16 @@ function openDecision(sub: Submission) {
             <TabsContent value="received">
                 <Card class="border-border/80 shadow-xs">
                     <CardHeader class="pb-3">
-                        <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                        <CardTitle
+                            class="flex items-center gap-2 text-base font-semibold text-foreground"
+                        >
                             <CheckCircle2 class="h-4 w-4 text-green-500" />
                             Kelompok Menerima Balasan Perusahaan
                         </CardTitle>
                         <CardDescription class="text-xs">
-                            Kelompok yang telah mengunggah bukti surat balasan dari perusahaan. Siap untuk proses keputusan penempatan.
+                            Kelompok yang telah mengunggah bukti surat balasan
+                            dari perusahaan. Siap untuk proses keputusan
+                            penempatan.
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="p-0">
@@ -360,11 +411,14 @@ function openDecision(sub: Submission) {
                                 class="mb-2 h-8 w-8 text-green-500 opacity-50"
                             />
                             <p class="text-xs font-medium">
-                                Tidak ada kelompok yang mengunggah surat balasan perusahaan.
+                                Tidak ada kelompok yang mengunggah surat balasan
+                                perusahaan.
                             </p>
                         </div>
                         <div v-else class="overflow-x-auto">
-                            <table class="w-full border-collapse text-left text-xs">
+                            <table
+                                class="w-full border-collapse text-left text-xs"
+                            >
                                 <thead>
                                     <tr
                                         class="border-b border-border/60 bg-muted/40 text-[10px] font-semibold text-muted-foreground uppercase"
@@ -384,14 +438,22 @@ function openDecision(sub: Submission) {
                                         class="transition-colors hover:bg-muted/10"
                                     >
                                         <td class="p-4">
-                                            <div class="text-xs font-semibold text-foreground">
+                                            <div
+                                                class="text-xs font-semibold text-foreground"
+                                            >
                                                 {{ sub.group.leader.name }}
                                             </div>
-                                            <div class="text-[10px] text-muted-foreground">
-                                                {{ sub.group.leader.nim || '-' }}
+                                            <div
+                                                class="text-[10px] text-muted-foreground"
+                                            >
+                                                {{
+                                                    sub.group.leader.nim || '-'
+                                                }}
                                             </div>
                                         </td>
-                                        <td class="p-4 font-medium text-foreground">
+                                        <td
+                                            class="p-4 font-medium text-foreground"
+                                        >
                                             {{ sub.company_name }}
                                         </td>
                                         <td class="p-4">
@@ -413,7 +475,10 @@ function openDecision(sub: Submission) {
                                                 variant="secondary"
                                                 class="px-2 py-0.5 font-mono text-[10px]"
                                             >
-                                                {{ sub.group.memberships_count }} Orang
+                                                {{
+                                                    sub.group.memberships_count
+                                                }}
+                                                Orang
                                             </Badge>
                                         </td>
                                         <td class="p-4">

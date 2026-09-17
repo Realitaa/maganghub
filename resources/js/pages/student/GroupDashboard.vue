@@ -164,8 +164,16 @@ const isSubmissionEditable = computed(() => {
 
 <template>
     <Head title="Beranda">
-        <link rel="preload" :href="group.banner_url ?? '/assets/images/default-company-background.png'" as="image"
-            type="image/webp" fetchpriority="high">
+        <link
+            rel="preload"
+            :href="
+                group.banner_url ??
+                '/assets/images/default-company-background.png'
+            "
+            as="image"
+            type="image/webp"
+            fetchpriority="high"
+        />
     </Head>
 
     <div class="flex-1">

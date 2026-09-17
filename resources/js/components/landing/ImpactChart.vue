@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { ChartData, ChartOptions } from 'chart.js';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import BaseChart from '@/components/ui/chart/BaseChart.vue';
 import type { CompanyStatistics } from '@/types';
-import type { ChartData, ChartOptions } from 'chart.js';
 
 const props = withDefaults(
     defineProps<{
@@ -28,6 +28,7 @@ let observer: MutationObserver | null = null;
 
 onMounted(() => {
     checkTheme();
+
     if (typeof document !== 'undefined') {
         observer = new MutationObserver(checkTheme);
         observer.observe(document.documentElement, {
@@ -126,8 +127,13 @@ const chartOptions = computed<ChartOptions<'pie'>>(() => {
                     },
                     generateLabels: (chart) => {
                         const data = chart.data;
-                        if (!data.labels || !data.datasets.length) return [];
+
+                        if (!data.labels || !data.datasets.length) {
+                            return [];
+                        }
+
                         const dataset = data.datasets[0];
+
                         return data.labels
                             .map((label, i) => {
                                 const val = (dataset.data[i] as number) || 0;
@@ -176,20 +182,24 @@ const chartOptions = computed<ChartOptions<'pie'>>(() => {
                 callbacks: {
                     label: (context) => {
                         const label = context.label || '';
+
                         if (
                             !props.showHavenotInLegend &&
                             label === 'Belum Magang'
                         ) {
                             return '';
                         }
+
                         const value = context.parsed;
-                        const total = (
-                            context.dataset.data as number[]
-                        ).reduce((a, b) => a + b, 0);
+                        const total = (context.dataset.data as number[]).reduce(
+                            (a, b) => a + b,
+                            0,
+                        );
                         const pct =
                             total > 0
                                 ? ((value / total) * 100).toFixed(1)
                                 : '0.0';
+
                         return ` ${label}: ${value} (${pct}%)`;
                     },
                 },
@@ -200,7 +210,7 @@ const chartOptions = computed<ChartOptions<'pie'>>(() => {
 </script>
 
 <template>
-    <div class="h-[360px] w-full min-w-0 max-w-full">
+    <div class="h-[360px] w-full max-w-full min-w-0">
         <BaseChart type="pie" :data="chartData" :options="chartOptions" />
     </div>
 </template>

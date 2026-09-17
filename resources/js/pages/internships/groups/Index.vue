@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Search, Briefcase, Building2, Calendar, ArrowRight } from '@lucide/vue';
+import {
+    Search,
+    Briefcase,
+    Building2,
+    Calendar,
+    ArrowRight,
+} from '@lucide/vue';
 import { ref, watch } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +34,10 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
-import { index as groupsIndex, show as groupShow } from '@/routes/internships/groups';
+import {
+    index as groupsIndex,
+    show as groupShow,
+} from '@/routes/internships/groups';
 import type { Group } from '@/types';
 
 // Define layout breadcrumbs
@@ -74,7 +83,10 @@ const applyFilters = () => {
         groupsIndex.url(),
         {
             search: searchQuery.value || undefined,
-            status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
+            status:
+                selectedStatus.value === 'all'
+                    ? undefined
+                    : selectedStatus.value,
         },
         {
             preserveState: true,
@@ -97,8 +109,15 @@ watch(selectedStatus, () => {
 // Navigate to detail preserving current filters in URL
 function goToDetail(group: Group) {
     const params = new URLSearchParams();
-    if (searchQuery.value) params.set('search', searchQuery.value);
-    if (selectedStatus.value && selectedStatus.value !== 'all') params.set('status', selectedStatus.value);
+
+    if (searchQuery.value) {
+        params.set('search', searchQuery.value);
+    }
+
+    if (selectedStatus.value && selectedStatus.value !== 'all') {
+        params.set('status', selectedStatus.value);
+    }
+
     const qs = params.toString();
     const url = groupShow.url({ group: group.code }) + (qs ? `?${qs}` : '');
     router.visit(url);
@@ -160,7 +179,8 @@ function getStatusClass(status?: string): string {
                 Manajemen Magang
             </h1>
             <p class="mt-1 text-sm text-muted-foreground">
-                Daftar seluruh kelompok magang dari berbagai tahap dan status pelaksanaan.
+                Daftar seluruh kelompok magang dari berbagai tahap dan status
+                pelaksanaan.
             </p>
         </div>
 
@@ -200,17 +220,39 @@ function getStatusClass(status?: string): string {
                                     <SelectValue placeholder="Semua Status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Semua Status</SelectItem>
-                                    <SelectItem value="forming">Pembentukan</SelectItem>
-                                    <SelectItem value="submitted">Diajukan</SelectItem>
-                                    <SelectItem value="letter_published">Surat Terbit</SelectItem>
-                                    <SelectItem value="applying">Mengajukan</SelectItem>
-                                    <SelectItem value="loa_review">Review LoA</SelectItem>
-                                    <SelectItem value="accepted">Diterima</SelectItem>
-                                    <SelectItem value="partially_accepted">Diterima Sebagian</SelectItem>
-                                    <SelectItem value="rejected">Ditolak</SelectItem>
-                                    <SelectItem value="internship_started">Sedang Magang</SelectItem>
-                                    <SelectItem value="completed">Selesai Magang</SelectItem>
+                                    <SelectItem value="all"
+                                        >Semua Status</SelectItem
+                                    >
+                                    <SelectItem value="forming"
+                                        >Pembentukan</SelectItem
+                                    >
+                                    <SelectItem value="submitted"
+                                        >Diajukan</SelectItem
+                                    >
+                                    <SelectItem value="letter_published"
+                                        >Surat Terbit</SelectItem
+                                    >
+                                    <SelectItem value="applying"
+                                        >Mengajukan</SelectItem
+                                    >
+                                    <SelectItem value="loa_review"
+                                        >Review LoA</SelectItem
+                                    >
+                                    <SelectItem value="accepted"
+                                        >Diterima</SelectItem
+                                    >
+                                    <SelectItem value="partially_accepted"
+                                        >Diterima Sebagian</SelectItem
+                                    >
+                                    <SelectItem value="rejected"
+                                        >Ditolak</SelectItem
+                                    >
+                                    <SelectItem value="internship_started"
+                                        >Sedang Magang</SelectItem
+                                    >
+                                    <SelectItem value="completed"
+                                        >Selesai Magang</SelectItem
+                                    >
                                 </SelectContent>
                             </Select>
                         </div>
@@ -282,7 +324,9 @@ function getStatusClass(status?: string): string {
                                 <TableCell
                                     class="py-4 font-medium text-foreground"
                                 >
-                                    <div class="flex items-center gap-1.5 text-xs">
+                                    <div
+                                        class="flex items-center gap-1.5 text-xs"
+                                    >
                                         <Building2
                                             class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
@@ -302,7 +346,14 @@ function getStatusClass(status?: string): string {
                                         <Calendar
                                             class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                                         />
-                                        <span v-if="group.active_submission?.start_date || group.activeSubmission?.start_date">
+                                        <span
+                                            v-if="
+                                                group.active_submission
+                                                    ?.start_date ||
+                                                group.activeSubmission
+                                                    ?.start_date
+                                            "
+                                        >
                                             {{
                                                 formatDate(
                                                     group.active_submission
@@ -313,7 +364,8 @@ function getStatusClass(status?: string): string {
                                             }}
                                             <span
                                                 class="mx-1 text-muted-foreground/50"
-                                            >s/d</span>
+                                                >s/d</span
+                                            >
                                             {{
                                                 formatDate(
                                                     group.active_submission
@@ -328,25 +380,17 @@ function getStatusClass(status?: string): string {
                                 </TableCell>
                                 <TableCell class="py-4 text-center">
                                     <Badge
-                                        :class="
-                                            getStatusClass(
-                                                group.status,
-                                            )
-                                        "
+                                        :class="getStatusClass(group.status)"
                                         class="border px-2.5 py-1 text-[10px] font-medium shadow-2xs transition-all"
                                     >
-                                        {{
-                                            getStatusLabel(
-                                                group.status,
-                                            )
-                                        }}
+                                        {{ getStatusLabel(group.status) }}
                                     </Badge>
                                 </TableCell>
                                 <TableCell class="py-4 text-right">
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        class="h-8 cursor-pointer gap-1.5 font-medium text-xs"
+                                        class="h-8 cursor-pointer gap-1.5 text-xs font-medium"
                                         @click="goToDetail(group)"
                                         :id="`btn-detail-group-${group.id}`"
                                     >

@@ -133,6 +133,7 @@ const previewContainerRef = ref<HTMLElement | null>(null);
 async function loadTemplatePreview() {
     if (!props.template.exists) {
         previewError.value = 'Template surat belum diunggah.';
+
         return;
     }
 
@@ -141,6 +142,7 @@ async function loadTemplatePreview() {
 
     try {
         const response = await fetch(templateRawRoute.url());
+
         if (!response.ok) {
             throw new Error('Gagal mengambil berkas template surat.');
         }
@@ -149,11 +151,16 @@ async function loadTemplatePreview() {
 
         if (previewContainerRef.value) {
             previewContainerRef.value.innerHTML = '';
-            await renderAsync(arrayBuffer, previewContainerRef.value, undefined, {
-                inWrapper: true,
-                ignoreWidth: true,
-                breakPages: true,
-            });
+            await renderAsync(
+                arrayBuffer,
+                previewContainerRef.value,
+                undefined,
+                {
+                    inWrapper: true,
+                    ignoreWidth: true,
+                    breakPages: true,
+                },
+            );
         }
     } catch (err: any) {
         previewError.value =
@@ -166,12 +173,14 @@ async function loadTemplatePreview() {
 async function loadProcessedPreview() {
     if (!props.template.exists) {
         previewError.value = 'Template surat belum diunggah.';
+
         return;
     }
 
     if (!selectedGroupId.value) {
         previewError.value =
             'Silakan pilih kelompok terlebih dahulu untuk melihat pratinjau hasil penimpaan data.';
+
         return;
     }
 
@@ -184,6 +193,7 @@ async function loadProcessedPreview() {
 
         if (!response.ok) {
             const errorText = await response.text();
+
             throw new Error(
                 errorText || 'Gagal memproses penimpaan template dokumen.',
             );
@@ -193,11 +203,16 @@ async function loadProcessedPreview() {
 
         if (previewContainerRef.value) {
             previewContainerRef.value.innerHTML = '';
-            await renderAsync(arrayBuffer, previewContainerRef.value, undefined, {
-                inWrapper: true,
-                ignoreWidth: true,
-                breakPages: true,
-            });
+            await renderAsync(
+                arrayBuffer,
+                previewContainerRef.value,
+                undefined,
+                {
+                    inWrapper: true,
+                    ignoreWidth: true,
+                    breakPages: true,
+                },
+            );
         }
     } catch (err: any) {
         previewError.value =
@@ -313,18 +328,26 @@ onMounted(() => {
 
                         <!-- Form Perbarui Berkas Template -->
                         <div class="space-y-3">
-                            <Label class="text-xs font-semibold text-foreground">
+                            <Label
+                                class="text-xs font-semibold text-foreground"
+                            >
                                 Perbarui Berkas Template
                             </Label>
                             <div
-                                class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/80 p-5 text-center transition-colors hover:bg-muted/10 cursor-pointer"
+                                class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/80 p-5 text-center transition-colors hover:bg-muted/10"
                                 @click="triggerUpload"
                             >
-                                <FileText class="mb-2 h-8 w-8 text-muted-foreground" />
-                                <h4 class="text-xs font-semibold text-foreground">
+                                <FileText
+                                    class="mb-2 h-8 w-8 text-muted-foreground"
+                                />
+                                <h4
+                                    class="text-xs font-semibold text-foreground"
+                                >
                                     Format Dokumen Word (.docx)
                                 </h4>
-                                <p class="mt-0.5 text-[11px] text-muted-foreground">
+                                <p
+                                    class="mt-0.5 text-[11px] text-muted-foreground"
+                                >
                                     Gunakan berkas .docx maksimal 2 MB.
                                 </p>
                             </div>
@@ -396,10 +419,11 @@ onMounted(() => {
                             </p>
                             <p
                                 v-else
-                                class="text-[11px] text-muted-foreground leading-relaxed"
+                                class="text-[11px] leading-relaxed text-muted-foreground"
                             >
                                 Pilih kelompok di atas untuk menguji penimpaan
-                                variabel otomatis pada tab &ldquo;Diproses&rdquo;.
+                                variabel otomatis pada tab
+                                &ldquo;Diproses&rdquo;.
                             </p>
                         </div>
 
@@ -495,14 +519,14 @@ onMounted(() => {
                         >
                             <TabsTrigger
                                 value="template"
-                                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs cursor-pointer"
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
                             >
                                 <FileText class="h-3.5 w-3.5" />
                                 <span>Template</span>
                             </TabsTrigger>
                             <TabsTrigger
                                 value="processed"
-                                class="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs cursor-pointer"
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
                             >
                                 <FileCheck2 class="h-3.5 w-3.5" />
                                 <span>Diproses</span>
@@ -515,14 +539,15 @@ onMounted(() => {
                             Menampilkan dokumen template asli (.docx).
                         </span>
                         <span v-else>
-                            Menampilkan dokumen setelah ditimpa informasi kelompok terpilih.
+                            Menampilkan dokumen setelah ditimpa informasi
+                            kelompok terpilih.
                         </span>
                     </p>
                 </div>
 
                 <!-- Kartu Pratinjau (Background putih, border-0, rounded-none) -->
                 <div
-                    class="relative w-full overflow-hidden bg-white text-zinc-900 border-0 rounded-none shadow-sm dark:bg-white dark:text-zinc-900 min-h-[500px]"
+                    class="relative min-h-[500px] w-full overflow-hidden rounded-none border-0 bg-white text-zinc-900 shadow-sm dark:bg-white dark:text-zinc-900"
                 >
                     <!-- Loading State Overlay -->
                     <div
@@ -571,11 +596,11 @@ onMounted(() => {
                     <!-- Docx Render View -->
                     <div
                         v-show="template.exists && !previewError"
-                        class="max-h-[850px] min-h-[500px] w-full overflow-auto p-4 flex flex-col items-center"
+                        class="flex max-h-[850px] min-h-[500px] w-full flex-col items-center overflow-auto p-4"
                     >
                         <div
                             ref="previewContainerRef"
-                            class="w-full flex flex-col items-center"
+                            class="flex w-full flex-col items-center"
                         />
                     </div>
                 </div>
@@ -595,7 +620,9 @@ onMounted(() => {
 }
 
 :deep(.docx-wrapper > section.docx) {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06) !important;
+    box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.08),
+        0 2px 4px -2px rgb(0 0 0 / 0.06) !important;
     margin-bottom: 24px !important;
     border: 1px solid #e4e4e7 !important;
     max-width: 100% !important;

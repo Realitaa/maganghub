@@ -148,12 +148,18 @@ const endDateValue = computed({
 });
 
 const editable = computed(() => {
-    if (props.mode === 'admin') return true;
+    if (props.mode === 'admin') {
+        return true;
+    }
+
     return props.isSubmissionEditable;
 });
 
 const minStartDate = computed(() => {
-    if (props.mode === 'admin') return undefined;
+    if (props.mode === 'admin') {
+        return undefined;
+    }
+
     return today(getLocalTimeZone());
 });
 
@@ -162,7 +168,10 @@ const minEndDate = computed(() => {
         return startDateValue.value.add({ days: 1 });
     }
 
-    if (props.mode === 'admin') return undefined;
+    if (props.mode === 'admin') {
+        return undefined;
+    }
+
     return today(getLocalTimeZone()).add({ days: 1 });
 });
 
@@ -209,12 +218,15 @@ function submitSubmissionProposal() {
 
 function saveAdminSubmission() {
     isProcessing.value = true;
-    submissionForm.post(adminUpdateSubmissionRoute.url({ group: props.group.code }), {
-        preserveScroll: true,
-        onFinish: () => {
-            isProcessing.value = false;
+    submissionForm.post(
+        adminUpdateSubmissionRoute.url({ group: props.group.code }),
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isProcessing.value = false;
+            },
         },
-    });
+    );
 }
 </script>
 
@@ -242,10 +254,12 @@ function saveAdminSubmission() {
                 <AlertTitle v-if="isLeader">
                     Persiapan Pengajuan Magang
                 </AlertTitle>
-                <AlertTitle v-else> Menunggu Pengajuan Ketua Kelompok </AlertTitle>
+                <AlertTitle v-else>
+                    Menunggu Pengajuan Ketua Kelompok
+                </AlertTitle>
                 <AlertDescription v-if="isLeader">
-                    Isi data instansi/perusahaan tujuan magang di bawah ini. Setelah
-                    diajukan, data dan keanggotaan akan
+                    Isi data instansi/perusahaan tujuan magang di bawah ini.
+                    Setelah diajukan, data dan keanggotaan akan
                     <strong>dikunci</strong>.
                 </AlertDescription>
                 <AlertDescription v-else>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { ChartData, ChartOptions } from 'chart.js';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import BaseChart from '@/components/ui/chart/BaseChart.vue';
 import type { GroupStatusDistributionItem } from '@/types';
-import type { ChartData, ChartOptions } from 'chart.js';
 
 const props = defineProps<{
     items: GroupStatusDistributionItem[];
@@ -21,6 +21,7 @@ let observer: MutationObserver | null = null;
 
 onMounted(() => {
     checkTheme();
+
     if (typeof document !== 'undefined') {
         observer = new MutationObserver(checkTheme);
         observer.observe(document.documentElement, {
@@ -90,10 +91,16 @@ const chartOptions = computed<ChartOptions<'doughnut'>>(() => {
                     },
                     generateLabels: (chart) => {
                         const data = chart.data;
-                        if (!data.labels || !data.datasets.length) return [];
+
+                        if (!data.labels || !data.datasets.length) {
+                            return [];
+                        }
+
                         const dataset = data.datasets[0];
+
                         return data.labels.map((label, i) => {
                             const val = (dataset.data[i] as number) || 0;
+
                             return {
                                 text: `${label} (${val})`,
                                 fillStyle: (
@@ -124,13 +131,15 @@ const chartOptions = computed<ChartOptions<'doughnut'>>(() => {
                     label: (context) => {
                         const label = context.label || '';
                         const value = context.parsed;
-                        const total = (
-                            context.dataset.data as number[]
-                        ).reduce((a, b) => a + b, 0);
+                        const total = (context.dataset.data as number[]).reduce(
+                            (a, b) => a + b,
+                            0,
+                        );
                         const pct =
                             total > 0
                                 ? ((value / total) * 100).toFixed(1)
                                 : '0.0';
+
                         return ` ${label}: ${value} kelompok (${pct}%)`;
                     },
                 },

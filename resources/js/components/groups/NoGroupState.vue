@@ -296,7 +296,9 @@ function cancelJoinRequest(requestId: number) {
                     </div>
 
                     <!-- Help/Tip Section (Before Divider) -->
-                    <div class="text-xs font-light text-muted-foreground sm:text-sm">
+                    <div
+                        class="text-xs font-light text-muted-foreground sm:text-sm"
+                    >
                         <template v-if="isLocked">
                             <span
                                 class="flex items-center justify-center gap-1.5 text-amber-600 lg:justify-start dark:text-amber-400"

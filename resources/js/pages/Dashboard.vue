@@ -53,7 +53,10 @@ const userName = computed(() => page.props.auth?.user?.name ?? 'Admin');
 const { formatDateTime } = useIdTimeFormat();
 
 const formattedUpdatedAt = computed(() => {
-    if (!props.publicChart?.updated_at) return '-';
+    if (!props.publicChart?.updated_at) {
+        return '-';
+    }
+
     return formatDateTime(props.publicChart.updated_at);
 });
 </script>
@@ -266,8 +269,8 @@ const formattedUpdatedAt = computed(() => {
                         Status Mahasiswa Magang
                     </CardTitle>
                     <CardDescription>
-                        Ditampilkan di halaman utama pada bagian
-                        &ldquo;Mengapa Magang Penting?&rdquo;
+                        Ditampilkan di halaman utama pada bagian &ldquo;Mengapa
+                        Magang Penting?&rdquo;
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="flex flex-1 flex-col justify-between">

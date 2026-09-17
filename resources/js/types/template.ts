@@ -19,4 +19,3 @@ export interface TemplatePlaceholder {
     description: string;
     example: string;
 }
-

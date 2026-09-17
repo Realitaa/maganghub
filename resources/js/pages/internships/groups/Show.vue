@@ -70,11 +70,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { useIdTimeFormat } from '@/composables/useIdTimeFormat';
-import {
-    downloadLetter,
-    downloadResponse,
-} from '@/routes/groups/submissions';
+import { downloadLetter, downloadResponse } from '@/routes/groups/submissions';
 import {
     index as groupsIndex,
     kick as kickMemberRoute,
@@ -105,8 +101,6 @@ defineOptions({
 const props = defineProps<{
     group: Group;
 }>();
-
-const { formatDate, formatDateTime } = useIdTimeFormat();
 
 // ─── Navigation State ─────────────────────────────────────────────────────────
 
@@ -206,9 +200,13 @@ function openKickModal(user: User) {
 }
 
 function submitKick() {
-    if (!memberToKick.value) return;
+    if (!memberToKick.value) {
+        return;
+    }
+
     if (!kickReason.value.trim()) {
         kickError.value = 'Alasan mengeluarkan anggota wajib diisi.';
+
         return;
     }
 
@@ -227,7 +225,9 @@ function submitKick() {
             },
             onError: (errors) => {
                 kickError.value =
-                    errors.reason || errors.user_id || 'Gagal mengeluarkan anggota kelompok.';
+                    errors.reason ||
+                    errors.user_id ||
+                    'Gagal mengeluarkan anggota kelompok.';
             },
             onFinish: () => {
                 kickProcessing.value = false;
@@ -250,7 +250,9 @@ function openChangeLeaderModal(user: User) {
 }
 
 function submitChangeLeader() {
-    if (!memberToPromote.value) return;
+    if (!memberToPromote.value) {
+        return;
+    }
 
     changeLeaderProcessing.value = true;
     router.post(
@@ -299,28 +301,30 @@ function triggerResponseUpload() {
 
 function handleLetterChange(event: Event) {
     const target = event.target as HTMLInputElement;
+
     if (target.files && target.files[0]) {
         letterForm.file = target.files[0];
         isUploadingLetter.value = true;
 
-        letterForm.post(
-            replaceLetterRoute.url({ group: props.group.code }),
-            {
-                forceFormData: true,
-                onSuccess: () => {
-                    letterForm.reset();
-                    if (letterInput.value) letterInput.value.value = '';
-                },
-                onFinish: () => {
-                    isUploadingLetter.value = false;
-                },
+        letterForm.post(replaceLetterRoute.url({ group: props.group.code }), {
+            forceFormData: true,
+            onSuccess: () => {
+                letterForm.reset();
+
+                if (letterInput.value) {
+                    letterInput.value.value = '';
+                }
             },
-        );
+            onFinish: () => {
+                isUploadingLetter.value = false;
+            },
+        });
     }
 }
 
 function handleResponseChange(event: Event) {
     const target = event.target as HTMLInputElement;
+
     if (target.files && target.files[0]) {
         responseForm.file = target.files[0];
         isUploadingResponse.value = true;
@@ -331,7 +335,10 @@ function handleResponseChange(event: Event) {
                 forceFormData: true,
                 onSuccess: () => {
                     responseForm.reset();
-                    if (responseInput.value) responseInput.value.value = '';
+
+                    if (responseInput.value) {
+                        responseInput.value.value = '';
+                    }
                 },
                 onFinish: () => {
                     isUploadingResponse.value = false;
@@ -343,7 +350,10 @@ function handleResponseChange(event: Event) {
 
 // Redirect to user management search
 function navigateToUserManagement(nim?: string | null) {
-    if (!nim) return;
+    if (!nim) {
+        return;
+    }
+
     router.visit(usersIndex.url({ query: { search: nim } }));
 }
 
@@ -363,16 +373,13 @@ function openAdminStatusModal() {
 }
 
 function submitAdminStatus() {
-    adminStatusForm.post(
-        updateStatusRoute.url({ group: props.group.code }),
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                showAdminStatusDialog.value = false;
-                adminStatusForm.reset();
-            },
+    adminStatusForm.post(updateStatusRoute.url({ group: props.group.code }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAdminStatusDialog.value = false;
+            adminStatusForm.reset();
         },
-    );
+    });
 }
 
 // ─── Danger Zone: Admin Disband Group ─────────────────────────────────────────
@@ -389,25 +396,27 @@ function openDisbandModal() {
 }
 
 function submitDisbandGroup() {
-    disbandForm.delete(
-        disbandGroupRoute.url({ group: props.group.code }),
-        {
-            onSuccess: () => {
-                showDisbandDialog.value = false;
-            },
+    disbandForm.delete(disbandGroupRoute.url({ group: props.group.code }), {
+        onSuccess: () => {
+            showDisbandDialog.value = false;
         },
-    );
+    });
 }
 </script>
 
 <template>
-    <Head :title="`Detail Kelompok - ${group.active_submission?.company_name || group.leader?.name}`" />
+    <Head
+        :title="`Detail Kelompok - ${group.active_submission?.company_name || group.leader?.name}`"
+    />
 
     <div class="flex-1">
         <!-- ─── 1. HERO: BANNER KELOMPOK (AT THE VERY TOP) ─── -->
         <div class="relative h-48 w-full overflow-hidden md:h-64">
             <img
-                :src="group.banner_url ?? '/assets/images/default-company-background.png'"
+                :src="
+                    group.banner_url ??
+                    '/assets/images/default-company-background.png'
+                "
                 :alt="`Banner kelompok ${group.leader?.name}`"
                 class="h-full w-full object-cover"
                 fetchpriority="high"
@@ -480,7 +489,9 @@ function submitDisbandGroup() {
                                     >
                                         {{ statusLabel }}
                                     </p>
-                                    <p class="text-[11px] text-muted-foreground">
+                                    <p
+                                        class="text-[11px] text-muted-foreground"
+                                    >
                                         {{ statusDescription }}
                                     </p>
                                 </div>
@@ -545,11 +556,14 @@ function submitDisbandGroup() {
                 <TabsContent value="details" class="space-y-6">
                     <Card class="border border-border/80 shadow-xs">
                         <CardHeader class="pb-3">
-                            <CardTitle class="text-base font-semibold text-foreground">
+                            <CardTitle
+                                class="text-base font-semibold text-foreground"
+                            >
                                 Daftar Anggota Kelompok
                             </CardTitle>
                             <CardDescription class="text-xs">
-                                Kelola mahasiswa yang tergabung dalam kelompok magang ini.
+                                Kelola mahasiswa yang tergabung dalam kelompok
+                                magang ini.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="p-0">
@@ -605,7 +619,7 @@ function submitDisbandGroup() {
                                     >
                                         <!-- Nama -->
                                         <TableCell
-                                            class="p-4 align-middle font-medium text-foreground text-xs"
+                                            class="p-4 align-middle text-xs font-medium text-foreground"
                                         >
                                             {{ membership.user?.name }}
                                         </TableCell>
@@ -619,7 +633,7 @@ function submitDisbandGroup() {
 
                                         <!-- NIM -->
                                         <TableCell
-                                            class="p-4 align-middle text-xs font-mono text-muted-foreground"
+                                            class="p-4 align-middle font-mono text-xs text-muted-foreground"
                                         >
                                             {{ membership.user?.nim || '-' }}
                                         </TableCell>
@@ -647,9 +661,11 @@ function submitDisbandGroup() {
                                                     group.leader_id
                                                 "
                                                 variant="default"
-                                                class="gap-1 font-semibold text-[10px]"
+                                                class="gap-1 text-[10px] font-semibold"
                                             >
-                                                <Crown class="h-3 w-3 text-amber-400" />
+                                                <Crown
+                                                    class="h-3 w-3 text-amber-400"
+                                                />
                                                 Ketua
                                             </Badge>
                                             <Badge
@@ -697,7 +713,10 @@ function submitDisbandGroup() {
                                                         <UserIcon
                                                             class="mr-2 h-4 w-4 text-primary"
                                                         />
-                                                        <span>Ke Manajemen Pengguna</span>
+                                                        <span
+                                                            >Ke Manajemen
+                                                            Pengguna</span
+                                                        >
                                                         <ExternalLink
                                                             class="ml-auto h-3 w-3 opacity-60"
                                                         />
@@ -728,7 +747,10 @@ function submitDisbandGroup() {
                                                         <Crown
                                                             class="mr-2 h-4 w-4"
                                                         />
-                                                        <span>Angkat Jadi Ketua</span>
+                                                        <span
+                                                            >Angkat Jadi
+                                                            Ketua</span
+                                                        >
                                                     </DropdownMenuItem>
 
                                                     <!-- 3. Tendang Anggota (Hanya Anggota Biasa) -->
@@ -762,37 +784,59 @@ function submitDisbandGroup() {
                     <!-- ─── 2. INFORMASI LENGKAP KELOMPOK MAGANG ─── -->
                     <Card class="border border-border/80 shadow-xs">
                         <CardHeader class="pb-3">
-                            <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                            <CardTitle
+                                class="flex items-center gap-2 text-base font-semibold text-foreground"
+                            >
                                 <Building2 class="h-4 w-4 text-primary" />
                                 Informasi Lengkap Kelompok Magang
                             </CardTitle>
                             <CardDescription class="text-xs">
-                                Perbarui informasi instansi, divisi, bidang, model kerja, serta periode pelaksanaan magang kelompok ini.
+                                Perbarui informasi instansi, divisi, bidang,
+                                model kerja, serta periode pelaksanaan magang
+                                kelompok ini.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <InternshipSubmissionForm :group="group" mode="admin" />
+                            <InternshipSubmissionForm
+                                :group="group"
+                                mode="admin"
+                            />
                         </CardContent>
                     </Card>
 
                     <!-- ─── 3. DANGER ZONE ─── -->
                     <Card class="border border-border/80 shadow-xs">
                         <CardHeader class="pb-3">
-                            <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                            <CardTitle
+                                class="flex items-center gap-2 text-base font-semibold text-foreground"
+                            >
                                 <AlertTriangle class="h-4 w-4 text-amber-500" />
                                 Danger Zone
                             </CardTitle>
                             <CardDescription class="text-xs">
-                                Tindakan di bawah ini dapat mengubah alur kritis kelompok magang. Harap berhati-hati sebelum melakukan perubahan status atau membubarkan kelompok.
+                                Tindakan di bawah ini dapat mengubah alur kritis
+                                kelompok magang. Harap berhati-hati sebelum
+                                melakukan perubahan status atau membubarkan
+                                kelompok.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <!-- Ubah Status Kelompok -->
-                            <div class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div
+                                class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                            >
                                 <div class="space-y-1">
-                                    <h4 class="text-sm font-semibold text-foreground">Ubah Status Kelompok</h4>
+                                    <h4
+                                        class="text-sm font-semibold text-foreground"
+                                    >
+                                        Ubah Status Kelompok
+                                    </h4>
                                     <p class="text-xs text-muted-foreground">
-                                        Paksa perubahan status tahapan magang kelompok ini ke alur lain. Perubahan ini akan mengirim notifikasi ke seluruh anggota kelompok dan mencatat riwayat aktivitas.
+                                        Paksa perubahan status tahapan magang
+                                        kelompok ini ke alur lain. Perubahan ini
+                                        akan mengirim notifikasi ke seluruh
+                                        anggota kelompok dan mencatat riwayat
+                                        aktivitas.
                                     </p>
                                 </div>
                                 <Button
@@ -806,11 +850,20 @@ function submitDisbandGroup() {
                             </div>
 
                             <!-- Bubarkan Kelompok -->
-                            <div class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div
+                                class="flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                            >
                                 <div class="space-y-1">
-                                    <h4 class="text-sm font-semibold text-foreground">Bubarkan Kelompok</h4>
+                                    <h4
+                                        class="text-sm font-semibold text-foreground"
+                                    >
+                                        Bubarkan Kelompok
+                                    </h4>
                                     <p class="text-xs text-muted-foreground">
-                                        Membubarkan kelompok ini secara permanen. Seluruh anggota akan menerima notifikasi dan data keanggotaan serta pengajuan akan dihapus.
+                                        Membubarkan kelompok ini secara
+                                        permanen. Seluruh anggota akan menerima
+                                        notifikasi dan data keanggotaan serta
+                                        pengajuan akan dihapus.
                                     </p>
                                 </div>
                                 <Button
@@ -848,22 +901,32 @@ function submitDisbandGroup() {
                         <!-- Card 1: Surat Permohonan Magang -->
                         <Card class="border border-border/80 shadow-xs">
                             <CardHeader class="pb-3">
-                                <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                                <CardTitle
+                                    class="flex items-center gap-2 text-base font-semibold text-foreground"
+                                >
                                     <FileText class="h-4 w-4 text-primary" />
                                     Surat Permohonan Magang
                                 </CardTitle>
                                 <CardDescription class="text-xs">
-                                    Surat izin / pengantar resmi dari kampus untuk diajukan ke instansi tujuan.
+                                    Surat izin / pengantar resmi dari kampus
+                                    untuk diajukan ke instansi tujuan.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent class="space-y-4">
                                 <div
-                                    class="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2 text-xs"
+                                    class="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-4 text-xs"
                                 >
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-muted-foreground">Status Berkas:</span>
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span class="text-muted-foreground"
+                                            >Status Berkas:</span
+                                        >
                                         <Badge
-                                            v-if="group.active_submission?.letter_path"
+                                            v-if="
+                                                group.active_submission
+                                                    ?.letter_path
+                                            "
                                             class="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                                         >
                                             Tersedia
@@ -872,22 +935,36 @@ function submitDisbandGroup() {
                                             Belum Terbit
                                         </Badge>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-muted-foreground">Instansi Tujuan:</span>
-                                        <span class="font-medium text-foreground">
-                                            {{ group.active_submission?.company_name || '-' }}
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span class="text-muted-foreground"
+                                            >Instansi Tujuan:</span
+                                        >
+                                        <span
+                                            class="font-medium text-foreground"
+                                        >
+                                            {{
+                                                group.active_submission
+                                                    ?.company_name || '-'
+                                            }}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2 pt-2">
+                                <div
+                                    class="flex flex-wrap items-center gap-2 pt-2"
+                                >
                                     <!-- Download Letter -->
                                     <Button
-                                        v-if="group.active_submission?.letter_path"
+                                        v-if="
+                                            group.active_submission?.letter_path
+                                        "
                                         as="a"
                                         :href="
                                             downloadLetter.url({
-                                                submission: group.active_submission.id,
+                                                submission:
+                                                    group.active_submission.id,
                                             })
                                         "
                                         target="_blank"
@@ -905,7 +982,10 @@ function submitDisbandGroup() {
                                         variant="default"
                                         class="cursor-pointer gap-1.5 text-xs font-medium"
                                         @click="triggerLetterUpload"
-                                        :disabled="isUploadingLetter || !group.active_submission"
+                                        :disabled="
+                                            isUploadingLetter ||
+                                            !group.active_submission
+                                        "
                                         id="btn-replace-letter"
                                     >
                                         <Spinner
@@ -915,7 +995,8 @@ function submitDisbandGroup() {
                                         <Upload v-else class="h-3.5 w-3.5" />
                                         <span>
                                             {{
-                                                group.active_submission?.letter_path
+                                                group.active_submission
+                                                    ?.letter_path
                                                     ? 'Timpa Surat Permohonan'
                                                     : 'Unggah Surat Permohonan'
                                             }}
@@ -924,7 +1005,7 @@ function submitDisbandGroup() {
                                 </div>
                                 <p
                                     v-if="letterForm.errors.file"
-                                    class="text-xs text-destructive font-medium"
+                                    class="text-xs font-medium text-destructive"
                                 >
                                     {{ letterForm.errors.file }}
                                 </p>
@@ -934,22 +1015,32 @@ function submitDisbandGroup() {
                         <!-- Card 2: Surat Balasan Perusahaan (LoA) -->
                         <Card class="border border-border/80 shadow-xs">
                             <CardHeader class="pb-3">
-                                <CardTitle class="flex items-center gap-2 text-base font-semibold text-foreground">
+                                <CardTitle
+                                    class="flex items-center gap-2 text-base font-semibold text-foreground"
+                                >
                                     <FileSearch class="h-4 w-4 text-primary" />
                                     Surat Balasan / LoA Perusahaan
                                 </CardTitle>
                                 <CardDescription class="text-xs">
-                                    Surat keputusan resmi penerimaan atau penolakan magang dari pihak perusahaan.
+                                    Surat keputusan resmi penerimaan atau
+                                    penolakan magang dari pihak perusahaan.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent class="space-y-4">
                                 <div
-                                    class="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2 text-xs"
+                                    class="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-4 text-xs"
                                 >
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-muted-foreground">Status Balasan:</span>
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span class="text-muted-foreground"
+                                            >Status Balasan:</span
+                                        >
                                         <Badge
-                                            v-if="group.active_submission?.company_response_path"
+                                            v-if="
+                                                group.active_submission
+                                                    ?.company_response_path
+                                            "
                                             class="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                                         >
                                             Sudah Diunggah
@@ -958,22 +1049,34 @@ function submitDisbandGroup() {
                                             Belum Ada
                                         </Badge>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-muted-foreground">Status Magang:</span>
-                                        <span class="font-medium text-foreground">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span class="text-muted-foreground"
+                                            >Status Magang:</span
+                                        >
+                                        <span
+                                            class="font-medium text-foreground"
+                                        >
                                             {{ statusLabel }}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2 pt-2">
+                                <div
+                                    class="flex flex-wrap items-center gap-2 pt-2"
+                                >
                                     <!-- Download Response -->
                                     <Button
-                                        v-if="group.active_submission?.company_response_path"
+                                        v-if="
+                                            group.active_submission
+                                                ?.company_response_path
+                                        "
                                         as="a"
                                         :href="
                                             downloadResponse.url({
-                                                submission: group.active_submission.id,
+                                                submission:
+                                                    group.active_submission.id,
                                             })
                                         "
                                         target="_blank"
@@ -991,7 +1094,10 @@ function submitDisbandGroup() {
                                         variant="default"
                                         class="cursor-pointer gap-1.5 text-xs font-medium"
                                         @click="triggerResponseUpload"
-                                        :disabled="isUploadingResponse || !group.active_submission"
+                                        :disabled="
+                                            isUploadingResponse ||
+                                            !group.active_submission
+                                        "
                                         id="btn-replace-response"
                                     >
                                         <Spinner
@@ -1001,7 +1107,8 @@ function submitDisbandGroup() {
                                         <Upload v-else class="h-3.5 w-3.5" />
                                         <span>
                                             {{
-                                                group.active_submission?.company_response_path
+                                                group.active_submission
+                                                    ?.company_response_path
                                                     ? 'Timpa Surat Balasan'
                                                     : 'Unggah Surat Balasan'
                                             }}
@@ -1010,7 +1117,7 @@ function submitDisbandGroup() {
                                 </div>
                                 <p
                                     v-if="responseForm.errors.file"
-                                    class="text-xs text-destructive font-medium"
+                                    class="text-xs font-medium text-destructive"
                                 >
                                     {{ responseForm.errors.file }}
                                 </p>
@@ -1037,13 +1144,16 @@ function submitDisbandGroup() {
         <Dialog v-model:open="showKickDialog">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle class="flex items-center gap-2 text-destructive">
+                    <DialogTitle
+                        class="flex items-center gap-2 text-destructive"
+                    >
                         <UserMinus class="h-5 w-5" />
                         Keluarkan Mahasiswa dari Kelompok
                     </DialogTitle>
                     <DialogDescription class="text-xs">
-                        Tindakan ini akan mencabut keanggotaan mahasiswa dari kelompok magang ini.
-                        Mahasiswa akan menerima notifikasi beserta alasan yang Anda cantumkan di bawah ini.
+                        Tindakan ini akan mencabut keanggotaan mahasiswa dari
+                        kelompok magang ini. Mahasiswa akan menerima notifikasi
+                        beserta alasan yang Anda cantumkan di bawah ini.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -1056,21 +1166,26 @@ function submitDisbandGroup() {
                             {{ memberToKick.name }}
                         </p>
                         <p class="text-muted-foreground">
-                            NIM: {{ memberToKick.nim || '-' }} &bull; {{ memberToKick.email }}
+                            NIM: {{ memberToKick.nim || '-' }} &bull;
+                            {{ memberToKick.email }}
                         </p>
                     </div>
 
                     <div class="space-y-1.5">
                         <Label for="kick-reason" class="text-xs font-medium">
-                            Alasan Mengeluarkan Anggota <span class="text-destructive">*</span>
+                            Alasan Mengeluarkan Anggota
+                            <span class="text-destructive">*</span>
                         </Label>
                         <Textarea
                             id="kick-reason"
                             v-model="kickReason"
                             placeholder="Contoh: Mengundurkan diri karena telah diterima magang mandiri..."
-                            class="min-h-[100px] text-xs resize-none"
+                            class="min-h-[100px] resize-none text-xs"
                         />
-                        <p v-if="kickError" class="text-xs text-destructive font-medium">
+                        <p
+                            v-if="kickError"
+                            class="text-xs font-medium text-destructive"
+                        >
                             {{ kickError }}
                         </p>
                     </div>
@@ -1093,7 +1208,10 @@ function submitDisbandGroup() {
                         :disabled="kickProcessing"
                         id="btn-confirm-kick"
                     >
-                        <Spinner v-if="kickProcessing" class="h-3.5 w-3.5 animate-spin" />
+                        <Spinner
+                            v-if="kickProcessing"
+                            class="h-3.5 w-3.5 animate-spin"
+                        />
                         <UserMinus v-else class="h-3.5 w-3.5" />
                         Keluarkan Anggota
                     </Button>
@@ -1105,13 +1223,16 @@ function submitDisbandGroup() {
         <Dialog v-model:open="showChangeLeaderDialog">
             <DialogContent class="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle class="flex items-center gap-2 text-foreground">
+                    <DialogTitle
+                        class="flex items-center gap-2 text-foreground"
+                    >
                         <Crown class="h-5 w-5 text-amber-500" />
                         Angkat Sebagai Ketua Kelompok
                     </DialogTitle>
                     <DialogDescription class="text-xs">
-                        Apakah Anda yakin ingin mengalihkan kepemimpinan kelompok magang ini?
-                        Perubahan ini akan dicatat ke dalam linimasa riwayat kelompok.
+                        Apakah Anda yakin ingin mengalihkan kepemimpinan
+                        kelompok magang ini? Perubahan ini akan dicatat ke dalam
+                        linimasa riwayat kelompok.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -1123,20 +1244,27 @@ function submitDisbandGroup() {
                             Calon Ketua Baru: {{ memberToPromote.name }}
                         </p>
                         <p class="text-muted-foreground">
-                            NIM: {{ memberToPromote.nim || '-' }} &bull; {{ memberToPromote.email }}
+                            NIM: {{ memberToPromote.nim || '-' }} &bull;
+                            {{ memberToPromote.email }}
                         </p>
                     </div>
 
                     <div
                         class="flex items-start gap-2 rounded-lg border border-amber-200/50 bg-amber-50/10 p-3 text-xs text-amber-900 dark:border-amber-900/50 dark:text-amber-200"
                     >
-                        <AlertCircle class="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
+                        <AlertCircle
+                            class="mt-0.5 h-4 w-4 shrink-0 text-amber-500"
+                        />
                         <p>
-                            Ketua sebelumnya akan tetap berada di dalam kelompok sebagai anggota biasa.
+                            Ketua sebelumnya akan tetap berada di dalam kelompok
+                            sebagai anggota biasa.
                         </p>
                     </div>
 
-                    <p v-if="changeLeaderError" class="text-xs text-destructive font-medium">
+                    <p
+                        v-if="changeLeaderError"
+                        class="text-xs font-medium text-destructive"
+                    >
                         {{ changeLeaderError }}
                     </p>
                 </div>
@@ -1153,12 +1281,15 @@ function submitDisbandGroup() {
                     <Button
                         variant="default"
                         size="sm"
-                        class="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+                        class="gap-1.5 bg-amber-600 text-white hover:bg-amber-700"
                         @click="submitChangeLeader"
                         :disabled="changeLeaderProcessing"
                         id="btn-confirm-change-leader"
                     >
-                        <Spinner v-if="changeLeaderProcessing" class="h-3.5 w-3.5 animate-spin" />
+                        <Spinner
+                            v-if="changeLeaderProcessing"
+                            class="h-3.5 w-3.5 animate-spin"
+                        />
                         <Crown v-else class="h-3.5 w-3.5" />
                         Ya, Angkat Menjadi Ketua
                     </Button>
@@ -1172,46 +1303,82 @@ function submitDisbandGroup() {
                 <DialogHeader>
                     <DialogTitle>Ubah Status Kelompok Magang</DialogTitle>
                     <DialogDescription>
-                        Pilih status tahapan baru untuk kelompok ini. Seluruh anggota kelompok akan menerima notifikasi atas perubahan ini.
+                        Pilih status tahapan baru untuk kelompok ini. Seluruh
+                        anggota kelompok akan menerima notifikasi atas perubahan
+                        ini.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form @submit.prevent="submitAdminStatus" class="space-y-4 py-2">
+                <form
+                    @submit.prevent="submitAdminStatus"
+                    class="space-y-4 py-2"
+                >
                     <div class="space-y-1.5">
                         <Label for="admin_select_status">Status Baru</Label>
                         <Select v-model="adminStatusForm.status">
-                            <SelectTrigger id="admin_select_status" class="w-full">
+                            <SelectTrigger
+                                id="admin_select_status"
+                                class="w-full"
+                            >
                                 <SelectValue placeholder="Pilih status baru" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value="forming">Membentuk Kelompok</SelectItem>
-                                    <SelectItem value="submitted">Pengajuan Dikirim</SelectItem>
-                                    <SelectItem value="letter_published">Surat Terbit</SelectItem>
-                                    <SelectItem value="applying">Menunggu Balasan Perusahaan</SelectItem>
-                                    <SelectItem value="loa_review">Review Balasan Perusahaan</SelectItem>
-                                    <SelectItem value="accepted">Diterima</SelectItem>
-                                    <SelectItem value="partially_accepted">Diterima Sebagian</SelectItem>
-                                    <SelectItem value="rejected">Ditolak Perusahaan</SelectItem>
-                                    <SelectItem value="internship_started">Sedang Magang</SelectItem>
-                                    <SelectItem value="completed">Selesai Magang</SelectItem>
+                                    <SelectItem value="forming"
+                                        >Membentuk Kelompok</SelectItem
+                                    >
+                                    <SelectItem value="submitted"
+                                        >Pengajuan Dikirim</SelectItem
+                                    >
+                                    <SelectItem value="letter_published"
+                                        >Surat Terbit</SelectItem
+                                    >
+                                    <SelectItem value="applying"
+                                        >Menunggu Balasan Perusahaan</SelectItem
+                                    >
+                                    <SelectItem value="loa_review"
+                                        >Review Balasan Perusahaan</SelectItem
+                                    >
+                                    <SelectItem value="accepted"
+                                        >Diterima</SelectItem
+                                    >
+                                    <SelectItem value="partially_accepted"
+                                        >Diterima Sebagian</SelectItem
+                                    >
+                                    <SelectItem value="rejected"
+                                        >Ditolak Perusahaan</SelectItem
+                                    >
+                                    <SelectItem value="internship_started"
+                                        >Sedang Magang</SelectItem
+                                    >
+                                    <SelectItem value="completed"
+                                        >Selesai Magang</SelectItem
+                                    >
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <span v-if="adminStatusForm.errors.status" class="text-xs text-destructive">
+                        <span
+                            v-if="adminStatusForm.errors.status"
+                            class="text-xs text-destructive"
+                        >
                             {{ adminStatusForm.errors.status }}
                         </span>
                     </div>
 
                     <div class="space-y-1.5">
-                        <Label for="admin_status_reason">Alasan / Catatan Perubahan (Opsional)</Label>
+                        <Label for="admin_status_reason"
+                            >Alasan / Catatan Perubahan (Opsional)</Label
+                        >
                         <Textarea
                             id="admin_status_reason"
                             v-model="adminStatusForm.reason"
                             placeholder="Contoh: Diterima percepatan magang berdasarkan arahan ketua prodi..."
                             rows="3"
                         />
-                        <span v-if="adminStatusForm.errors.reason" class="text-xs text-destructive">
+                        <span
+                            v-if="adminStatusForm.errors.reason"
+                            class="text-xs text-destructive"
+                        >
                             {{ adminStatusForm.errors.reason }}
                         </span>
                     </div>
@@ -1230,7 +1397,10 @@ function submitDisbandGroup() {
                             :disabled="adminStatusForm.processing"
                             id="btn-confirm-admin-status"
                         >
-                            <Spinner v-if="adminStatusForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                            <Spinner
+                                v-if="adminStatusForm.processing"
+                                class="mr-2 h-4 w-4 animate-spin"
+                            />
                             Simpan Perubahan Status
                         </Button>
                     </DialogFooter>
@@ -1242,22 +1412,34 @@ function submitDisbandGroup() {
         <Dialog v-model:open="showDisbandDialog">
             <DialogContent class="sm:max-w-[480px]">
                 <DialogHeader>
-                    <DialogTitle class="text-destructive">Bubarkan Kelompok Magang</DialogTitle>
+                    <DialogTitle class="text-destructive"
+                        >Bubarkan Kelompok Magang</DialogTitle
+                    >
                     <DialogDescription>
-                        Apakah Anda yakin ingin membubarkan kelompok magang ini? Tindakan ini akan menghapus keanggotaan dan seluruh data pengajuan kelompok secara permanen.
+                        Apakah Anda yakin ingin membubarkan kelompok magang ini?
+                        Tindakan ini akan menghapus keanggotaan dan seluruh data
+                        pengajuan kelompok secara permanen.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form @submit.prevent="submitDisbandGroup" class="space-y-4 py-2">
+                <form
+                    @submit.prevent="submitDisbandGroup"
+                    class="space-y-4 py-2"
+                >
                     <div class="space-y-1.5">
-                        <Label for="disband_reason">Alasan Pembubaran (Opsional)</Label>
+                        <Label for="disband_reason"
+                            >Alasan Pembubaran (Opsional)</Label
+                        >
                         <Textarea
                             id="disband_reason"
                             v-model="disbandForm.reason"
                             placeholder="Contoh: Kelompok dibubarkan atas permintaan anggota kelompok..."
                             rows="3"
                         />
-                        <span v-if="disbandForm.errors.reason" class="text-xs text-destructive">
+                        <span
+                            v-if="disbandForm.errors.reason"
+                            class="text-xs text-destructive"
+                        >
                             {{ disbandForm.errors.reason }}
                         </span>
                     </div>
@@ -1277,7 +1459,10 @@ function submitDisbandGroup() {
                             :disabled="disbandForm.processing"
                             id="btn-confirm-disband-group"
                         >
-                            <Spinner v-if="disbandForm.processing" class="mr-2 h-4 w-4 animate-spin" />
+                            <Spinner
+                                v-if="disbandForm.processing"
+                                class="mr-2 h-4 w-4 animate-spin"
+                            />
                             Ya, Bubarkan Kelompok
                         </Button>
                     </DialogFooter>
