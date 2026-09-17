@@ -44,6 +44,7 @@
         "chartjs-plugin-datalabels": "^2.2.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "docx-preview": "^0.4.0",
         "embla-carousel-vue": "^8.6.0",
         "idn-finlogos": "^2.3.0",
         "laravel-vite-plugin": "^3.0.0",

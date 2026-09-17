@@ -68,6 +68,8 @@ describe('Template Management Upload', function () {
             ->assertInertia(fn (Assert $page) => $page
                 ->component('internships/templates/Index')
                 ->has('template')
+                ->has('recentGroups')
+                ->has('placeholders')
                 ->where('template.exists', false)
             );
     });
@@ -108,6 +110,54 @@ describe('Template Management Upload', function () {
                 'file' => $file,
             ])
             ->assertSessionHasErrors(['file']);
+    });
+
+    it('allows operators to stream raw template', function () {
+        setupFakeTemplate();
+        $operator = User::factory()->create(['role' => 'operator']);
+
+        $this->actingAs($operator)
+            ->get(route('internships.templates.raw'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    });
+
+    it('returns 404 when raw template does not exist', function () {
+        $operator = User::factory()->create(['role' => 'operator']);
+
+        $this->actingAs($operator)
+            ->get(route('internships.templates.raw'))
+            ->assertNotFound();
+    });
+
+    it('allows operators to process template preview with group data and saves to processed path', function () {
+        setupFakeTemplate();
+        $operator = User::factory()->create(['role' => 'operator']);
+        ['group' => $group] = makeSubmittedSubmissionForLetter();
+
+        $this->actingAs($operator)
+            ->get(route('internships.templates.preview', ['group_id' => $group->id]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        Storage::assertExists('templates/letter_template_processed.docx');
+
+        // Also test POST method
+        $this->actingAs($operator)
+            ->post(route('internships.templates.preview'), ['group_id' => $group->id])
+            ->assertOk();
+    });
+
+    it('prevents students from accessing preview endpoints', function () {
+        $student = User::factory()->create(['role' => 'student']);
+
+        $this->actingAs($student)
+            ->get(route('internships.templates.raw'))
+            ->assertForbidden();
+
+        $this->actingAs($student)
+            ->get(route('internships.templates.preview', ['group_id' => 1]))
+            ->assertForbidden();
     });
 });
 

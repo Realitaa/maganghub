@@ -194,7 +194,7 @@ function getStatusClass(status?: string): string {
                             />
                         </div>
                         <!-- Status Filter -->
-                        <div class="w-full sm:w-48">
+                        <div>
                             <Select v-model="selectedStatus">
                                 <SelectTrigger class="h-9 text-xs">
                                     <SelectValue placeholder="Semua Status" />

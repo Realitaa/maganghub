@@ -373,6 +373,7 @@ function openDecision(sub: Submission) {
                                         <th class="p-4">Perusahaan Tujuan</th>
                                         <th class="p-4">Berkas Balasan</th>
                                         <th class="p-4 text-center">Anggota</th>
+                                        <th class="p-4">Tanggal Upload</th>
                                         <th class="p-4 text-right">Aksi</th>
                                     </tr>
                                 </thead>
@@ -414,6 +415,9 @@ function openDecision(sub: Submission) {
                                             >
                                                 {{ sub.group.memberships_count }} Orang
                                             </Badge>
+                                        </td>
+                                        <td class="p-4">
+                                            {{ formatDate(sub.updated_at) }}
                                         </td>
                                         <td class="p-4 text-right">
                                             <Button

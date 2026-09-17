@@ -11,16 +11,65 @@ use ZipArchive;
 class DocumentGeneratorService
 {
     /**
-     * Generate the internship application letter from the local template.
+     * Single source of truth for template placeholders exposed by the system.
      *
-     * @throws RuntimeException
+     * @var array<int, array<string, string>>
      */
+    public const PLACEHOLDERS = [
+        [
+            'key' => '{{company_name}}',
+            'label' => 'Nama Perusahaan',
+            'description' => 'Nama instansi atau perusahaan tujuan magang.',
+            'example' => 'PT Telkom Indonesia',
+        ],
+        [
+            'key' => '{{supervisor}}',
+            'label' => 'Pimpinan / Pembimbing',
+            'description' => 'Nama pimpinan atau kontak instansi tujuan (baris otomatis dihapus jika kosong).',
+            'example' => 'Bpk. Ahmad Fauzi, M.Kom',
+        ],
+        [
+            'key' => '{{start_date}}',
+            'label' => 'Tanggal Mulai',
+            'description' => 'Tanggal awal pelaksanaan magang dalam format Indonesia.',
+            'example' => '1 Juli 2026',
+        ],
+        [
+            'key' => '{{end_date}}',
+            'label' => 'Tanggal Selesai',
+            'description' => 'Tanggal akhir pelaksanaan magang dalam format Indonesia.',
+            'example' => '31 Agustus 2026',
+        ],
+        [
+            'key' => '{{today}}',
+            'label' => 'Tanggal Surat',
+            'description' => 'Tanggal saat dokumen surat pengantar diterbitkan.',
+            'example' => '17 September 2026',
+        ],
+        [
+            'key' => 'Tabel Anggota',
+            'label' => 'Tabel Anggota Mahasiswa',
+            'description' => 'Tabel otomatis berisi No, Nama Mahasiswa, NIM, dan Program Studi untuk setiap anggota kelompok pengajuan.',
+            'example' => '1 | Budi Santoso | 4201123456 | Ilmu Komputer',
+        ],
+    ];
+
     /**
-     * Generate the internship application letter from the local template.
+     * Get all available placeholders as single source of truth.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public static function getAvailablePlaceholders(): array
+    {
+        return self::PLACEHOLDERS;
+    }
+
+    /**
+     * Process the template DOCX by replacing placeholders with submission data.
      *
      * @throws RuntimeException
      */
-    public function generateLetter(InternshipSubmission $submission): string
+    public function processTemplateForSubmission(InternshipSubmission $submission, ?string $destinationPath = null): string
     {
         $templatePath = 'templates/letter_template.docx';
 
@@ -52,6 +101,11 @@ class DocumentGeneratorService
 
         // Fetch memberships
         $memberships = $submission->submissionMemberships()->with('user')->get();
+
+        if ($memberships->isEmpty()) {
+            // Fallback to active group memberships if submission snapshot is not yet created
+            $memberships = $submission->group?->memberships()->where('status', 'active')->with('user')->get() ?? collect();
+        }
 
         if ($memberships->isEmpty()) {
             $zip->close();
@@ -115,19 +169,40 @@ class DocumentGeneratorService
         $zip->addFromString('word/document.xml', $xmlContent);
         $zip->close();
 
-        // Save to private storage
-        $storageDir = 'letters';
-        if (! Storage::exists($storageDir)) {
-            Storage::makeDirectory($storageDir);
+        // Determine destination
+        $storagePath = $destinationPath ?? ('letters/permohonan_magang_'.$submission->id.'_'.uniqid().'.docx');
+        $targetDir = dirname($storagePath);
+        if (! Storage::exists($targetDir)) {
+            Storage::makeDirectory($targetDir);
         }
 
-        $storagePath = $storageDir.'/permohonan_magang_'.$submission->id.'_'.uniqid().'.docx';
         Storage::put($storagePath, file_get_contents($tempFile));
 
         // Cleanup
         unlink($tempFile);
 
         return $storagePath;
+    }
+
+    /**
+     * Generate the official internship application letter.
+     *
+     * @throws RuntimeException
+     */
+    public function generateLetter(InternshipSubmission $submission): string
+    {
+        return $this->processTemplateForSubmission($submission);
+    }
+
+    /**
+     * Generate the preview document overwritten with submission data.
+     * Saves to templates/letter_template_processed.docx.
+     *
+     * @throws RuntimeException
+     */
+    public function generatePreview(InternshipSubmission $submission): string
+    {
+        return $this->processTemplateForSubmission($submission, 'templates/letter_template_processed.docx');
     }
 
     /**

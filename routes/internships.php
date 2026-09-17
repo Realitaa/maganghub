@@ -30,4 +30,6 @@ Route::middleware(['auth', 'verified'])->prefix('internships')->group(function (
     // 4. Kelola Template
     Route::get('templates', [InternshipTemplateController::class, 'index'])->name('internships.templates.index');
     Route::post('templates', [InternshipTemplateController::class, 'store'])->name('internships.templates.store');
+    Route::get('templates/raw', [InternshipTemplateController::class, 'rawTemplate'])->name('internships.templates.raw');
+    Route::match(['get', 'post'], 'templates/preview', [InternshipTemplateController::class, 'processPreview'])->name('internships.templates.preview');
 });
